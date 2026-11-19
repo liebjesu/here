@@ -842,7 +842,7 @@ function logout(silent, again) {
 function yearMenu() {
   var ys = S.boot.years || [S.boot.year];
   modal('<h2>연도 선택</h2><p class="muted">지난 해 자료는 참고용입니다.</p><div class="yearsel">' + ys.map(function (y) {
-    return '<button class="' + (y === S.boot.year ? 'on' : '') + '" onclick="switchYear(\'' + y + '\')"><b>' + y + '</b><small>' + (y === S.boot.latestYear ? '최신' : '지난 자료') + '</small></button>';
+    return '<button class="' + (y === S.boot.year ? 'on' : '') + '" onclick="switchYear(\'' + y + '\')"><b>' + y + '</b><small>' + (y === (S.boot.editYear || S.boot.latestYear) ? '올해' : y > (S.boot.editYear || '') ? '준비 중' : '지난 자료') + '</small></button>';
   }).join('') + '</div>');
 }
 function switchYear(y) {
@@ -855,7 +855,8 @@ function switchYear(y) {
   call('boot').then(function (b) { afterBoot(b); toast(y + '년 자료를 보고 있어요'); })
     .catch(function () { S.auth.year = old; });
 }
-function isPastYear() { return S.boot && S.boot.latestYear && S.boot.year < S.boot.latestYear; }
+/** 지난 해 = 올해(기본 연도)보다 앞선 해. 내년 시트가 미리 있어도 올해는 지난 해가 아님 */
+function isPastYear() { var e = S.boot && (S.boot.editYear || S.boot.latestYear); return !!(e && S.boot.year < e); }
 function isSuper() { return !!S.isSuper; }
 
 /* ========================= 관리자 ========================= */
@@ -1221,7 +1222,7 @@ function orgForm(id) {
 /* ---------- 기도 · 봉헌 ---------- */
 VIEWS.prayer = function () {
   if (!S.params._data) { call('getTab', { tab: '기도봉헌' }).then(function (d) { S.params._data = d; render(); }); return loadingView('대표기도 · 봉헌'); }
-  var rows = S.params._data.slice().sort(function (a, b) { return a.날짜 < b.날짜 ? -1 : 1; }), ns = nextSunday(), ed = canEdit('기도봉헌');
+  var rows = S.params._data.slice().sort(function (a, b) { return a.날짜 < b.날짜 ? -1 : 1; }), ns = nextSunday(), ed = isAdmin(), mc = homeClass();
   var cur = rows.filter(function (r) { return r.날짜 >= ns; })[0];
   var hero = cur ? '<div class="hero" style="margin-top:.7rem"><div class="eyebrow">' + (cur.날짜 === ns ? '이번 주일' : '다음 순서') + ' · ' + esc(fmtD(cur.날짜)) + '</div>' +
     '<div class="row" style="margin-top:.6rem"><div><div class="meta">대표기도</div><div class="hi">' + (esc(cur.기도자) || '미정') + '</div></div><div><div class="meta">봉헌</div><div class="hi">' + (esc(cur.봉헌) || '미정') + '</div></div></div>' +
@@ -1231,17 +1232,36 @@ VIEWS.prayer = function () {
   var list = order.map(function (m) {
     return '<h3 class="org-h">' + (+m.slice(5)) + '월</h3>' + months[m].map(function (r) {
       var past = r.날짜 < ns;
-      return '<button class="list-item" style="' + (past ? 'opacity:.55' : '') + (r === cur ? ';border-color:var(--ci-sky);background:var(--p-sky)' : '') + '" ' + (ed ? 'onclick="prayerForm(\'' + r.ID + '\')"' : '') + '>' +
+      return '<button class="list-item" style="' + (past ? 'opacity:.55' : '') + (r === cur ? ';border-color:var(--ci-sky);background:var(--p-sky)' : '') + '" ' + (canPrayer(r) ? 'onclick="prayerForm(\'' + r.ID + '\')"' : '') + '>' +
         '<span style="width:3.2rem;font-weight:900">' + shortD(r.날짜) + '</span><span class="grow"><b>' + (esc(r.기도자) || '<span class="muted">기도 미정</span>') + '</b>' + (r.학년반 ? ' <span class="badge">' + esc(r.학년반) + '</span>' : '') +
         '<br><span class="muted">봉헌 ' + (esc(r.봉헌) || '-') + (r.비고 ? ' · ' + esc(r.비고) : '') + '</span></span></button>';
     }).join('');
   }).join('');
+  var mine = !ed && mc && !isPastYear() ? rows.filter(function (r) { return canPrayer(r); }).length : 0;
   return topbar('대표기도 · 봉헌') + hero +
+    (mine ? '<div class="hint">우리 반(' + esc(mc) + ') 순서 ' + mine + '번은 눌러서 기도자 · 봉헌을 고칠 수 있어요.</div>' : '') +
     (ed ? '<div class="row" style="margin-top:.7rem"><button class="btn light small" onclick="prayerForm(\'\')">+ 주일 추가</button><button class="btn light small" onclick="fillSundays()">' + esc(S.boot.year) + '년 주일 모두 만들기</button></div>' : '') +
     (list || '<div class="empty">아직 순서가 없어요</div>');
 };
+/** 기도봉헌 한 줄을 고칠 수 있는지: 관리자는 모두, 담임은 우리 반 순서만 (학년반 또는 봉헌 칸에 반 이름) */
+function canPrayer(r) {
+  if (isAdmin()) return true;
+  var c = homeClass(); if (!c || isPastYear()) return false;
+  var re = new RegExp('(^|[^0-9])' + c.replace(/[^0-9A-Za-z가-힣]/g, '\\$&') + '([^0-9]|$)');
+  return re.test(r.학년반 || '') || re.test(r.봉헌 || '');
+}
 function prayerForm(id) {
   var r = id ? S.params._data.filter(function (x) { return x.ID === id; })[0] : { 날짜: nextSunday() };
+  if (!isAdmin()) {   // 담임: 기도자 · 봉헌 · 비고만, 삭제 없음
+    if (!r || !canPrayer(r)) { toast('담당반 순서만 고칠 수 있어요'); return; }
+    rowForm('기도봉헌', r, [
+      { k: '기도자', label: '대표기도', list: S.boot.teachers.map(function (t) { return t.이름; }).concat(students().map(function (s) { return s.이름; })) },
+      { k: '봉헌', label: '봉헌 (반·팀·이름)', ph: '예) 1-1반, 서기팀' },
+      { k: '비고', label: '비고' }
+    ], fmtD(r.날짜) + (r.학년반 ? ' · ' + r.학년반 + '반' : '') + ' 순서');
+    var del = document.querySelector('#modal .btn.danger'); if (del) del.remove();
+    return;
+  }
   rowForm('기도봉헌', r, [
     { k: '날짜', label: '날짜', type: 'date' },
     { k: '기도자', label: '대표기도', list: S.boot.teachers.map(function (t) { return t.이름; }).concat(students().map(function (s) { return s.이름; })) },
@@ -1823,7 +1843,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261120073318';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261120073921';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>고등부 출석부</title>
+<style>
+:root{
+  --fs:18px;
+  --bg:#f4f6fb; --card:#ffffff; --ink:#1b1f2a; --sub:#5b6476; --line:#dfe3ec;
+  --pri:#2f4fd8; --pri-soft:#e6ebff; --ok:#16a34a; --ok-soft:#dcfce7; --no:#dc2626; --no-soft:#fee2e2;
+  --warn:#b45309; --warn-soft:#fef3c7;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{font-size:var(--fs)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;line-height:1.4;word-break:keep-all}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+input,textarea,select{font:inherit;color:var(--ink);width:100%;padding:.5rem .7rem;border:2px solid var(--line);border-radius:10px;background:#fff}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--pri)}
+textarea{min-height:7rem;resize:vertical}
+label{display:block;font-weight:700;margin:.8rem 0 .3rem;font-size:.9rem;color:var(--sub)}
+a{color:var(--pri)}
+
+#app{max-width:640px;margin:0 auto;padding:0 16px 120px}
+.top{position:sticky;top:0;z-index:5;background:var(--bg);display:flex;align-items:center;gap:.4rem;margin:0 -16px;padding:.5rem 16px;border-bottom:1px solid var(--line)}
+.top h1{font-size:1.15rem;margin:0;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.back{background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:.3rem .65rem;font-weight:700;font-size:.9rem;white-space:nowrap}
+.fs{display:flex;gap:4px;flex:none}
+.fs button{background:#fff;border:1.5px solid var(--line);border-radius:10px;height:2.1rem;min-width:2.5rem;padding:0 .4rem;font-weight:800;line-height:1}
+.fs button.sm{font-size:.75rem} .fs button.lg{font-size:1.05rem}
+
+.hello{padding:.7rem 0 .2rem}
+.hello b{font-size:1.15rem;display:block}
+.hello span{color:var(--sub);font-size:.88rem}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:.7rem}
+.tile{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:.7rem .5rem;min-height:3.3rem;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.05rem}
+.tile.main{grid-column:1/-1;background:var(--pri);color:#fff;border-color:var(--pri);min-height:3.9rem;font-size:1.2rem}
+.tile:active{transform:scale(.98)}
+
+.card{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:.8rem;margin:.55rem 0}
+.card h3{margin:0 0 .25rem;font-size:1.05rem}
+.muted{color:var(--sub);font-size:.86rem}
+.notice-banner{display:block;width:100%;text-align:left;background:var(--warn-soft);border:1.5px solid #fcd34d;border-radius:14px;padding:.6rem .8rem;margin-top:.5rem}
+.notice-banner small{color:var(--warn);font-weight:800}
+
+.btn{display:flex;align-items:center;justify-content:center;gap:.4rem;width:100%;min-height:2.7rem;padding:.45rem .9rem;border-radius:12px;font-weight:800;background:var(--pri);color:#fff;font-size:1rem;text-decoration:none}
+.btn.light{background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+.btn.ok{background:var(--ok)}
+.btn.danger{background:#fff;color:var(--no);border:1.5px solid #fca5a5}
+.btn.small{min-height:2.2rem;font-size:.88rem;width:auto;padding:.3rem .75rem;border-radius:10px}
+.row{display:flex;gap:.5rem}
+.row>*{flex:1}
+
+.chips{display:flex;gap:.4rem;overflow-x:auto;padding:.5rem 0;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;padding:.3rem .8rem;border-radius:999px;background:#fff;border:1.5px solid var(--line);font-weight:800;font-size:.92rem;white-space:nowrap}
+.chip.on{background:var(--pri);color:#fff;border-color:var(--pri)}
+.chips.wrap{flex-wrap:wrap;overflow:visible}
+
+.datebar{display:flex;align-items:center;gap:.4rem;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:.3rem;margin-top:.5rem}
+.datebar button{width:2.4rem;height:2.4rem;border-radius:10px;background:var(--pri-soft);font-size:1rem;font-weight:900;color:var(--pri)}
+.datebar .d{flex:1;text-align:center;font-weight:900;font-size:1.05rem;line-height:1.2}
+.datebar .d small{display:block;font-weight:600;color:var(--sub);font-size:.72rem}
+
+.stu{display:flex;align-items:stretch;gap:6px;margin:5px 0}
+.stu .tg{flex:1;min-width:0;display:flex;align-items:center;gap:.5rem;text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:.45rem .7rem}
+.stu .tg b{font-size:1.1rem;flex:none}
+.stu .tg small{flex:1;min-width:0;color:var(--sub);font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stu .tg .st{flex:none;font-weight:900;font-size:.88rem;padding:.15rem .6rem;border-radius:999px;background:var(--no-soft);color:var(--no)}
+.stu.p .tg{border-color:var(--ok);background:#effcf3}
+.stu.p .tg .st{background:var(--ok);color:#fff}
+.stu .memo{flex:none;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:0 .6rem;font-size:.8rem;font-weight:700;color:var(--sub)}
+
+.savebar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1.5px solid var(--line);padding:.5rem 16px calc(.5rem + env(safe-area-inset-bottom))}
+.savebar .in{max-width:640px;margin:0 auto;display:flex;align-items:center;gap:.7rem}
+.savebar .sum{font-weight:800;font-size:.9rem;white-space:nowrap;line-height:1.3}
+.savebar .btn{flex:1}
+.g{color:var(--ok)} .r{color:var(--no)} .s{color:var(--sub)}
+
+.list-item{display:flex;align-items:center;gap:.6rem;width:100%;text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:.55rem .8rem;margin:.4rem 0}
+.list-item .grow{flex:1;min-width:0}
+.list-item b{font-size:1.05rem}
+.badge{display:inline-block;padding:.08rem .5rem;border-radius:999px;font-size:.75rem;font-weight:800;background:var(--pri-soft);color:var(--pri);vertical-align:middle}
+.badge.g{background:var(--ok-soft);color:var(--ok)} .badge.r{background:var(--no-soft);color:var(--no)} .badge.w{background:var(--warn-soft);color:var(--warn)}
+.call{flex:none;padding:.35rem .7rem;border-radius:10px;background:var(--ok-soft);color:var(--ok);font-weight:800;font-size:.85rem;text-decoration:none}
+
+.stat-big{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:.6rem}
+.stat-big div{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:.6rem .3rem;text-align:center}
+.stat-big b{display:block;font-size:1.5rem;line-height:1.1}
+.stat-big span{font-size:.76rem;color:var(--sub);font-weight:700}
+.bars{display:flex;align-items:flex-end;gap:5px;height:8rem;margin-top:.5rem}
+.bars .b{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+.bars .b i{display:block;width:100%;background:var(--pri);border-radius:5px 5px 2px 2px;min-height:3px}
+.bars .b:last-child i{background:var(--ok)}
+.bars .b em{font-style:normal;font-size:.62rem;color:var(--sub);margin-top:3px;white-space:nowrap}
+.bars .b span{font-size:.7rem;font-weight:800;margin-bottom:2px}
+.meter{height:.7rem;background:#eef0f5;border-radius:99px;overflow:hidden;margin-top:.3rem}
+.meter i{display:block;height:100%;background:var(--pri);border-radius:99px}
+
+.weeks{display:flex;gap:.35rem;margin-top:.4rem}
+.wk{flex:1;height:2.4rem;border-radius:10px;border:1.5px solid var(--line);background:#fff;font-weight:800;font-size:.85rem}
+.wk.on{background:var(--ok);border-color:var(--ok);color:#fff}
+
+.dots{display:flex;flex-wrap:wrap;gap:4px;margin-top:.4rem}
+.dots i{width:1rem;height:1rem;border-radius:4px;background:#e5e7eb}
+.dots i.p{background:var(--ok)} .dots i.a{background:#fca5a5}
+
+.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:#fff;width:100%;max-width:640px;border-radius:20px 20px 0 0;padding:1rem 16px calc(1rem + env(safe-area-inset-bottom));max-height:88vh;overflow:auto}
+.sheet h2{margin:0 0 .5rem;font-size:1.15rem}
+
+#toast{position:fixed;left:50%;bottom:5.5rem;transform:translateX(-50%);background:#1b1f2a;color:#fff;padding:.6rem 1.1rem;border-radius:999px;font-weight:800;z-index:40;display:none;max-width:90%;text-align:center}
+#loading{position:fixed;inset:0;background:rgba(255,255,255,.7);z-index:30;display:none;align-items:center;justify-content:center;font-weight:900;font-size:1.1rem}
+#loading.on{display:flex}
+
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:.8rem}
+.pad button{height:3.4rem;border-radius:14px;background:#fff;border:1.5px solid var(--line);font-size:1.4rem;font-weight:900}
+.pin-dots{display:flex;justify-content:center;gap:.9rem;margin:1rem 0}
+.pin-dots i{width:1rem;height:1rem;border-radius:50%;border:3px solid var(--pri)}
+.pin-dots i.on{background:var(--pri)}
+.empty{text-align:center;color:var(--sub);padding:1.5rem 0}
+.foot{display:flex;flex-wrap:wrap;gap:.4rem;justify-content:center;margin-top:1rem}
+.pre{white-space:pre-wrap}
+.hint{background:var(--pri-soft);color:var(--pri);border-radius:10px;padding:.5rem .7rem;font-size:.84rem;font-weight:700;margin-top:.4rem}
+.pick{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:.6rem}
+.pick button{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:.7rem .5rem;text-align:center}
+.pick button b{display:block;font-size:1.15rem}
+.pick button span{font-size:.8rem;color:var(--sub)}
+
+/* 화면 맨 위 도구줄: 글씨 크기 + PC 보기 */
+.tools{display:flex;gap:6px;padding:8px 0 4px}
+.tools button{flex:1;height:2.6rem;border-radius:12px;background:#fff;border:1.5px solid var(--line);font-weight:800;font-size:.95rem;white-space:nowrap;display:flex;align-items:center;justify-content:center;gap:.3rem}
+.tools .a1{font-size:.8em} .tools .a2{font-size:1.25em}
+.tools .pcbtn{flex:.9;color:var(--pri)}
+@media (max-width:699px){.tools .pcbtn{display:none}}
+
+/* 표 (PC 출석부 전체표, 학생 명단 표) */
+.tblwrap{overflow:auto;max-height:calc(100vh - 230px);background:#fff;border:1.5px solid var(--line);border-radius:12px;margin-top:.4rem}
+.tbl{border-collapse:separate;border-spacing:0;font-size:.82rem;white-space:nowrap;width:100%}
+.tbl th,.tbl td{border-bottom:1px solid var(--line);border-right:1px solid #eef0f5;padding:.32rem .45rem;text-align:center}
+.tbl thead th{position:sticky;top:0;background:#f4f6fb;z-index:2;font-weight:800}
+.tbl .c1{position:sticky;left:0;background:#fff;z-index:1;min-width:2.8rem}
+.tbl .c2{position:sticky;left:2.8rem;background:#fff;z-index:1;text-align:left;font-weight:800;min-width:4.6rem}
+.tbl thead .c1,.tbl thead .c2{z-index:3;background:#f4f6fb}
+.tbl td.o{background:#dcfce7;color:#15803d;font-weight:900}
+.tbl td.x{background:#fff5f5;color:#ef4444}
+.tbl tfoot td{position:sticky;bottom:0;background:#f4f6fb;font-weight:800;z-index:1}
+.tbl tfoot .c1,.tbl tfoot .c2{z-index:3;background:#f4f6fb}
+.tbl tr.clk{cursor:pointer} .tbl tr.clk:hover td{background:#f0f4ff}
+.tbl td.l{text-align:left} .tbl td.note{white-space:normal;min-width:16rem;text-align:left;color:var(--sub)}
+.tbl tr.grp td{background:#eef2ff;font-weight:800;text-align:left}
+
+/* PC 넓게 보기 */
+.split>div{min-width:0}
+.wide #app{max-width:1320px;padding:0 28px 120px}
+.wide .top{margin:0 -28px;padding:.5rem 28px}
+.wide .tiles{grid-template-columns:repeat(4,1fr)}
+.wide .tile.main{grid-column:span 4}
+.wide .cols{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:10px;align-items:start;margin-top:.5rem}
+.wide .cols>.card{margin:0}
+.wide .stulist{display:grid;grid-template-columns:repeat(3,1fr);gap:0 10px}
+.wide .pick{grid-template-columns:repeat(6,1fr)}
+.wide .split{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+.wide .savebar .in{max-width:1320px}
+.wide .sheet-bg{align-items:center}
+.wide .sheet{border-radius:20px;max-width:620px}
+.wide .tools{max-width:none}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast"></div>
+<div id="loading">잠시만요…</div>
+<div id="modal"></div>
+
+<script>
+/* =========================================================
+   서버 연결 (Apps Script) — 미리보기에서는 예시 데이터 사용
+   ========================================================= */
+var IS_GAS = typeof google !== 'undefined' && google.script && google.script.run;
+var S = {           // 앱 상태
+  user: null, pin: '', role: '', boot: null,
+  view: 'home', params: {}, history: [],
+  att: null, dirty: false
+};
+
+function store(k, v) { try { if (v === undefined) return JSON.parse(localStorage.getItem(k)); localStorage.setItem(k, JSON.stringify(v)); } catch (e) { return null; } }
+function unstore(k) { try { localStorage.removeItem(k); } catch (e) {} }
+
+function call(action, payload, quiet) {
+  if (!quiet) loading(true);
+  return new Promise(function (resolve, reject) {
+    var done = function (res) {
+      loading(false);
+      if (!res || !res.ok) { toast((res && res.error) || '오류가 났어요'); reject(res); return; }
+      S.role = res.role; resolve(res.data);
+    };
+    var fail = function (e) { loading(false); toast('인터넷 연결을 확인해 주세요'); reject(e); };
+    if (IS_GAS) google.script.run.withSuccessHandler(done).withFailureHandler(fail).api(S.pin, action, payload || {});
+    else if (window.APP_API) {
+      // GitHub Pages: Apps Script 웹앱에 직접 요청 (text/plain 이라 CORS 사전요청 없음)
+      fetch(window.APP_API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ pin: S.pin, action: action, p: payload || {} }), redirect: 'follow' })
+        .then(function (r) { return r.json(); }).then(done).catch(fail);
+    }
+    else setTimeout(function () { done(MOCK.api(S.pin, action, payload || {})); }, 250);
+  });
+}
+
+/* ========================= 유틸 ========================= */
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+function $(id) { return document.getElementById(id); }
+function toast(msg) { var t = $('toast'); t.textContent = msg; t.style.display = 'block'; clearTimeout(t._h); t._h = setTimeout(function () { t.style.display = 'none'; }, 2200); }
+function loading(on) { $('loading').classList.toggle('on', !!on); }
+var WD = ['일', '월', '화', '수', '목', '금', '토'];
+function parseD(s) { var p = s.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+function ymd(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+function fmtD(s, withYear) { if (!s || !/^\d{4}-\d{2}-\d{2}/.test(s)) return s || ''; var d = parseD(s.slice(0, 10)); return (withYear ? d.getFullYear() + '년 ' : '') + (d.getMonth() + 1) + '월 ' + d.getDate() + '일 (' + WD[d.getDay()] + ')'; }
+function shortD(s) { var d = parseD(s); return (d.getMonth() + 1) + '/' + d.getDate(); }
+function todayStr() { return (S.boot && S.boot.today) || ymd(new Date()); }
+function lastSunday() { var d = parseD(todayStr()); d.setDate(d.getDate() - d.getDay()); return ymd(d); }
+function addDays(s, n) { var d = parseD(s); d.setDate(d.getDate() + n); return ymd(d); }
+function tel(n) { return String(n || '').replace(/[^0-9]/g, ''); }
+function isAdmin() { return S.role === 'admin'; }
+function students() { return S.boot.students; }
+function stuById(id) { return students().filter(function (s) { return s.ID === id; })[0]; }
+function classNames() { return S.boot.classes.map(function (c) { return c.반; }).filter(function (c) { return /^\d-\d$/.test(c); }); }
+/** 담임 반 (담임이 아니면 '') */
+function homeClass() {
+  var t = S.boot.teachers.filter(function (t) { return t.이름 === S.user; })[0];
+  if (t && /^\d-\d$/.test(t.담당반 || '')) return t.담당반;
+  var c = S.boot.classes.filter(function (c) { return /^\d-\d$/.test(c.반) && (c.담임교사 || '').split(/[,\s]+/).indexOf(S.user) >= 0; })[0];
+  return c ? c.반 : '';
+}
+function myClass() { return homeClass() || classNames()[0]; }
+
+/* ========================= 화면 전환 ========================= */
+function go(view, params, noPush) {
+  if (S.dirty && S.view === 'attend' && view !== 'attend') {
+    if (!confirm('저장하지 않은 출석이 있어요.\n저장하지 않고 나갈까요?')) return;
+    S.dirty = false;
+  }
+  if (!noPush && S.view !== view) S.history.push({ view: S.view, params: S.params });
+  S.view = view; S.params = params || {};
+  closeModal();
+  render();
+  window.scrollTo(0, 0);
+}
+function back() { var h = S.history.pop() || { view: 'home', params: {} }; go(h.view, h.params, true); }
+function topbar(title, extra) {
+  return '<div class="top"><button class="back" onclick="back()">◀ 뒤로</button><h1>' + esc(title) + '</h1>' + (extra || '') + '</div>';
+}
+/** 모든 화면 맨 위: 글씨 크기(가로로 넓은 버튼) + PC 넓게 보기 */
+function toolStrip() {
+  return '<div class="tools"><button onclick="fontStep(-1)"><span class="a1">가</span> 글씨 작게</button>' +
+    '<button onclick="fontStep(1)"><span class="a2">가</span> 글씨 크게</button>' +
+    '<button class="pcbtn" onclick="togglePC()">' + (isWide() ? '휴대폰 화면으로' : 'PC 넓게 보기') + '</button></div>';
+}
+function isWide() { var v = store('hs_pc'); return (v === null || v === undefined) ? window.innerWidth >= 900 : !!v; }
+function applyWide() { document.body.classList.toggle('wide', isWide()); }
+function togglePC() { store('hs_pc', !isWide()); applyWide(); render(); }
+function render() {
+  var app = $('app');
+  if (!S.user || !S.boot) { app.innerHTML = toolStrip() + viewLogin(); return; }
+  var v = VIEWS[S.view] || VIEWS.home;
+  var out = v(S.params);
+  if (typeof out === 'string') app.innerHTML = toolStrip() + out;
+}
+function modal(html) { $('modal').innerHTML = '<div class="sheet-bg" onclick="if(event.target===this)closeModal()"><div class="sheet">' + html + '</div></div>'; }
+function closeModal() { $('modal').innerHTML = ''; }
+
+/* ========================= 로그인 ========================= */
+var LOGIN = { step: 'name', name: '', pin: '', teachers: null };
+function viewLogin() {
+  if (LOGIN.step === 'pin' || !LOGIN.teachers) {
+    var dots = '';
+    for (var i = 0; i < Math.max(4, LOGIN.pin.length); i++) dots += '<i class="' + (LOGIN.pin.length > i ? 'on' : '') + '"></i>';
+    var keys = [1, 2, 3, 4, 5, 6, 7, 8, 9, '지우기', 0, '확인'].map(function (k) {
+      return '<button onclick="pinKey(\'' + k + '\')" style="' + (typeof k === 'string' ? 'font-size:1rem' : '') + '">' + k + '</button>';
+    }).join('');
+    return '<div class="top" style="border:0"><h1></h1></div><div class="hello" style="text-align:center;padding-top:1.2rem"><b style="font-size:1.4rem">고등부 출석부</b>' +
+      '<span>비밀번호를 누르고 [확인]을 눌러 주세요</span></div>' +
+      '<div class="pin-dots">' + dots + '</div><div class="pad">' + keys + '</div>' +
+      '<p class="muted" style="text-align:center;margin-top:1.2rem">비밀번호는 부장/총무 선생님께 문의하세요.<br>한 번 입력하면 다음부터는 바로 열립니다.</p>';
+  }
+  var list = LOGIN.teachers.map(function (t) {
+    return '<button class="list-item" onclick="pickName(\'' + esc(t.이름) + '\')"><span class="grow"><b>' + esc(t.이름) + '</b> <span class="muted">' + esc(t.직분 || '') + '</span><br><span class="muted">' + esc(t.담당반 ? t.담당반 + '반 담임' : (t.역할 || '')) + '</span></span></button>';
+  }).join('');
+  return '<div class="top" style="border:0"><h1>어느 선생님이세요?</h1></div><div class="hello" style="padding-top:0"><b></b><span>내 이름을 눌러 주세요</span></div>' + list;
+}
+function pinKey(k) {
+  if (k === '지우기') LOGIN.pin = LOGIN.pin.slice(0, -1);
+  else if (k === '확인') return tryPin();
+  else if (LOGIN.pin.length < 8) LOGIN.pin += k;
+  render();
+}
+function tryPin() {
+  if (LOGIN.pin.length < 4) { toast('비밀번호를 끝까지 눌러 주세요'); return; }
+  S.pin = LOGIN.pin;
+  call('boot').then(function (b) {
+    S.boot = b; LOGIN.teachers = b.teachers; LOGIN.step = 'name'; render();
+  }).catch(function () { LOGIN.pin = ''; render(); });
+}
+function pickName(n) {
+  S.user = n; store('hs_login', { user: n, pin: S.pin });
+  S.view = 'home'; render();
+  toast(n + ' 선생님, 환영합니다!');
+}
+function logout() {
+  if (!confirm('로그아웃 할까요?')) return;
+  unstore('hs_login'); S.user = null; S.boot = null; LOGIN = { step: 'pin', name: '', pin: '', teachers: null }; render();
+}
+
+/* ========================= 화면들 ========================= */
+var VIEWS = {};
+
+VIEWS.home = function () {
+  var b = S.boot, n = b.latestNotice;
+  var banner = n ? '<button class="notice-banner" onclick="go(\'notices\')"><small>최근 공지 · ' + esc(fmtD(n.날짜)) + '</small><br><b>' + esc(n.제목) + '</b></button>' : '';
+  var tile = function (label, onclick, cls) { return '<button class="tile ' + (cls || '') + '" onclick="' + onclick + '">' + label + '</button>'; };
+  var hc = homeClass();
+  return '<div class="top"><h1>' + esc(b.title) + '</h1></div>' +
+    '<div class="hello"><b>' + esc(S.user) + ' 선생님, 반갑습니다</b><span>' + fmtD(todayStr()) + (hc ? ' · ' + hc + '반 담임' : '') + '</span></div>' + banner +
+    '<div class="tiles">' +
+    tile(hc ? hc + '반 출석 체크' : '출석 체크', 'openAttend()', 'main') +
+    tile('새신자', "go('newcomers')") +
+    tile('면담 기록', "go('notes')") +
+    tile('출석 통계', "go('stats')") +
+    tile('학생 명단', "go('students')") +
+    tile('공지사항', "go('notices')") +
+    tile('사역 준비', "go('ministry')") +
+    tile('출석부 전체표', "go('sheet')") +
+    '</div>' +
+    '<div class="foot">' +
+    (b.chatLink ? '<a class="btn light small" href="' + esc(b.chatLink) + '" target="_blank">교사 단톡방</a>' : '') +
+    (isAdmin() ? '<a class="btn light small" href="' + esc(b.sheetUrl) + '" target="_blank">원본 구글시트</a>' : '') +
+    '<button class="btn light small" onclick="logout()">로그아웃</button></div>';
+};
+
+/* ---------- 출석 체크 ---------- */
+function openAttend() { S.att = null; go('attend'); }
+VIEWS.attend = function () {
+  if (!S.att) S.att = { date: lastSunday(), cls: homeClass(), marks: {}, reasons: {}, touched: {}, showAll: false, loaded: false };
+  var a = S.att;
+  var datebar = '<div class="datebar"><button onclick="attDate(-7)">◀</button><div class="d">' + fmtD(a.date) + '<small>' + (a.date === lastSunday() ? '이번 주일' : '◀ ▶ 로 날짜 바꾸기') + '</small></div><button onclick="attDate(7)">▶</button></div>';
+  if (!a.loaded) { loadAttendance(); return topbar('출석 체크') + datebar + '<div class="empty">불러오는 중…</div>'; }
+
+  // 담임이 아니면 반부터 고르기
+  if (!a.cls) {
+    var pick = classNames().map(function (c) {
+      var mem = students().filter(function (s) { return s.반 === c && s.상태 === '재적'; });
+      var pc = students().filter(function (s) { return s.반 === c && a.marks[s.ID] === '출석'; }).length;
+      var t = (S.boot.classes.filter(function (x) { return x.반 === c; })[0] || {}).담임교사 || '';
+      return '<button onclick="attClass(\'' + c + '\')"><b>' + c + '반</b><span>' + esc(t) + '<br>재적 ' + mem.length + '명' + (pc ? ' · 출석 ' + pc : '') + '</span></button>';
+    }).join('');
+    return topbar('출석 체크') + datebar + '<h3 style="margin:1rem 0 0">어느 반 출석을 체크할까요?</h3><div class="pick">' + pick + '</div>';
+  }
+
+  var list = students().filter(function (s) { return s.반 === a.cls && (a.showAll || s.상태 === '재적' || a.marks[s.ID] === '출석'); });
+  var hiddenCnt = students().filter(function (s) { return s.반 === a.cls && s.상태 !== '재적'; }).length;
+  var chips = classNames().map(function (c) {
+    return '<button class="chip ' + (c === a.cls ? 'on' : '') + '" onclick="attClass(\'' + c + '\')">' + c + '반' + (a.touched[c] ? ' *' : '') + '</button>';
+  }).join('');
+  var rows = list.map(function (s) {
+    var on = a.marks[s.ID] === '출석', r = a.reasons[s.ID] || '';
+    var sub = r || (s.상태 !== '재적' ? s.상태 : '');
+    return '<div class="stu ' + (on ? 'p' : '') + '"><button class="tg" onclick="mark(\'' + s.ID + '\')"><b>' + esc(s.이름) + '</b><small>' + esc(sub) + '</small><span class="st">' + (on ? '출석' : '결석') + '</span></button>' +
+      '<button class="memo" onclick="reasonSheet(\'' + s.ID + '\')">메모</button></div>';
+  }).join('') || '<div class="empty">이 반에 학생이 없어요</div>';
+  var nP = list.filter(function (s) { return a.marks[s.ID] === '출석'; }).length;
+
+  return topbar(a.cls + '반 출석') + datebar +
+    '<div class="chips">' + chips + '</div>' +
+    '<p class="muted" style="margin:0 0 .3rem">이름을 누르면 <b class="g">출석</b>, 한 번 더 누르면 결석으로 바뀝니다.</p>' +
+    '<div class="stulist">' + rows + '</div>' +
+    '<div class="row" style="margin-top:.6rem"><button class="btn light small" onclick="allPresent()">모두 출석</button>' +
+    '<button class="btn light small" onclick="S.att.showAll=!S.att.showAll;render()">' + (a.showAll ? '재적만 보기' : '장결·타교회 (' + hiddenCnt + ')') + '</button>' +
+    '<button class="btn light small" onclick="studentForm(null,\'' + a.cls + '\')">학생 추가</button></div>' +
+    '<div class="savebar"><div class="in"><div class="sum"><span class="g">출석 ' + nP + '</span><br><span class="r">결석 ' + (list.length - nP) + '</span></div>' +
+    '<button class="btn ' + (S.dirty ? 'ok' : 'light') + '" onclick="saveAtt()">' + (S.dirty ? '저장하기' : '저장됨') + '</button></div></div>';
+};
+function loadAttendance() {
+  call('getAttendance', { date: S.att.date }).then(function (rows) {
+    S.att.marks = {}; S.att.reasons = {}; S.att.touched = {};
+    rows.forEach(function (r) { S.att.marks[r.학생ID] = r.상태; if (r.사유) S.att.reasons[r.학생ID] = r.사유; });
+    S.att.loaded = true; S.dirty = false; render();
+  });
+}
+function attClass(c) { S.att.cls = c; render(); window.scrollTo(0, 0); }
+function attDate(n) {
+  if (S.dirty && !confirm('저장하지 않은 출석이 있어요.\n저장하지 않고 날짜를 바꿀까요?')) return;
+  S.att.date = addDays(S.att.date, n); S.att.loaded = false; S.dirty = false; render();
+}
+function touch(id) { var s = stuById(id); if (s) S.att.touched[s.반] = 1; S.dirty = true; }
+function mark(id) { S.att.marks[id] = S.att.marks[id] === '출석' ? '결석' : '출석'; touch(id); render(); }
+function allPresent() {
+  students().forEach(function (s) { if (s.반 === S.att.cls && s.상태 === '재적') S.att.marks[s.ID] = '출석'; });
+  S.att.touched[S.att.cls] = 1; S.dirty = true; render();
+}
+function reasonSheet(id) {
+  var s = stuById(id), cur = S.att.reasons[id] || '';
+  var quick = ['늦잠', '학원', '아픔', '가족행사', '여행', '다른 예배', '연락안됨', '시험'].map(function (q) {
+    return '<button class="chip" onclick="setReason(\'' + id + '\',\'' + q + '\')">' + q + '</button>';
+  }).join('');
+  modal('<h2>' + esc(s.이름) + ' 메모</h2><p class="muted">결석 이유나 특이사항을 남겨 주세요</p><div class="chips wrap">' + quick + '</div>' +
+    '<label>직접 쓰기</label><input id="rsn" value="' + esc(cur) + '" placeholder="예) 3부 예배 드림">' +
+    '<div class="row" style="margin-top:.8rem"><button class="btn light" onclick="setReason(\'' + id + '\',\'\')">지우기</button><button class="btn" onclick="setReason(\'' + id + '\',$(\'rsn\').value)">확인</button></div>' +
+    (s.연락처 ? '<a class="btn light" style="margin-top:.5rem" href="tel:' + tel(s.연락처) + '">' + esc(s.이름) + '에게 전화</a>' : ''));
+}
+function setReason(id, v) {
+  v = (v || '').trim();
+  if (v) S.att.reasons[id] = v; else delete S.att.reasons[id];
+  if (v === '다른 예배') S.att.marks[id] = '출석';
+  touch(id); closeModal(); render();
+}
+function saveAtt() {
+  var a = S.att;
+  if (!Object.keys(a.touched).length) { toast('바뀐 내용이 없어요'); return; }
+  // 손댄 반의 재적 학생은 모두 저장: 출석을 누르지 않은 학생은 결석
+  var recs = students().filter(function (s) { return a.touched[s.반] && (s.상태 === '재적' || a.marks[s.ID]); }).map(function (s) {
+    return { 학생ID: s.ID, 이름: s.이름, 반: s.반, 상태: a.marks[s.ID] === '출석' ? '출석' : '결석', 사유: a.reasons[s.ID] || '' };
+  });
+  call('saveAttendance', { date: a.date, teacher: S.user, records: recs }).then(function () {
+    recs.forEach(function (r) { a.marks[r.학생ID] = r.상태; });
+    a.touched = {}; S.dirty = false; render(); toast('저장했어요. 수고하셨습니다!');
+  });
+}
+
+/* ---------- 학생 명단 / 상세 ---------- */
+VIEWS.students = function (p) {
+  var cls = p.cls || myClass(), q = (p.q || '').trim();
+  var chips = ['전체'].concat(classNames()).map(function (c) {
+    return '<button class="chip ' + (c === cls ? 'on' : '') + '" onclick="go(\'students\',{cls:\'' + c + '\'},true)">' + (c === '전체' ? c : c + '반') + '</button>';
+  }).join('');
+  var list = students().filter(function (s) {
+    return (q ? s.이름.indexOf(q) >= 0 : (cls === '전체' || s.반 === cls));
+  }).sort(function (a, b) { return (a.상태 === '재적' ? 0 : 1) - (b.상태 === '재적' ? 0 : 1); });
+  var rows = list.map(function (s) {
+    var st = s.상태 === '재적' ? '' : ' <span class="badge ' + (s.상태 === '장결' ? 'w' : 'r') + '">' + esc(s.상태) + '</span>';
+    return '<div class="list-item"><div class="grow" onclick="go(\'student\',{id:\'' + s.ID + '\'})"><b>' + esc(s.이름) + '</b> <span class="muted">' + esc(s.반) + '반</span>' + st + '<br><span class="muted">' + esc(s.학교 || '') + '</span></div>' +
+      (s.연락처 ? '<a class="call" href="tel:' + tel(s.연락처) + '">전화</a>' : '') + '</div>';
+  }).join('') || '<div class="empty">학생이 없어요</div>';
+  return topbar('학생 명단') +
+    '<input style="margin-top:.8rem" placeholder="이름으로 찾기" value="' + esc(q) + '" onchange="go(\'students\',{cls:\'' + cls + '\',q:this.value},true)">' +
+    '<div class="chips">' + chips + '</div>' + (isWide() ? studentTable(list) : rows) +
+    '<button class="btn light" style="margin-top:.6rem" onclick="studentForm(null,\'' + (cls === '전체' ? '' : cls) + '\')">+ 학생 추가</button>';
+};
+
+function studentTable(list) {
+  if (!list.length) return '<div class="empty">학생이 없어요</div>';
+  var H = ['반', '이름', '상태', '학교', '연락처', '보호자', '보호자연락처', '생년월일', '특이사항'];
+  return '<div class="tblwrap"><table class="tbl"><thead><tr>' + H.map(function (h, i) { return '<th class="' + (i === 0 ? 'c1' : i === 1 ? 'c2' : '') + '">' + h + '</th>'; }).join('') + '</tr></thead><tbody>' +
+    list.map(function (s) {
+      return '<tr class="clk" onclick="go(\'student\',{id:\'' + s.ID + '\'})"><td class="c1">' + esc(s.반) + '</td><td class="c2">' + esc(s.이름) + '</td><td>' + esc(s.상태) + '</td><td class="l">' + esc(s.학교) +
+        '</td><td>' + esc(s.연락처) + '</td><td class="l">' + esc(s.보호자) + '</td><td>' + esc(s.보호자연락처) + '</td><td>' + esc(s.생년월일) + '</td><td class="note">' + esc(s.특이사항) + '</td></tr>';
+    }).join('') + '</tbody></table></div>';
+}
+
+VIEWS.student = function (p) {
+  if (!S.params._data) {
+    call('getStudent', { id: p.id }).then(function (d) { S.params._data = d; render(); });
+    return topbar('학생 정보') + '<div class="empty">불러오는 중…</div>';
+  }
+  var d = S.params._data, s = d.student;
+  var info = [['반', s.반 + '반'], ['상태', s.상태], ['생년월일', s.생년월일], ['학교', s.학교], ['보호자', s.보호자], ['등록일', s.등록일]]
+    .filter(function (x) { return x[1]; }).map(function (x) { return '<div><span class="muted">' + x[0] + '</span> &nbsp;<b>' + esc(x[1]) + '</b></div>'; }).join('');
+  var att = d.attendance.slice(0, 20).reverse();
+  var dots = att.map(function (r) { return '<i class="' + (r.상태 === '출석' ? 'p' : 'a') + '" title="' + r.날짜 + '"></i>'; }).join('');
+  var pc = d.attendance.filter(function (r) { return r.상태 === '출석'; }).length;
+  var notes = d.notes.slice(0, 10).map(noteCard).join('') || '<p class="muted">아직 기록이 없어요</p>';
+  return topbar(s.이름) + '<div class="split"><div>' +
+    '<div class="row" style="margin-top:.8rem">' +
+    (s.연락처 ? '<a class="btn ok" href="tel:' + tel(s.연락처) + '">학생 전화</a>' : '') +
+    (s.보호자연락처 ? '<a class="btn light" href="tel:' + tel(s.보호자연락처) + '">부모님 전화</a>' : '') + '</div>' +
+    (s.연락처 ? '<a class="btn light" style="margin-top:.6rem" href="sms:' + tel(s.연락처) + '">문자 보내기</a>' : '') +
+    '<div class="card">' + info + (s.특이사항 ? '<div class="hint pre" style="margin-top:.7rem">' + esc(s.특이사항) + '</div>' : '') + '</div>' +
+    '<div class="card"><h3>최근 출석 <span class="muted">(초록=출석)</span></h3><div class="dots">' + (dots || '<span class="muted">기록 없음</span>') + '</div>' +
+    '<p class="muted" style="margin:.5rem 0 0">전체 ' + d.attendance.length + '번 기록 중 출석 ' + pc + '번' + (d.attendance[0] ? ' · 마지막 기록 ' + fmtD(d.attendance[0].날짜) : '') + '</p></div>' +
+    '<button class="btn light" onclick="studentForm(\'' + s.ID + '\')">학생 정보 고치기</button></div><div>' +
+    '<button class="btn" style="margin-top:.8rem" onclick="noteForm(\'' + s.ID + '\')">면담 기록하기</button>' +
+    '<h3 style="margin:1rem 0 .2rem">면담·심방 기록</h3>' + notes + '</div></div>';
+};
+
+function studentForm(id, cls) {
+  var s = id ? (S.params._data && S.params._data.student) || stuById(id) : { 반: cls || myClass(), 상태: '재적' };
+  var clsOpts = classNames().map(function (c) { return '<option ' + (c === s.반 ? 'selected' : '') + '>' + c + '</option>'; }).join('');
+  var stOpts = ['재적', '장결', '타교회', '졸업'].map(function (c) { return '<option ' + (c === s.상태 ? 'selected' : '') + '>' + c + '</option>'; }).join('');
+  var f = function (k, ph, type) { return '<label>' + k + '</label><input id="f_' + k + '" type="' + (type || 'text') + '" value="' + esc(s[k] || '') + '" placeholder="' + (ph || '') + '">'; };
+  modal('<h2>' + (id ? '학생 정보 고치기' : '새 학생 추가') + '</h2>' +
+    f('이름') + '<div class="row"><div><label>반</label><select id="f_반">' + clsOpts + '</select></div><div><label>상태</label><select id="f_상태">' + stOpts + '</select></div></div>' +
+    f('연락처', '010-0000-0000', 'tel') + f('학교') + f('생년월일', '2010-01-01') + f('보호자') + f('보호자연락처', '', 'tel') +
+    '<label>특이사항</label><textarea id="f_특이사항">' + esc(s.특이사항 || '') + '</textarea>' +
+    '<button class="btn" style="margin-top:1rem" onclick="saveStudent(\'' + (id || '') + '\')">저장</button>');
+}
+function saveStudent(id) {
+  var o = { ID: id || undefined };
+  ['이름', '반', '상태', '연락처', '학교', '생년월일', '보호자', '보호자연락처', '특이사항'].forEach(function (k) { o[k] = $('f_' + k).value.trim(); });
+  if (!o.이름) { toast('이름을 써 주세요'); return; }
+  call('saveStudent', o).then(function (saved) {
+    var list = S.boot.students, i = list.findIndex(function (x) { return x.ID === saved.ID; });
+    if (i >= 0) list[i] = saved; else list.push(saved);
+    if (S.params._data) S.params._data.student = saved;
+    closeModal(); render(); toast('저장했어요');
+  });
+}
+
+/* ---------- 새신자 ---------- */
+VIEWS.newcomers = function (p) {
+  if (!S.params._data) { call('getNewcomers').then(function (d) { S.params._data = d; render(); }); return topbar('새신자') + '<div class="empty">불러오는 중…</div>'; }
+  var filt = p.f || '정착중';
+  var all = S.params._data;
+  var chips = ['정착중', '등반완료', '전체'].map(function (c) { return '<button class="chip ' + (c === filt ? 'on' : '') + '" onclick="S.params.f=\'' + c + '\';render()">' + c + '</button>'; }).join('');
+  var list = all.filter(function (n) { return filt === '전체' || (n.상태 || '정착중') === filt; });
+  var cards = list.map(function (n) {
+    var wks = ['1주차', '2주차', '3주차', '4주차'].map(function (w) {
+      return '<button class="wk ' + (n[w] ? 'on' : '') + '" onclick="toggleWeek(\'' + n.ID + '\',\'' + w + '\')">' + w + '' + '</button>';
+    }).join('');
+    return '<div class="card"><div style="display:flex;gap:.6rem;align-items:center"><div style="flex:1"><h3>' + esc(n.이름) + ' <span class="badge">' + esc(n.배정반 || '반 미정') + '</span>' +
+      (n.상태 === '등반완료' ? ' <span class="badge g">등반완료</span>' : '') + '</h3>' +
+      '<div class="muted">' + esc(fmtD(n.등록일)) + ' 등록 · ' + esc(n['학교/학년'] || '') + (n.전도자 ? ' · 전도: ' + esc(n.전도자) : '') + '</div></div>' +
+      (n.연락처 ? '<a class="call" href="tel:' + tel(n.연락처) + '">전화</a>' : '') + '</div>' +
+      '<div class="muted" style="margin-top:.6rem;font-weight:700">새신자 교육 (눌러서 체크)</div><div class="weeks">' + wks + '</div>' +
+      (n.메모 ? '<div class="hint pre">' + esc(n.메모) + '</div>' : '') +
+      '<div class="row" style="margin-top:.7rem"><button class="btn light small" onclick="newcomerForm(\'' + n.ID + '\')">고치기</button>' +
+      (n.상태 !== '등반완료' ? '<button class="btn light small" onclick="promote(\'' + n.ID + '\')">학생 명단에 올리기</button>' : '') + '</div></div>';
+  }).join('') || '<div class="empty">해당하는 새신자가 없어요</div>';
+  return topbar('새신자') + '<button class="btn" style="margin-top:.8rem" onclick="newcomerForm()">+ 새신자 등록하기</button>' +
+    '<div class="chips">' + chips + '</div><div class="cols">' + cards + '</div>';
+};
+function ncById(id) { return S.params._data.filter(function (n) { return n.ID === id; })[0]; }
+function toggleWeek(id, w) {
+  var n = ncById(id), o = { ID: id }; o[w] = n[w] ? '' : 'O';
+  call('saveNewcomer', o, true).then(function (s) { Object.assign(n, s); render(); });
+  n[w] = o[w]; render();
+}
+function newcomerForm(id) {
+  var n = id ? ncById(id) : { 등록일: todayStr() };
+  var clsOpts = ['<option value="">아직 미정</option>'].concat(classNames().concat(['새신자반']).map(function (c) { return '<option ' + (c === n.배정반 ? 'selected' : '') + '>' + c + '</option>'; })).join('');
+  var f = function (k, ph, type) { return '<label>' + k + '</label><input id="n_' + k + '" type="' + (type || 'text') + '" value="' + esc(n[k] || '') + '" placeholder="' + (ph || '') + '">'; };
+  modal('<h2>' + (id ? '새신자 정보 고치기' : '새신자 등록') + '</h2>' + f('이름') + f('등록일', '', 'date') +
+    '<label>배정반</label><select id="n_배정반">' + clsOpts + '</select>' +
+    f('학교/학년', '예) 화곡고1') + f('연락처', '010-', 'tel') + f('전도자', '데려온 친구 이름') + f('생년월일') +
+    '<label>메모</label><textarea id="n_메모" placeholder="가족, 신앙배경, 관심사 등">' + esc(n.메모 || '') + '</textarea>' +
+    '<button class="btn" style="margin-top:1rem" onclick="saveNewcomer(\'' + (id || '') + '\')">저장</button>');
+}
+function saveNewcomer(id) {
+  var o = { ID: id || undefined };
+  ['이름', '등록일', '배정반', '학교/학년', '연락처', '전도자', '생년월일', '메모'].forEach(function (k) { o[k] = $('n_' + k).value.trim(); });
+  if (!o.이름) { toast('이름을 써 주세요'); return; }
+  call('saveNewcomer', o).then(function () { S.params._data = null; closeModal(); render(); toast('저장했어요'); });
+}
+function promote(id) {
+  var n = ncById(id);
+  var cls = n.배정반 && /^\d-\d$/.test(n.배정반) ? n.배정반 : prompt('어느 반으로 올릴까요? (예: 1-2)', myClass());
+  if (!cls) return;
+  if (!confirm(n.이름 + ' 학생을 ' + cls + '반 명단에 올릴까요?')) return;
+  call('promoteNewcomer', { id: id, 반: cls }).then(function (s) { S.boot.students.push(s); S.params._data = null; render(); toast(cls + '반 명단에 올렸어요'); });
+}
+
+/* ---------- 면담 기록 ---------- */
+var NOTE_TYPES = ['심방', '전화', '카톡/문자', '상담', '출석부메모', '기타'];
+function noteCard(n) {
+  return '<div class="card"><div class="muted"><b>' + esc(fmtD(n.날짜)) + '</b> · <span class="badge">' + esc(n.유형) + '</span>' + (n.교사 ? ' · ' + esc(n.교사) : '') + (n.장소 ? ' · ' + esc(n.장소) : '') + '</div>' +
+    '<h3 style="margin-top:.3rem">' + esc(n.이름) + (n.반 ? ' <span class="muted">' + esc(n.반) + '반</span>' : '') + '</h3><div class="pre">' + esc(n.내용) + '</div></div>';
+}
+VIEWS.notes = function (p) {
+  if (!S.params._data) { call('getNotes', { limit: 120 }).then(function (d) { S.params._data = d; render(); }); return topbar('면담 기록') + '<div class="empty">불러오는 중…</div>'; }
+  var t = p.t || '전체';
+  var chips = ['전체'].concat(NOTE_TYPES).map(function (c) { return '<button class="chip ' + (c === t ? 'on' : '') + '" onclick="S.params.t=\'' + c + '\';render()">' + c + '</button>'; }).join('');
+  var list = S.params._data.filter(function (n) { return t === '전체' || n.유형 === t; }).slice(0, 60);
+  return topbar('면담 기록') + '<button class="btn" style="margin-top:.8rem" onclick="noteForm()">+ 새 면담 기록하기</button>' +
+    '<div class="chips">' + chips + '</div>' + '<div class="cols">' + (list.map(noteCard).join('') || '<div class="empty">기록이 없어요</div>') + '</div>';
+};
+var NF = {};
+function noteForm(sid) {
+  NF = { sid: sid || '', cls: sid ? stuById(sid).반 : myClass(), type: '심방' };
+  drawNoteForm();
+}
+function drawNoteForm() {
+  var keep = $('nt_c') ? { c: $('nt_c').value, d: $('nt_d').value, pl: $('nt_p').value } : { c: '', d: todayStr(), pl: '' };
+  var picked = NF.sid ? stuById(NF.sid) : null;
+  var who;
+  if (picked) {
+    who = '<div class="list-item"><span class="grow"><b>' + esc(picked.이름) + '</b> <span class="muted">' + esc(picked.반) + '반</span></span><button class="btn light small" onclick="NF.sid=\'\';drawNoteForm()">바꾸기</button></div>';
+  } else {
+    who = '<div class="chips">' + classNames().map(function (c) { return '<button class="chip ' + (c === NF.cls ? 'on' : '') + '" onclick="NF.cls=\'' + c + '\';drawNoteForm()">' + c + '반</button>'; }).join('') + '</div>' +
+      '<div class="chips wrap">' + students().filter(function (s) { return s.반 === NF.cls; }).map(function (s) {
+        return '<button class="chip" onclick="NF.sid=\'' + s.ID + '\';drawNoteForm()">' + esc(s.이름) + '</button>';
+      }).join('') + '</div>';
+  }
+  modal('<h2>면담 기록하기</h2><label>누구를 만났나요?</label>' + who +
+    '<label>어떻게 만났나요?</label><div class="chips wrap">' + NOTE_TYPES.filter(function (t) { return t !== '출석부메모'; }).map(function (t) {
+      return '<button class="chip ' + (t === NF.type ? 'on' : '') + '" onclick="NF.type=\'' + t + '\';drawNoteForm()">' + t + '</button>';
+    }).join('') + '</div>' +
+    '<div class="row"><div><label>날짜</label><input id="nt_d" type="date" value="' + esc(keep.d) + '"></div><div><label>장소</label><input id="nt_p" value="' + esc(keep.pl) + '" placeholder="예) 카페"></div></div>' +
+    '<label>내용</label><textarea id="nt_c" placeholder="나눈 이야기, 기도제목 등">' + esc(keep.c) + '</textarea>' +
+    '<div class="hint">키보드의 마이크 버튼을 누르면 말로 입력할 수 있어요</div>' +
+    '<button class="btn" style="margin-top:1rem" onclick="saveNote()">저장</button>');
+}
+function saveNote() {
+  var s = NF.sid ? stuById(NF.sid) : null, c = $('nt_c').value.trim();
+  if (!s) { toast('학생을 골라 주세요'); return; }
+  if (!c) { toast('내용을 써 주세요'); return; }
+  call('saveNote', { 날짜: $('nt_d').value, 학생ID: s.ID, 이름: s.이름, 반: s.반, 유형: NF.type, 교사: S.user, 장소: $('nt_p').value.trim(), 내용: c })
+    .then(function () { closeModal(); S.params._data = null; render(); toast('기록했어요'); });
+}
+
+/* ---------- 통계 ---------- */
+VIEWS.stats = function (p) {
+  if (!S.params._data) { call('getStats', {}).then(function (d) { S.params._data = d; render(); }); return topbar('출석 통계') + '<div class="empty">계산하는 중…</div>'; }
+  var d = S.params._data, w = d.weekly.slice(-12), last = w[w.length - 1] || { 합계: 0, 반별: {} }, prev = w[w.length - 2];
+  var max = Math.max.apply(null, w.map(function (x) { return x.합계; }).concat([1]));
+  var avg = w.length ? Math.round(w.reduce(function (a, x) { return a + x.합계; }, 0) / w.length) : 0;
+  var diff = prev ? last.합계 - prev.합계 : 0;
+  var bars = w.map(function (x) { return '<div class="b"><span>' + x.합계 + '</span><i style="height:' + Math.round(x.합계 / max * 100) + '%"></i><em>' + shortD(x.날짜) + '</em></div>'; }).join('');
+  var cls = d.classes.filter(function (c) { return /^\d-\d$/.test(c.반); }).map(function (c) {
+    return '<button class="list-item" onclick="S.params.c=\'' + c.반 + '\';render()" style="display:block"><div style="display:flex;justify-content:space-between"><b>' + c.반 + '반</b>' +
+      '<span><b>' + (last.반별[c.반] || 0) + '명</b> <span class="muted">/ 재적 ' + c.재적 + '</span></span></div>' +
+      '<div class="meter"><i style="width:' + c.평균출석률 + '%"></i></div><div class="muted">최근 ' + d.recentWeeks + '주 평균 출석률 ' + c.평균출석률 + '%</div></button>';
+  }).join('');
+  var care = d.needCare.slice(0, 15).map(function (s) {
+    return '<div class="list-item"><div class="grow" onclick="go(\'student\',{id:\'' + s.ID + '\'})"><b>' + esc(s.이름) + '</b> <span class="muted">' + s.반 + '반</span><br><span class="badge w">' + s.결석주수 + '주째 못 나옴</span> <span class="muted">마지막 ' + shortD(s.최근출석) + '</span></div>' +
+      (s.연락처 ? '<a class="call" href="tel:' + tel(s.연락처) + '">전화</a>' : '') + '</div>';
+  }).join('') || '<p class="muted">모두 잘 나오고 있어요</p>';
+  var detail = '';
+  if (p.c) {
+    detail = '<div class="card"><h3>' + p.c + '반 학생별 (최근 ' + d.recentWeeks + '주)</h3>' + d.perStudent.filter(function (s) { return s.반 === p.c; })
+      .sort(function (a, b) { return b.최근12주 - a.최근12주; }).map(function (s) {
+        var pct = d.recentWeeks ? Math.round(s.최근12주 / d.recentWeeks * 100) : 0;
+        return '<div style="margin:.6rem 0" onclick="go(\'student\',{id:\'' + s.ID + '\'})"><div style="display:flex;justify-content:space-between"><b>' + esc(s.이름) + '</b><span>' + s.최근12주 + '/' + d.recentWeeks + '주</span></div><div class="meter"><i style="width:' + pct + '%;background:' + (pct >= 70 ? 'var(--ok)' : pct >= 30 ? 'var(--pri)' : 'var(--no)') + '"></i></div></div>';
+      }).join('') + '</div>';
+  }
+  return topbar('출석 통계') +
+    '<p class="muted" style="margin:.8rem 0 0">' + (d.lastDate ? fmtD(d.lastDate) + ' 기준' : '아직 출석 기록이 없어요') + '</p>' +
+    '<div class="stat-big"><div><b>' + last.합계 + '</b><span>최근 주일 출석</span></div><div><b class="' + (diff >= 0 ? 'g' : 'r') + '">' + (diff >= 0 ? '+' : '') + diff + '</b><span>전주 대비</span></div><div><b>' + avg + '</b><span>최근 평균</span></div></div>' +
+    '<div class="split"><div>' + '<div class="card"><h3>주일별 출석 인원</h3><div class="bars">' + bars + '</div></div>' +
+    '<div class="card" style="border-color:#fcd34d;background:#fffdf3"><h3>연락이 필요한 친구</h3><p class="muted" style="margin:0">3주 이상 출석하지 못한 재적 학생</p>' + care + '</div>' +
+    '</div><div>' + '<h3 style="margin:.6rem 0 0">반별 출석 <span class="muted">(누르면 학생별로 보여요)</span></h3>' + cls + detail + '</div></div>' +
+    '<p class="muted" style="text-align:center">재적 ' + d.totalActive + '명 · 전체 명단 ' + d.totalAll + '명</p>';
+};
+
+/* ---------- 출석부 전체표 (PC에서 넓게) ---------- */
+VIEWS.sheet = function (p) {
+  var per = p.per || '12주', cls = p.cls || '전체', y = +todayStr().slice(0, 4);
+  var head = topbar('출석부 전체표') +
+    '<div class="chips">' + ['12주', '올해', '작년'].map(function (x) {
+      return '<button class="chip ' + (x === per ? 'on' : '') + '" onclick="go(\'sheet\',{per:\'' + x + '\',cls:\'' + cls + '\'},true)">' + (x === '12주' ? '최근 12주' : x === '올해' ? y + '년' : (y - 1) + '년') + '</button>';
+    }).join('') + '<span style="width:.6rem"></span>' + ['전체'].concat(classNames()).map(function (c) {
+      return '<button class="chip ' + (c === cls ? 'on' : '') + '" onclick="S.params.cls=\'' + c + '\';render()">' + (c === '전체' ? '전체 반' : c + '반') + '</button>';
+    }).join('') + '</div>';
+  if (!S.params._data) {
+    var from = per === '12주' ? addDays(lastSunday(), -77) : per === '올해' ? y + '-01-01' : (y - 1) + '-01-01';
+    var to = per === '작년' ? (y - 1) + '-12-31' : todayStr();
+    call('getAttendanceRange', { from: from, to: to }).then(function (d) { S.params._data = d; render(); });
+    return head + '<div class="empty">불러오는 중…</div>';
+  }
+  var recs = S.params._data, dates = {}, map = {}, has = {};
+  recs.forEach(function (r) { dates[r[0]] = 1; map[r[1] + '|' + r[0]] = r; has[r[1]] = 1; });
+  var dl = Object.keys(dates).sort();
+  if (!dl.length) return head + '<div class="empty">이 기간에는 출석 기록이 없어요</div>';
+  var order = classNames();
+  var list = students().filter(function (s) { return (cls === '전체' || s.반 === cls) && (s.상태 === '재적' || has[s.ID]); })
+    .sort(function (a, b) { return order.indexOf(a.반) - order.indexOf(b.반); });
+  var tot = dl.map(function () { return 0; });
+  var curCls = '', body = '';
+  list.forEach(function (s) {
+    if (cls === '전체' && s.반 !== curCls) { curCls = s.반; body += '<tr class="grp"><td class="c1">' + esc(s.반) + '</td><td class="c2">' + esc(s.반) + '반</td><td colspan="' + (dl.length + 2) + '"></td></tr>'; }
+    var cnt = 0;
+    var cells = dl.map(function (d, i) {
+      var r = map[s.ID + '|' + d];
+      if (!r) return '<td></td>';
+      var t = r[3] ? ' title="' + esc(r[3]) + '"' : '';
+      if (r[2] === '출석') { cnt++; tot[i]++; return '<td class="o"' + t + '>O</td>'; }
+      return '<td class="x"' + t + '>' + (r[3] ? '·' : '') + '</td>';
+    }).join('');
+    body += '<tr class="clk" onclick="go(\'student\',{id:\'' + s.ID + '\'})"><td class="c1">' + esc(s.반) + '</td><td class="c2">' + esc(s.이름) + (s.상태 !== '재적' ? ' <span class="muted">(' + esc(s.상태) + ')</span>' : '') + '</td>' + cells +
+      '<td><b>' + cnt + '</b></td><td>' + Math.round(cnt / dl.length * 100) + '%</td></tr>';
+  });
+  var thead = '<tr><th class="c1">반</th><th class="c2">이름</th>' + dl.map(function (d) { return '<th>' + shortD(d) + '</th>'; }).join('') + '<th>출석</th><th>출석률</th></tr>';
+  var tfoot = '<tr><td class="c1"></td><td class="c2">출석 합계</td>' + tot.map(function (n) { return '<td>' + n + '</td>'; }).join('') + '<td colspan="2">' + list.length + '명</td></tr>';
+  return head + '<p class="muted" style="margin:0">O = 출석 · 빨간 칸 = 결석 (· 은 결석 이유 있음, 마우스를 올리면 보여요) · 이름을 누르면 학생 정보</p>' +
+    (isWide() ? '' : '<div class="hint">PC나 태블릿에서 [PC 넓게 보기]로 보면 한눈에 보여요. 휴대폰에서는 옆으로 밀어서 보세요.</div>') +
+    '<div class="tblwrap"><table class="tbl"><thead>' + thead + '</thead><tbody>' + body + '</tbody><tfoot>' + tfoot + '</tfoot></table></div>';
+};
+
+/* ---------- 공지 ---------- */
+VIEWS.notices = function () {
+  if (!S.params._data) { call('getNotices').then(function (d) { S.params._data = d; render(); }); return topbar('공지사항') + '<div class="empty">불러오는 중…</div>'; }
+  var list = S.params._data.map(function (n) {
+    return '<div class="card" style="' + (n.중요 === 'Y' ? 'border-color:#fcd34d;background:#fffdf3' : '') + '"><div class="muted">' + (n.중요 === 'Y' ? '<b>[중요]</b> · ' : '') + esc(fmtD(n.날짜)) + ' · ' + esc(n.작성자) + '</div>' +
+      '<h3 style="margin-top:.3rem">' + esc(n.제목) + '</h3><div class="pre">' + esc(n.내용) + '</div>' +
+      (isAdmin() ? '<div class="row" style="margin-top:.6rem"><button class="btn light small" onclick="noticeForm(\'' + n.ID + '\')">고치기</button><button class="btn danger small" onclick="delNotice(\'' + n.ID + '\')">삭제</button></div>' : '') + '</div>';
+  }).join('') || '<div class="empty">공지가 없어요</div>';
+  return topbar('공지사항') + (isAdmin() ? '<button class="btn" style="margin-top:.8rem" onclick="noticeForm()">+ 공지 쓰기</button>' : '') + '<div class="cols">' + list + '</div>';
+};
+function noticeForm(id) {
+  var n = id ? S.params._data.filter(function (x) { return x.ID === id; })[0] : { 날짜: todayStr(), 작성자: S.user };
+  modal('<h2>' + (id ? '공지 고치기' : '공지 쓰기') + '</h2><label>제목</label><input id="g_t" value="' + esc(n.제목 || '') + '">' +
+    '<label>날짜</label><input id="g_d" type="date" value="' + esc(n.날짜) + '">' +
+    '<label>내용</label><textarea id="g_c" style="min-height:12rem">' + esc(n.내용 || '') + '</textarea>' +
+    '<label style="display:flex;align-items:center;gap:.5rem"><input id="g_i" type="checkbox" style="width:1.6rem;height:1.6rem" ' + (n.중요 === 'Y' ? 'checked' : '') + '> 중요 공지 (맨 위에 고정)</label>' +
+    '<button class="btn" style="margin-top:1rem" onclick="saveNotice(\'' + (id || '') + '\')">저장</button>');
+}
+function saveNotice(id) {
+  var o = { ID: id || undefined, 제목: $('g_t').value.trim(), 날짜: $('g_d').value, 내용: $('g_c').value.trim(), 중요: $('g_i').checked ? 'Y' : '', 작성자: S.user };
+  if (!o.제목) { toast('제목을 써 주세요'); return; }
+  call('saveNotice', o).then(function () { closeModal(); S.params._data = null; render(); toast('공지를 올렸어요'); });
+}
+function delNotice(id) { if (confirm('이 공지를 삭제할까요?')) call('deleteNotice', { id: id }).then(function () { S.params._data = null; render(); }); }
+
+/* ---------- 사역 준비 ---------- */
+var MIN_ST = ['준비전', '준비중', '완료'];
+VIEWS.ministry = function () {
+  if (!S.params._data) { call('getMinistry').then(function (d) { S.params._data = d; render(); }); return topbar('사역 준비') + '<div class="empty">불러오는 중…</div>'; }
+  var groups = {};
+  S.params._data.forEach(function (m) { (groups[m.시기] = groups[m.시기] || []).push(m); });
+  var html = Object.keys(groups).sort().map(function (k) {
+    var lbl = /^\d{4}-\d{2}$/.test(k) ? k.slice(0, 4) + '년 ' + (+k.slice(5)) + '월' : k;
+    return '<h3 style="margin:1.2rem 0 0">' + esc(lbl) + '</h3><div class="cols">' + groups[k].map(function (m) {
+      var bc = m.진행상태 === '완료' ? 'g' : m.진행상태 === '준비중' ? 'w' : '';
+      return '<div class="card"><h3>' + esc(m.사역명) + ' <span class="badge ' + bc + '">' + esc(m.진행상태 || '준비전') + '</span></h3>' +
+        '<div class="muted">' + (m.담당 ? '담당: ' + esc(m.담당) : '담당 미정') + '</div>' + (m.메모 ? '<div class="muted pre" style="margin-top:.3rem">' + esc(m.메모) + '</div>' : '') +
+        (m.구글시트링크 ? '<a class="btn ok" style="margin-top:.7rem" href="' + esc(m.구글시트링크) + '" target="_blank">이 사역 준비 탭 열기</a>'
+          : '<button class="btn light" style="margin-top:.7rem" onclick="makeSheet(\'' + m.ID + '\')">사역준비 시트에 탭 만들기</button>') +
+        '<div class="row" style="margin-top:.5rem"><button class="btn light small" onclick="cycleMin(\'' + m.ID + '\')">상태 바꾸기</button><button class="btn light small" onclick="ministryForm(\'' + m.ID + '\')">고치기</button></div></div>';
+    }).join('') + '</div>';
+  }).join('');
+  var book = S.boot.ministryBookUrl;
+  return topbar('사역 준비') + '<div class="hint" style="margin-top:.8rem">모든 사역은 <b>사역준비 구글시트 1개</b>에 사역마다 탭으로 정리됩니다. 링크만 있으면 로그인 없이 함께 편집할 수 있어요.</div>' +
+    (book ? '<a class="btn ok" style="margin-top:.6rem" href="' + esc(book) + '" target="_blank">사역준비 시트 전체 열기</a>' : '') +
+    '<button class="btn" style="margin-top:.8rem" onclick="ministryForm()">+ 사역 추가</button>' + (html || '<div class="empty">등록된 사역이 없어요</div>');
+};
+function minById(id) { return S.params._data.filter(function (m) { return m.ID === id; })[0]; }
+function cycleMin(id) {
+  var m = minById(id), nx = MIN_ST[(MIN_ST.indexOf(m.진행상태 || '준비전') + 1) % MIN_ST.length];
+  m.진행상태 = nx; render(); call('saveMinistry', { ID: id, 진행상태: nx }, true);
+}
+function makeSheet(id) {
+  if (!confirm('사역준비 구글시트에 이 사역의 탭을 만들까요?' + (S.boot.ministryBookUrl ? '' : '\n(처음 한 번은 사역준비 구글시트가 새로 만들어지고, 링크가 있는 사람은 편집할 수 있게 공유됩니다)'))) return;
+  call('createMinistrySheet', { id: id }).then(function (url) {
+    minById(id).구글시트링크 = url;
+    if (!S.boot.ministryBookUrl) S.boot.ministryBookUrl = url.split('#')[0];
+    render(); toast('탭을 만들었어요');
+  });
+}
+function ministryForm(id) {
+  var m = id ? minById(id) : { 시기: todayStr().slice(0, 7), 진행상태: '준비전' };
+  modal('<h2>' + (id ? '사역 고치기' : '사역 추가') + '</h2><label>사역 이름</label><input id="m_n" value="' + esc(m.사역명 || '') + '" placeholder="예) 여름수련회">' +
+    '<label>시기 (월)</label><input id="m_s" type="month" value="' + esc(m.시기 || '') + '">' +
+    '<label>담당</label><input id="m_w" value="' + esc(m.담당 || '') + '">' +
+    '<label>준비 시트 링크 <span class="muted">(비워두면 [탭 만들기]로 자동 생성)</span></label><input id="m_l" value="' + esc(m.구글시트링크 || '') + '" placeholder="https://docs.google.com/...">' +
+    '<label>메모</label><textarea id="m_m">' + esc(m.메모 || '') + '</textarea>' +
+    '<button class="btn" style="margin-top:1rem" onclick="saveMin(\'' + (id || '') + '\')">저장</button>' +
+    (id && isAdmin() ? '<button class="btn danger" style="margin-top:.6rem" onclick="delMin(\'' + id + '\')">삭제</button>' : ''));
+}
+function saveMin(id) {
+  var o = { ID: id || undefined, 사역명: $('m_n').value.trim(), 시기: $('m_s').value, 담당: $('m_w').value.trim(), 구글시트링크: $('m_l').value.trim(), 메모: $('m_m').value.trim() };
+  if (!id) o.진행상태 = '준비전';
+  if (!o.사역명) { toast('사역 이름을 써 주세요'); return; }
+  call('saveMinistry', o).then(function () { closeModal(); S.params._data = null; render(); toast('저장했어요'); });
+}
+function delMin(id) { if (confirm('이 사역을 삭제할까요?')) call('deleteMinistry', { id: id }).then(function () { closeModal(); S.params._data = null; render(); }); }
+
+/* ---------- 글씨 크기 ---------- */
+var SIZES = [14, 15, 16, 17, 18, 20, 22, 24, 26], DEF_FS = 17;
+function fontStep(d) {
+  var cur = store('hs_fs') || DEF_FS, i = SIZES.indexOf(cur); if (i < 0) i = SIZES.indexOf(DEF_FS);
+  var j = Math.max(0, Math.min(SIZES.length - 1, i + d));
+  if (j === i) { toast(d > 0 ? '가장 큰 글씨예요' : '가장 작은 글씨예요'); return; }
+  store('hs_fs', SIZES[j]); applyFont();
+}
+function applyFont() { document.documentElement.style.setProperty('--fs', (store('hs_fs') || DEF_FS) + 'px'); }
+
+/* ========================= 시작 ========================= */
+function start() {
+  applyFont(); applyWide();
+  window.addEventListener('resize', function () { if (store('hs_pc') === null) { var w = document.body.classList.contains('wide'); applyWide(); if (w !== isWide()) render(); } });
+  var saved = store('hs_login');
+  if (saved && saved.pin) {
+    S.pin = saved.pin;
+    call('boot').then(function (b) { S.boot = b; S.user = saved.user; render(); })
+      .catch(function () { unstore('hs_login'); LOGIN.step = 'pin'; render(); });
+  } else { LOGIN.step = 'pin'; render(); }
+  window.addEventListener('beforeunload', function (e) { if (S.dirty) { e.preventDefault(); e.returnValue = ''; } });
+}
+if (IS_GAS) start();
+else {
+  // GitHub Pages: config.js 에 APP_API(앱 주소)가 있으면 실제 데이터,
+  // 없으면 컴퓨터 미리보기용 예시 데이터(preview-mock.js)
+  var loadJs = function (src, ok, bad) { var el = document.createElement('script'); el.src = src; el.onload = ok; el.onerror = bad; document.head.appendChild(el); };
+  var noApp = function () { document.body.innerHTML = '<p style="padding:2rem">앱 주소 설정(config.js)이 없습니다.</p>'; };
+  var mock = function () { loadJs('preview-mock.js', start, noApp); };
+  loadJs('config.js', function () { if (window.APP_API) start(); else mock(); }, mock);
+}
+</script>
+</body>
+</html>

@@ -201,8 +201,24 @@ svg.ic{width:1.25em;height:1.25em;flex:none;display:block}
 
 .empty{text-align:center;color:var(--sub);padding:1.6rem 0}
 .foot{display:flex;flex-wrap:wrap;gap:.4rem;justify-content:center;margin-top:1rem}
-.sig{display:flex;align-items:center;justify-content:center;gap:.45rem;margin-top:1.3rem;color:#9aa1b8;font-size:.64rem;font-weight:800;letter-spacing:.14em}
-.sig img{width:1.2rem;height:auto;opacity:.9}
+/* 맨 아래 교회 시그니처 (CI 원본 그대로) */
+.sig{display:flex;justify-content:center;margin:1.8rem 0 .4rem}
+.sig img{width:min(15rem,72%);height:auto}
+
+/* 텍스트 워드마크: HERE. + 목민교회 고등부 */
+.wm{display:inline-flex;flex-direction:column;align-items:flex-start;line-height:1}
+.wm b{font-size:1.85rem;font-weight:900;letter-spacing:-.055em;background:linear-gradient(100deg,#151c33 10%,#1475bc 95%);-webkit-background-clip:text;background-clip:text;color:transparent;padding-right:.1em}
+.wm b em{font-style:normal;color:var(--ci-sky);-webkit-text-fill-color:var(--ci-sky)}
+.wm .bar{display:flex;gap:3px;width:100%;margin-top:.4rem}
+.wm .bar i{flex:1;height:4px;border-radius:4px}
+.wm .bar i:nth-child(1){background:var(--ci-blue)} .wm .bar i:nth-child(2){background:var(--ci-sky)}
+.wm .bar i:nth-child(3){background:var(--ci-orange)} .wm .bar i:nth-child(4){background:var(--ci-lime)}
+.wm small{display:block;margin-top:.45rem;font-size:.74rem;font-weight:800;letter-spacing:.2em;color:var(--sub)}
+.wm.lg{align-items:center}
+.wm.lg b{font-size:3.6rem}
+.wm.lg .bar{width:72%}
+.wm.lg .bar i{height:5px}
+.wm.lg small{font-size:.86rem;letter-spacing:.28em;margin-top:.6rem}
 .pre{white-space:pre-wrap}
 .hint{background:var(--p-sky);color:#0b5e86;border-radius:14px;padding:.55rem .75rem;font-size:.83rem;font-weight:700;margin-top:.45rem}
 .pick{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:.6rem}
@@ -265,9 +281,13 @@ svg.ic{width:1.25em;height:1.25em;flex:none;display:block}
 /* ===== 브랜드 ===== */
 var APP_NAME = 'HERE';                       // 앱 이름 (바꾸려면 여기만)
 var APP_SUB = '목민교회 고등부';
-var LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 78.49 64.56"><path fill="#1475bc" d="M4.24 64.47L46.08 64.47C46.08 17.99 0.2 0 0.2 0L0.2 60.33C0.2 60.33 0 64.47 4.24 64.47"/><path fill="#ffffff" d="M31.32 40.69L31.32 38L23.07 38C22.06 38 21.55 37.38 21.55 36.46L21.55 29.12L18.45 29.12L18.45 36.46C18.45 37.35 17.9 38 16.92 38L8.67 38L8.67 40.69L16.92 41.14C17.71 41.18 18.45 41.69 18.45 42.65L18.45 64.56L21.55 64.56L21.55 42.65C21.55 41.75 22.22 41.19 23.07 41.14L31.32 40.69"/><path fill="#00b9f2" d="M60.13 0C60.13 0 43.42 6.55 30.17 21.97C32.09 24.21 33.95 26.65 35.67 29.27C43.21 23.68 53 19.94 60.13 17.74L60.13 0"/><path fill="#f7941d" d="M69.57 32.24L69.57 15.26C69.57 15.26 49.05 19.33 35.67 29.27C37.88 32.65 39.87 36.35 41.5 40.39C50.86 36.09 61.99 33.58 69.57 32.24"/><path fill="#b2d234" d="M41.5 40.39C44.32 47.38 46.08 55.38 46.08 64.47L74.27 64.47C78.49 64.47 78.46 60.33 78.46 60.33L78.46 30.94C78.46 30.94 57.44 33.07 41.5 40.39"/></svg>';
-var LOGO = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(LOGO_SVG);
+// 목민교회 교단 시그니처 (CI 매뉴얼 원본 벡터, 변형 금지) — 앱 맨 아래에만 사용
+var SIG_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 310.34 76.63"><path fill="#1475bc" d="M244.46 65.74L281.59 65.74C281.59 24.5 240.88 8.54 240.88 8.54L240.88 62.06C240.88 62.06 240.7 65.74 244.46 65.74"/><path fill="#ffffff" d="M268.49 44.64L268.49 42.25L261.17 42.25C260.27 42.25 259.82 41.7 259.82 40.89L259.82 34.37L257.07 34.37L257.07 40.89C257.07 41.67 256.58 42.25 255.72 42.25L248.39 42.25L248.39 44.64L255.72 45.04C256.41 45.07 257.07 45.52 257.07 46.38L257.07 65.81L259.82 65.81L259.82 46.38C259.82 45.58 260.41 45.09 261.17 45.04L268.49 44.64"/><path fill="#00b9f2" d="M294.05 8.54C294.05 8.54 279.22 14.35 267.46 28.03C269.18 30.02 270.82 32.18 272.35 34.51C279.03 29.54 287.73 26.23 294.05 24.28L294.05 8.54"/><path fill="#f7941d" d="M302.43 37.14L302.43 22.07C302.43 22.07 284.22 25.69 272.35 34.51C274.31 37.51 276.07 40.79 277.52 44.37C285.83 40.56 295.7 38.33 302.43 37.14"/><path fill="#b2d234" d="M277.52 44.37C280.03 50.57 281.59 57.67 281.59 65.74L306.6 65.74C310.34 65.74 310.32 62.06 310.32 62.06L310.32 35.99C310.32 35.99 291.66 37.88 277.52 44.37"/><path fill="#231f20" d="M76.77 32.25h15.96v6.01h-15.96zM87.09 41.91L98.28 41.91L98.28 28.59L70.87 28.59L70.87 38.92C70.87 40.64 72.15 41.9 73.98 41.9L81.53 41.91L81.53 45.62L67.86 45.62L67.86 49.27L100.8 49.27L100.8 45.62L87.09 45.62L87.09 41.91"/><path fill="#231f20" d="M133.26 27.38h5.56v26.25h-5.56z"/><path fill="#231f20" d="M119.47 51.76L113.95 51.76L113.95 62.78C113.95 64.5 115.23 65.76 117.07 65.76L139.42 65.77L139.42 62.12L119.47 62.12L119.47 51.76"/><path fill="#231f20" d="M113.49 32.28h7.84v11.65h-7.84zM126.89 47.58L126.89 28.6L107.97 28.6L107.97 44.59C107.97 46.31 109.25 47.57 111.09 47.58L126.89 47.58"/><path fill="#231f20" d="M193.16 35.12C193.82 34.26 194.81 33.84 195.78 33.84C196.74 33.84 197.74 34.26 198.4 35.12C199.13 36.05 199.62 37.66 199.59 39.29C199.62 40.92 199.13 42.53 198.4 43.47C197.74 44.33 196.74 44.75 195.78 44.75C194.81 44.75 193.82 44.33 193.16 43.47C192.43 42.53 191.94 40.92 191.97 39.29C191.94 37.66 192.43 36.05 193.16 35.12M211.1 27.38L211.1 52.14C210.56 52.51 208.76 53.55 205.47 53.55L198.58 53.55L198.58 48.03C200.04 47.67 201.21 47.12 201.8 46.69C204.33 44.87 205.27 42.09 205.25 39.77C205.22 37.71 204.51 35.29 202.57 33.5L206.91 33.5L206.91 29.82L198.58 29.82L198.58 26.11L193.02 26.11L193.02 29.82L184.79 29.82L184.79 33.5L188.99 33.5C187.05 35.29 186.34 37.71 186.32 39.77C186.29 42.09 187.23 44.87 189.76 46.69C190.36 47.12 191.54 47.68 193.02 48.03L193.02 53.55L184.43 53.55L184.43 57.2C184.43 57.2 202.78 57.2 205.39 57.2C208.42 57.2 210.51 56.12 211.1 55.77L211.1 66.38L216.66 66.38L216.66 27.38L211.1 27.38"/><path fill="#231f20" d="M70.86 56.6L92.25 56.6L92.25 66.38L97.78 66.38L97.78 52.96L70.86 52.95L70.86 56.6"/><path fill="#231f20" d="M176.31 51.11L176.31 28.6L147.76 28.59L147.76 32.25L170.97 32.25L170.97 51.75C170.97 56.56 169.76 58.89 169.22 59.68L166.09 59.68L166.09 42.01L160.72 42.01L160.72 59.68L156.49 59.68L156.49 42.01L151.12 42.01L151.12 59.68L145.75 59.68L145.75 63.33L178.69 63.33L178.69 59.68L174.39 59.68C174.97 58.88 176.31 56.45 176.31 51.11"/><path fill="#231f20" d="M78.19 9.2L78.19 13.09L76.99 13.09L76.99 9.2L75.46 9.2L75.46 17.03C75.15 17.14 74.44 17.32 73.04 17.32L71.34 17.32L71.34 10.95L74.04 10.95L74.04 9.57L69.81 9.57L69.81 9.57L69.81 18.7L73.09 18.7C74.45 18.7 75.15 18.52 75.46 18.41L75.46 21.87L76.99 21.87L76.99 14.47L78.19 14.47L78.19 21.87L79.71 21.87L79.71 9.2L78.19 9.2"/><path fill="#231f20" d="M148.84 19.51L148.84 17.02L152.83 17.02L152.83 15.64L145.05 15.64L145.05 13.87L152.63 13.87L152.63 9.39L143.53 9.39L143.53 10.78L151.11 10.78L151.11 12.48L143.53 12.48L143.53 17.02L147.32 17.02L147.32 19.51L142.73 19.51L142.73 20.89L153.43 20.89L153.43 19.51L148.84 19.51"/><path fill="#231f20" d="M117.16 16.6L106.52 16.6L106.52 17.99L111.06 17.99L111.06 21.87L112.59 21.87L112.59 17.99L117.16 17.99L117.16 16.6"/><path fill="#231f20" d="M111.82 11.7C112.64 12.73 114.45 14.03 116.68 14.55L117.07 13.3C114.44 12.51 112.68 11.1 112.68 9.41L112.68 9.19L110.97 9.19L110.97 9.41C110.97 11.1 109.21 12.51 106.58 13.3L106.97 14.55C109.2 14.03 111.01 12.73 111.82 11.7"/><path fill="#231f20" d="M102.86 9.2h1.53v12.67h-1.53z"/><path fill="#231f20" d="M99.58 14.84C99.6 14.58 99.61 14.3 99.61 14.01C99.61 13.68 99.6 13.37 99.57 13.07L100.48 13.07L100.48 14.84L99.58 14.84M96.76 17.41C95.97 17.41 95.52 15.96 95.52 14.01C95.52 12.07 95.97 10.61 96.76 10.61C97.55 10.61 98 12.07 98 14.01C98 15.96 97.55 17.41 96.76 17.41M100.48 11.68L99.36 11.68C98.95 10.06 98.05 9.19 96.76 9.19C94.95 9.19 93.91 10.88 93.91 14.01C93.91 17.15 94.95 18.84 96.76 18.84C98.08 18.84 98.99 17.93 99.39 16.23L100.48 16.23L100.48 21.87L102 21.87L102 9.2L100.48 9.2L100.48 11.68"/><path fill="#231f20" d="M140.26 11.48L140.26 9.2L138.74 9.2L138.74 15.55L140.26 15.55L140.26 12.87L141.85 12.87L141.85 11.48L140.26 11.48"/><path fill="#231f20" d="M136.34 20.47C134.79 20.47 133.91 19.67 133.91 18.69C133.91 17.7 134.79 16.9 136.34 16.9C137.89 16.9 138.77 17.7 138.77 18.69C138.77 19.67 137.89 20.47 136.34 20.47M136.34 15.5C133.79 15.5 132.33 16.93 132.33 18.69C132.33 20.44 133.79 21.87 136.34 21.87C138.9 21.87 140.35 20.44 140.35 18.69C140.35 16.93 138.9 15.5 136.34 15.5"/><path fill="#231f20" d="M133.99 12.78C134.45 13.55 135.37 14.55 137.06 15.25L137.65 14C135.56 13.11 134.99 11.7 134.84 10.77L137.23 10.77L137.23 9.39L130.75 9.39L130.75 10.77L133.14 10.77C133 11.69 132.45 13.05 130.32 14L130.91 15.25C132.6 14.55 133.52 13.55 133.99 12.78"/><path fill="#231f20" d="M91.24 11.73L91.24 9.2L89.72 9.2L89.72 17.75L91.24 17.75L91.24 13.12L92.83 13.12L92.83 11.73L91.24 11.73"/><path fill="#231f20" d="M84.24 16.73L82.72 16.73L82.72 21.48L91.45 21.48L91.45 20.09L84.24 20.09L84.24 16.73"/><path fill="#231f20" d="M84.98 14.63C84.23 14.63 83.63 13.95 83.63 13.12C83.63 12.28 84.23 11.6 84.98 11.6C85.72 11.6 86.32 12.28 86.32 13.12C86.32 13.95 85.72 14.63 84.98 14.63M84.97 16C86.67 16 87.88 14.71 87.88 13.12C87.88 12.46 87.67 11.85 87.31 11.37L88.38 11.37L88.38 9.99L85.79 9.99L85.79 8.81L84.17 8.81L84.17 9.99L81.57 9.99L81.57 11.37L82.64 11.37C82.28 11.85 82.07 12.46 82.07 13.12C82.07 14.71 83.28 16 84.97 16"/><path fill="#231f20" d="M157.02 13.12C157.02 12.28 157.65 11.6 158.43 11.6C159.2 11.6 159.84 12.28 159.84 13.12C159.84 13.95 159.2 14.64 158.43 14.64C157.65 14.64 157.02 13.95 157.02 13.12M163.5 9.2L163.5 17.02C163.07 17.13 162.18 17.32 160.74 17.32L159.24 17.32L159.24 15.9C160.53 15.57 161.4 14.45 161.4 13.12C161.4 12.46 161.18 11.85 160.81 11.37L161.94 11.37L161.94 9.99L159.21 9.99L159.21 8.81L157.59 8.81L157.59 9.99L154.92 9.99L154.92 11.37L156.04 11.37C155.67 11.85 155.46 12.46 155.46 13.12C155.46 14.45 156.32 15.57 157.62 15.9L157.62 17.32L154.92 17.32L154.92 18.7L160.8 18.7C162.18 18.7 163.07 18.52 163.5 18.4L163.5 21.87L165.02 21.87L165.02 9.2L163.5 9.2"/><path fill="#231f20" d="M127.83 19.51C127.99 18.96 128.26 17.8 128.26 16.1L128.26 9.57L118.96 9.57L118.96 10.95L126.74 10.95L126.74 16.18C126.74 17.69 126.45 18.93 126.29 19.51L124.87 19.51L124.87 14.47L123.35 14.47L123.35 19.51L121.67 19.51L121.67 14.47L120.14 14.47L120.14 19.51L118.36 19.51L118.36 20.89L129.05 20.89L129.05 19.51L127.83 19.51"/><path fill="#231f20" d="M49.35 8.83C49.18 9.86 48.54 10.48 47.62 10.52C47.62 10.52 47.47 10.52 47.4 10.52C47.12 10.5 46.87 10.36 46.7 10.12C46.59 9.97 46.52 9.79 46.48 9.6L48.21 9.43L48.25 9.35C48.25 9.35 48.47 9.03 48.52 8.69C48.55 8.42 48.47 8.12 48.3 7.9C48.13 7.71 47.9 7.58 47.65 7.57C47.58 7.57 47.47 7.57 47.35 7.59L46.08 7.77C46.65 7.29 47.23 6.98 47.82 6.83C47.86 6.82 47.99 6.79 48.12 6.79C48.48 6.79 48.77 6.91 48.99 7.15C49.33 7.51 49.47 8.16 49.35 8.83M46.53 8.88C46.63 8.55 46.91 8.02 47.42 7.93C47.42 7.93 47.54 7.9 47.63 7.92C47.78 7.93 47.92 8 48.03 8.12C48.14 8.27 48.2 8.46 48.17 8.64C48.14 8.82 48.05 9 48 9.1L46.47 9.26C46.47 9.13 46.5 9 46.53 8.88M45.64 8.18L46.58 8.05C46.4 8.26 46.27 8.52 46.2 8.78C46.04 9.34 46.12 9.91 46.42 10.32C46.5 10.44 46.59 10.53 46.69 10.61L43.69 10.91C44.29 9.79 44.94 8.88 45.64 8.18M42.64 12.3C41.13 15.92 40.51 20.35 40.9 24.78C41.37 30 42.24 36.16 42.4 37.08C43.95 45.91 43.76 53.32 41.82 59.73C40.27 64.84 39.19 65.54 37.73 65.65C37.31 65.69 36.94 65.46 36.67 65.09C36.6 65 36.54 64.9 36.49 64.8L38.29 64.52C39.16 64.39 39.55 63.91 39.72 63.26C39.89 62.64 39.8 62.04 39.48 61.6C39.24 61.28 38.91 61.09 38.54 61.07C38.45 61.06 38.25 61.08 38 61.1L4.57 65.2C5.08 64.37 6.47 61.91 7.71 58.02C8.61 55.19 9.25 52.16 9.61 49.02C10.06 45.1 10.08 41 9.67 36.83C9.54 35.58 9.34 34.4 8.86 31.55C8.75 30.9 8.63 30.16 8.49 29.32C7.65 24.23 7.68 20.51 8.58 17.58C9.4 14.92 10.94 12.9 13.57 11.04C14.82 10.16 16.58 9.62 18.83 9.43C24.41 8.94 41.87 7.35 46.7 6.92C45.2 7.78 43.73 9.69 42.64 12.3M4.69 69.77C3.96 69.85 3.27 69.88 2.81 69.44C2.36 69.02 2.15 68.42 2.2 67.71C2.32 65.91 3.83 65.59 4.16 65.59C4.19 65.59 4.33 65.58 4.33 65.58L37 61.58C36.53 61.94 36.19 62.5 36.01 63.19C35.83 63.95 35.97 64.74 36.39 65.3C36.54 65.5 36.71 65.66 36.91 65.79L4.69 69.77M38.29 64.17C37.93 64.19 37.73 63.76 37.75 63.38C37.76 62.93 38.07 62.58 38.07 62.58C38.07 62.58 38.22 62.38 38.35 62.26C38.36 62.25 38.39 62.22 38.33 62.23C38.27 62.24 36.69 62.45 36.69 62.45C37.02 61.91 37.51 61.54 38.08 61.44L38.29 61.41C38.37 61.41 38.44 61.41 38.52 61.41C38.78 61.42 39.02 61.57 39.2 61.81C39.45 62.15 39.52 62.66 39.38 63.16C39.28 63.55 38.94 64.15 38.29 64.17M36.35 63.27C36.39 63.12 36.43 62.97 36.5 62.83L37.59 62.68C37.49 62.86 37.41 63.1 37.4 63.37C37.39 63.69 37.5 64.03 37.71 64.26L36.36 64.46C36.26 64.09 36.25 63.68 36.35 63.27M49.25 6.91C48.92 6.56 48.47 6.4 47.92 6.46C47.69 6.48 25.26 8.52 18.8 9.08C16.46 9.28 14.69 9.83 13.37 10.76C10.68 12.66 9.1 14.74 8.24 17.48C7.33 20.46 7.29 24.23 8.15 29.37C8.29 30.21 8.41 30.95 8.52 31.6C9 34.44 9.19 35.62 9.32 36.87C10.26 46.24 8.78 53.48 7.38 57.9C6.01 62.24 4.43 64.79 4.13 65.24C3.69 65.26 1.99 65.65 1.85 67.68C1.8 68.5 2.05 69.2 2.57 69.69C3.03 70.12 3.46 70.21 4.73 70.11C4.73 70.11 37.83 66.02 37.88 66.01C39.59 65.81 40.59 64.99 42.15 59.83C44.11 53.37 44.3 45.91 42.74 37.02C42.58 36.11 41.71 29.95 41.25 24.75C40.86 20.38 41.47 16.01 42.97 12.44C43.13 12.03 43.31 11.64 43.5 11.27L47.63 10.87C48.72 10.78 49.49 10.08 49.7 8.89C49.83 8.1 49.67 7.36 49.25 6.91"/><path fill="#00a56a" d="M49.35 8.83C49.18 9.86 48.54 10.48 47.62 10.52C47.62 10.52 47.47 10.52 47.4 10.52C47.12 10.5 46.87 10.36 46.7 10.12C46.59 9.97 46.52 9.79 46.48 9.6L48.21 9.43L48.25 9.35C48.25 9.35 48.47 9.03 48.52 8.69C48.55 8.42 48.47 8.12 48.3 7.9C48.13 7.71 47.9 7.58 47.65 7.57C47.58 7.57 47.47 7.57 47.35 7.59L46.08 7.77C46.65 7.29 47.23 6.98 47.82 6.83C47.86 6.82 47.99 6.79 48.12 6.79C48.48 6.79 48.77 6.91 48.99 7.15C49.33 7.51 49.47 8.16 49.35 8.83M46.53 8.88C46.63 8.55 46.91 8.02 47.42 7.93C47.42 7.93 47.54 7.9 47.63 7.92C47.78 7.93 47.92 8 48.03 8.12C48.14 8.27 48.2 8.46 48.17 8.64C48.14 8.82 48.05 9 48 9.1L46.47 9.26C46.47 9.13 46.5 9 46.53 8.88M45.64 8.18L46.58 8.05C46.4 8.26 46.27 8.52 46.2 8.78C46.04 9.34 46.12 9.91 46.42 10.32C46.5 10.44 46.59 10.53 46.69 10.61L43.69 10.91C44.29 9.79 44.94 8.88 45.64 8.18M42.64 12.3C41.13 15.92 40.51 20.35 40.9 24.78C41.37 30 42.24 36.16 42.4 37.08C43.95 45.91 43.76 53.32 41.82 59.73C40.27 64.84 39.19 65.54 37.73 65.65C37.31 65.69 36.94 65.46 36.67 65.09C36.6 65 36.54 64.9 36.49 64.8L38.29 64.52C39.16 64.39 39.55 63.91 39.72 63.26C39.89 62.64 39.8 62.04 39.48 61.6C39.24 61.28 38.91 61.09 38.54 61.07C38.45 61.06 38.25 61.08 38 61.1L4.57 65.2C5.08 64.37 6.47 61.91 7.71 58.02C8.61 55.19 9.25 52.16 9.61 49.02C10.06 45.1 10.08 41 9.67 36.83C9.54 35.58 9.34 34.4 8.86 31.55C8.75 30.9 8.63 30.16 8.49 29.32C7.65 24.23 7.68 20.51 8.58 17.58C9.4 14.92 10.94 12.9 13.57 11.04C14.82 10.16 16.58 9.62 18.83 9.43C24.41 8.94 41.87 7.35 46.7 6.92C45.2 7.78 43.73 9.69 42.64 12.3M4.69 69.77C3.96 69.85 3.27 69.88 2.81 69.44C2.36 69.02 2.15 68.42 2.2 67.71C2.32 65.91 3.83 65.59 4.16 65.59C4.19 65.59 4.33 65.58 4.33 65.58L37 61.58C36.53 61.94 36.19 62.5 36.01 63.19C35.83 63.95 35.97 64.74 36.39 65.3C36.54 65.5 36.71 65.66 36.91 65.79L4.69 69.77M38.29 64.17C37.93 64.19 37.73 63.76 37.75 63.38C37.76 62.93 38.07 62.58 38.07 62.58C38.07 62.58 38.22 62.38 38.35 62.26C38.36 62.25 38.39 62.22 38.33 62.23C38.27 62.24 36.69 62.45 36.69 62.45C37.02 61.91 37.51 61.54 38.08 61.44L38.29 61.41C38.37 61.41 38.44 61.41 38.52 61.41C38.78 61.42 39.02 61.57 39.2 61.81C39.45 62.15 39.52 62.66 39.38 63.16C39.28 63.55 38.94 64.15 38.29 64.17M36.35 63.27C36.39 63.12 36.43 62.97 36.5 62.83L37.59 62.68C37.49 62.86 37.41 63.1 37.4 63.37C37.39 63.69 37.5 64.03 37.71 64.26L36.36 64.46C36.26 64.09 36.25 63.68 36.35 63.27"/><path fill="#eb2b3a" d="M31.61 19.15C31.61 20.29 30.68 21.23 29.56 21.23C28.42 21.23 27.51 20.31 27.51 19.18C27.51 18.05 28.45 16.92 29.98 17.11C29.99 16.94 30.6 0.01 30.6 0.01L18.73 0L19.59 17.05C20.84 16.84 21.9 18.01 21.9 19.12C21.91 20.19 20.98 21.15 19.88 21.15C18.76 21.15 17.69 20.19 17.69 19.08L0 17.9L0 29.62C0 29.62 17.63 28.91 17.63 28.86C17.63 27.75 18.53 26.79 19.64 26.79C20.76 26.79 21.64 27.61 21.65 28.72C21.65 29.53 20.84 30.57 19.8 30.64C19.8 30.76 18.77 76.6 18.77 76.6L30.31 76.63L29.78 30.83C28.73 30.8 27.67 29.83 27.67 28.72C27.67 27.61 28.51 26.78 29.63 26.78C30.73 26.78 31.66 27.61 31.66 28.72L49.59 29.49L49.59 18.04L31.61 19.15"/><path fill="#ffffff" d="M20.81 31.38C20.76 33.72 19.88 72.66 19.81 75.64L29.24 75.62L28.76 31.49C27.6 31.12 26.77 30 26.77 28.78C26.77 27.2 28.05 25.93 29.63 25.93C30.81 25.93 31.87 26.65 32.29 27.76L48.32 28.27L48.32 19.19L32.22 20.06C31.83 21.22 30.72 22.08 29.6 22.08L29.51 22.08C27.87 22.02 26.73 20.8 26.73 19.13C26.73 17.87 27.55 16.77 28.75 16.42C28.8 15.28 29.16 6.19 29.35 1.13L19.99 1.12L20.73 16.23C22 16.61 22.86 17.76 22.86 19.09C22.86 20.74 21.52 22.09 19.88 22.09C18.63 22.09 17.49 21.28 17.06 20.12L1.29 19.27L1.29 28.4C6.46 28.22 15.85 27.88 16.94 27.81C17.34 26.67 18.44 25.87 19.66 25.87C21.25 25.87 22.53 27.16 22.53 28.75C22.53 29.9 21.86 30.92 20.81 31.38M19.46 75.99L19.46 75.81C19.5 74 20.47 31.37 20.47 31.25L20.48 31.14L20.58 31.1C21.56 30.72 22.19 29.79 22.19 28.75C22.19 27.35 21.05 26.22 19.66 26.22C18.56 26.22 17.57 26.95 17.25 28C17.23 28.14 17.1 28.15 16.91 28.16C16.79 28.17 16.62 28.18 16.4 28.19C15.98 28.2 15.38 28.23 14.59 28.27C13.26 28.32 11.42 28.38 9.1 28.47C5.15 28.61 1.16 28.75 1.12 28.76L0.94 28.76L0.94 18.9L17.31 19.79L17.35 19.9C17.7 20.98 18.74 21.73 19.88 21.73C21.33 21.73 22.52 20.55 22.52 19.09C22.52 17.88 21.7 16.83 20.52 16.53L20.4 16.49L19.63 0.78L29.71 0.79L29.71 0.97C29.65 2.54 29.11 16.4 29.08 16.57L29.08 16.69L28.96 16.72C27.85 16.99 27.08 17.98 27.08 19.13C27.08 20.86 28.3 21.69 29.52 21.73L29.6 21.73C30.74 21.73 31.66 20.75 31.93 19.84L31.97 19.73L48.67 18.83L48.67 28.63L32.04 28.1L32 27.98C31.66 26.96 30.7 26.27 29.63 26.27C28.24 26.27 27.12 27.4 27.12 28.78C27.12 29.89 27.9 30.91 28.98 31.2L29.11 31.23L29.59 75.96L19.46 75.99"/></svg>';
+var SIG = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(SIG_SVG);
 function brandName() { return esc(APP_NAME) + '<em>.</em>'; }
+/** 텍스트 타이틀 (로고 이미지 없이) */
+function wordmark(lg) { return '<div class="wm' + (lg ? ' lg' : '') + '"><b>' + brandName() + '</b><span class="bar"><i></i><i></i><i></i><i></i></span><small>' + esc(APP_SUB) + '</small></div>'; }
+function sigFooter() { return '<div class="sig"><img src="' + SIG + '" alt="대한예수교장로회 목민교회"></div>'; }
 
 /* ===== 아이콘 (둥근 선 + 옅은 면, 24px 격자) ===== */
 var ICONS = {
@@ -302,7 +322,7 @@ function call(action, payload, quiet) {
   return new Promise(function (resolve, reject) {
     var done = function (res) {
       loading(false);
-      if (!res || !res.ok) { toast((res && res.error) || '오류가 났어요'); reject(res); return; }
+      if (!res || !res.ok) { if (quiet !== 'silent') toast((res && res.error) || '오류가 났어요'); reject(res || {}); return; }
       S.role = res.role; resolve(res.data);
     };
     var fail = function (e) { loading(false); toast('인터넷 연결을 확인해 주세요'); reject(e); };
@@ -343,6 +363,37 @@ function homeClass() {
 }
 function myClass() { return homeClass() || classNames()[0]; }
 
+/* ========================= 빠르게 열기 (캐시) =========================
+   한 번 본 화면은 지난 데이터로 바로 보여주고, 뒤에서 조용히 새 데이터를 받아 바뀐 게 있으면 다시 그립니다. */
+var CACHE = {}, ATT = {};
+function loadSpec(view, p) {
+  switch (view) {
+    case 'stats': return { key: 'stats', action: 'getStats', payload: {} };
+    case 'newcomers': return { key: 'newcomers', action: 'getNewcomers', payload: {} };
+    case 'notes': return { key: 'notes', action: 'getNotes', payload: { limit: 120 } };
+    case 'notices': return { key: 'notices', action: 'getNotices', payload: {} };
+    case 'ministry': return { key: 'ministry', action: 'getMinistry', payload: {} };
+    case 'student': return p && p.id ? { key: 'student:' + p.id, action: 'getStudent', payload: { id: p.id } } : null;
+  }
+  return null;
+}
+function refreshQuiet(view, spec) {
+  call(spec.action, spec.payload, true).then(function (d) {
+    var changed = JSON.stringify(d) !== JSON.stringify(CACHE[spec.key]);
+    CACHE[spec.key] = d;
+    if (changed && S.view === view && !$('modal').innerHTML) { S.params._data = d; render(); }
+  }).catch(function () {});
+}
+/** 로그인 직후: 이번 주 출석과 각 화면 데이터를 한 번에 미리 받기 */
+function warmUp() {
+  if (S._warm) return; S._warm = true;
+  var sun = lastSunday();
+  call('prefetch', { date: sun }, true).then(function (d) {
+    CACHE.stats = d.stats; CACHE.newcomers = d.newcomers; CACHE.notes = d.notes; CACHE.notices = d.notices; CACHE.ministry = d.ministry;
+    if (!ATT[sun]) ATT[sun] = d.attendance;
+  }).catch(function () { S._warm = false; });
+}
+
 /* ========================= 화면 전환 ========================= */
 function go(view, params, noPush) {
   if (S.dirty && S.view === 'attend' && view !== 'attend') {
@@ -351,9 +402,12 @@ function go(view, params, noPush) {
   }
   if (!noPush && S.view !== view) S.history.push({ view: S.view, params: S.params });
   S.view = view; S.params = params || {};
+  var spec = loadSpec(view, S.params), quick = false;
+  if (spec && !S.params._data && CACHE[spec.key]) { S.params._data = CACHE[spec.key]; quick = true; }
   closeModal();
   render();
   window.scrollTo(0, 0);
+  if (quick) refreshQuiet(view, spec);
 }
 function back() { var h = S.history.pop() || { view: 'home', params: {} }; go(h.view, h.params, true); }
 function topbar(title, extra) {
@@ -374,6 +428,9 @@ function render() {
   var v = VIEWS[S.view] || VIEWS.home;
   var out = v(S.params);
   if (typeof out === 'string') app.innerHTML = toolStrip() + out;
+  var spec = loadSpec(S.view, S.params);
+  if (spec && S.params._data) CACHE[spec.key] = S.params._data;
+  if (S.boot && S.user) warmUp();
 }
 function modal(html) { $('modal').innerHTML = '<div class="sheet-bg" onclick="if(event.target===this)closeModal()"><div class="sheet">' + html + '</div></div>'; }
 function closeModal() { $('modal').innerHTML = ''; }
@@ -383,32 +440,54 @@ var LOGIN = { step: 'name', name: '', pin: '', teachers: null };
 function viewLogin() {
   if (LOGIN.step === 'pin' || !LOGIN.teachers) {
     var dots = '';
-    for (var i = 0; i < Math.max(4, LOGIN.pin.length); i++) dots += '<i class="' + (LOGIN.pin.length > i ? 'on' : '') + '"></i>';
+    var lens = pinLens();
+    if (!lens && !LOGIN._asked) askPinLens();
+    for (var i = 0; i < Math.max(4, lens ? lens[lens.length - 1] : 0, LOGIN.pin.length); i++) dots += '<i class="' + (LOGIN.pin.length > i ? 'on' : '') + '"></i>';
     var keys = [1, 2, 3, 4, 5, 6, 7, 8, 9, '지우기', 0, '확인'].map(function (k) {
       return '<button class="' + (k === '확인' ? 'k-ok' : k === '지우기' ? 'k-del' : '') + '" onclick="pinKey(\'' + k + '\')">' + k + '</button>';
     }).join('');
-    return '<div class="login-hero"><img src="' + LOGO + '" alt="목민교회"><div class="name">' + brandName() + '</div>' +
-      '<div class="eyebrow">' + esc(APP_SUB) + ' · TEACHERS</div><p style="margin-top:.9rem">비밀번호를 누르고 <b>[확인]</b>을 눌러 주세요</p></div>' +
+    return '<div class="login-hero">' + wordmark(true) + '<p style="margin-top:1.1rem">비밀번호를 눌러 주세요</p></div>' +
       '<div class="pin-dots">' + dots + '</div><div class="pad">' + keys + '</div>' +
-      '<p class="muted" style="text-align:center;margin-top:1.2rem">비밀번호는 부장/총무 선생님께 문의하세요.<br>한 번 입력하면 다음부터는 바로 열립니다.</p>';
+      '<p class="muted" style="text-align:center;margin-top:1.2rem">비밀번호는 부장/총무 선생님께 문의하세요.<br>한 번 입력하면 다음부터는 바로 열립니다.</p>' + sigFooter();
   }
   var list = LOGIN.teachers.map(function (t) {
     return '<button class="list-item" onclick="pickName(\'' + esc(t.이름) + '\')"><span class="av">' + esc((t.이름 || '?').charAt(0)) + '</span><span class="grow"><b>' + esc(t.이름) + '</b> <span class="muted">' + esc(t.직분 || '') + '</span><br><span class="muted">' + esc(t.담당반 ? t.담당반 + '반 담임' : (t.역할 || '')) + '</span></span></button>';
   }).join('');
-  return '<div class="brand"><img src="' + LOGO + '" alt=""><div class="bt"><b>어느 선생님이세요?</b><span>내 이름을 눌러 주세요</span></div></div>' + list;
+  return '<div class="brand"><div class="bt"><b>어느 선생님이세요?</b><span>내 이름을 눌러 주세요</span></div></div>' + list + sigFooter();
+}
+/** 비밀번호 자릿수 (서버가 알려줌, 이 기기에 기억) → 다 누르면 [확인] 없이 바로 로그인 */
+function pinLens() { var l = LOGIN.lens || store('hs_pinlens'); return l && l.length ? l : null; }
+function askPinLens() {
+  LOGIN._asked = true;
+  call('pinInfo', {}, 'silent').then(function (d) {
+    LOGIN.lens = d.lens; store('hs_pinlens', d.lens);
+    if (!S.user) render();
+  }).catch(function () { LOGIN._asked = false; });
 }
 function pinKey(k) {
+  if (LOGIN.busy) return;
   if (k === '지우기') LOGIN.pin = LOGIN.pin.slice(0, -1);
-  else if (k === '확인') return tryPin();
+  else if (k === '확인') return tryPin(false);
   else if (LOGIN.pin.length < 8) LOGIN.pin += k;
   render();
+  var lens = pinLens();
+  if (k !== '지우기' && lens && lens.indexOf(LOGIN.pin.length) >= 0) tryPin(true);
 }
-function tryPin() {
+function tryPin(auto) {
   if (LOGIN.pin.length < 4) { toast('비밀번호를 끝까지 눌러 주세요'); return; }
-  S.pin = LOGIN.pin;
-  call('boot').then(function (b) {
-    S.boot = b; LOGIN.teachers = b.teachers; LOGIN.step = 'name'; render();
-  }).catch(function () { LOGIN.pin = ''; render(); });
+  var lens = pinLens() || [], longer = lens.some(function (n) { return n > LOGIN.pin.length; });
+  // 자동 시도인데 더 긴 비밀번호(예: 관리자)도 있으면, 틀려도 조용히 계속 누를 수 있게
+  var quietFail = auto && longer;
+  S.pin = LOGIN.pin; LOGIN.busy = true;
+  call('boot', {}, quietFail ? 'silent' : false).then(function (b) {
+    LOGIN.busy = false; S.boot = b; LOGIN.teachers = b.teachers; LOGIN.step = 'name'; render();
+  }).catch(function (e) {
+    LOGIN.busy = false;
+    if (quietFail && e && e.ok === false) return;   // 계속 누르면 됨
+    LOGIN.pin = ''; render();
+    // 비밀번호 자릿수가 바뀌었을 수도 있으니 조용히 다시 확인 (기존 값은 그대로 두고 덮어쓰기만)
+    if (e && e.error && /맞지 않/.test(e.error)) askPinLens();
+  });
 }
 function pickName(n) {
   S.user = n; store('hs_login', { user: n, pin: S.pin });
@@ -417,7 +496,7 @@ function pickName(n) {
 }
 function logout() {
   if (!confirm('로그아웃 할까요?')) return;
-  unstore('hs_login'); S.user = null; S.boot = null; LOGIN = { step: 'pin', name: '', pin: '', teachers: null }; render();
+  unstore('hs_login'); S.user = null; S.boot = null; CACHE = {}; ATT = {}; S._warm = false; LOGIN = { step: 'pin', name: '', pin: '', teachers: null }; render();
 }
 
 /* ========================= 화면들 ========================= */
@@ -430,7 +509,7 @@ VIEWS.home = function () {
     return '<button class="tile ' + cls + '" onclick="' + onclick + '"><span class="ib">' + ic(icon) + '</span><span><b>' + label + '</b><small>' + en + '</small></span></button>';
   };
   var hc = homeClass(), sun = lastSunday();
-  return '<div class="brand"><img src="' + LOGO + '" alt="목민교회"><div class="bt"><b>' + brandName() + '</b><span>' + esc(APP_SUB) + '</span></div></div>' +
+  return '<div class="brand">' + wordmark(false) + '</div>' +
     '<div class="hero"><div class="eyebrow">This Sunday · ' + shortD(sun) + '</div>' +
     '<div class="hi">' + esc(S.user) + ' 선생님, 반가워요</div><div class="meta">' + fmtD(todayStr()) + (hc ? ' · ' + hc + '반 담임' : '') + '</div>' +
     '<button class="cta" onclick="openAttend()"><span>' + (hc ? hc + '반 출석 체크' : '출석 체크하기') + '</span><span class="arr">' + ic('arrow') + '</span></button></div>' + banner +
@@ -447,7 +526,7 @@ VIEWS.home = function () {
     (b.chatLink ? '<a class="btn light small" href="' + esc(b.chatLink) + '" target="_blank">교사 단톡방</a>' : '') +
     (isAdmin() ? '<a class="btn light small" href="' + esc(b.sheetUrl) + '" target="_blank">원본 구글시트</a>' : '') +
     '<button class="btn light small" onclick="logout()">로그아웃</button></div>' +
-    '<div class="sig"><img src="' + LOGO + '" alt="">MOKMIN PRESBYTERIAN CHURCH</div>';
+    sigFooter();
 };
 
 /* ---------- 출석 체크 ---------- */
@@ -456,6 +535,7 @@ VIEWS.attend = function () {
   if (!S.att) S.att = { date: lastSunday(), cls: homeClass(), marks: {}, reasons: {}, touched: {}, showAll: false, loaded: false };
   var a = S.att;
   var datebar = '<div class="datebar"><button onclick="attDate(-7)" aria-label="지난주">' + ic('back') + '</button><div class="d">' + fmtD(a.date) + '<small>' + (a.date === lastSunday() ? 'THIS SUNDAY' : '화살표로 날짜 바꾸기') + '</small></div><button onclick="attDate(7)" aria-label="다음주">' + ic('next') + '</button></div>';
+  if (!a.loaded && ATT[a.date]) { applyAtt(ATT[a.date]); refreshAtt(a.date); }
   if (!a.loaded) { loadAttendance(); return topbar('출석 체크') + datebar + '<div class="empty">불러오는 중…</div>'; }
 
   // 담임이 아니면 반부터 고르기
@@ -492,12 +572,25 @@ VIEWS.attend = function () {
     '<div class="savebar"><div class="in"><div class="sum"><span class="g">출석 ' + nP + '</span><br><span class="r">결석 ' + (list.length - nP) + '</span></div>' +
     '<button class="btn ' + (S.dirty ? 'ok' : 'light') + '" onclick="saveAtt()">' + (S.dirty ? '저장하기' : '저장됨') + '</button></div></div>';
 };
+function applyAtt(rows) {
+  S.att.marks = {}; S.att.reasons = {}; S.att.touched = {};
+  rows.forEach(function (r) { S.att.marks[r.학생ID] = r.상태; if (r.사유) S.att.reasons[r.학생ID] = r.사유; });
+  S.att.loaded = true; S.dirty = false;
+}
 function loadAttendance() {
-  call('getAttendance', { date: S.att.date }).then(function (rows) {
-    S.att.marks = {}; S.att.reasons = {}; S.att.touched = {};
-    rows.forEach(function (r) { S.att.marks[r.학생ID] = r.상태; if (r.사유) S.att.reasons[r.학생ID] = r.사유; });
-    S.att.loaded = true; S.dirty = false; render();
+  var date = S.att.date;
+  call('getAttendance', { date: date }).then(function (rows) {
+    ATT[date] = rows;
+    if (S.att && S.att.date === date) { applyAtt(rows); render(); }
   });
+}
+/** 다른 선생님이 그사이 저장했을 수 있으니 조용히 확인 (내가 고치는 중이면 건드리지 않음) */
+function refreshAtt(date) {
+  call('getAttendance', { date: date }, true).then(function (rows) {
+    var changed = JSON.stringify(rows) !== JSON.stringify(ATT[date]);
+    ATT[date] = rows;
+    if (changed && S.view === 'attend' && S.att && S.att.date === date && !S.dirty) { applyAtt(rows); render(); }
+  }).catch(function () {});
 }
 function attClass(c) { S.att.cls = c; render(); window.scrollTo(0, 0); }
 function attDate(n) {
@@ -535,6 +628,8 @@ function saveAtt() {
   });
   call('saveAttendance', { date: a.date, teacher: S.user, records: recs }).then(function () {
     recs.forEach(function (r) { a.marks[r.학생ID] = r.상태; });
+    ATT[a.date] = Object.keys(a.marks).map(function (id) { var st = stuById(id) || {}; return { 날짜: a.date, 학생ID: id, 이름: st.이름, 반: st.반, 상태: a.marks[id], 사유: a.reasons[id] || '' }; });
+    delete CACHE.stats;
     a.touched = {}; S.dirty = false; render(); toast('저장했어요. 수고하셨습니다!');
   });
 }

@@ -5,6 +5,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>HERE · 목민교회 고등부</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<meta name="theme-color" content="#151c33">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="HERE">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
 /* ===== 디자인 토큰: 목민교회 CI 4색 → 파스텔 ===== */
@@ -404,6 +412,76 @@ input,textarea,select{padding:.45rem .65rem}
 .wide .qt{padding:.8rem .3rem}
 .wide #app{padding:0 22px 96px}
 .wide .top{margin:0 -22px;padding:.35rem 22px}
+
+/* ===== 홈 화면에 추가 · 앱 설명 ===== */
+.intro{margin-top:.5rem;padding:.6rem .7rem;border-radius:16px;background:linear-gradient(135deg,var(--p-sky),var(--p-lilac));font-size:.88rem}
+.intro p{margin:0 0 .45rem;line-height:1.45}
+.intro .btn{width:100%}
+.hint.warn{background:var(--warn-soft);color:#8a4a06}
+.inst{display:flex;gap:6px;margin-top:.4rem}
+.inst-go{flex:1;display:flex;align-items:center;gap:.5rem;padding:.38rem .6rem;border-radius:13px;background:var(--p-lime);text-align:left;min-width:0}
+.inst-go .ib{width:1.6rem;height:1.6rem;border-radius:8px;background:#fff;color:var(--ok);display:flex;align-items:center;justify-content:center;flex:none}
+.inst-go .ib svg{width:1rem;height:1rem}
+.inst-go b{flex:1;min-width:0;font-size:.88rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.inst-go small{flex:none;font-size:.72rem;color:var(--sub);font-weight:700}
+.inst-x{width:2.3rem;flex:none;border-radius:13px;background:#fff;border:1px solid var(--line);color:var(--sub);font-weight:800}
+.steps{list-style:none;padding:0;margin:.4rem 0}
+.steps li{display:flex;gap:.6rem;align-items:flex-start;padding:.5rem 0;border-bottom:1px dashed var(--line)}
+.steps li>i{flex:none;width:1.7rem;height:1.7rem;border-radius:50%;background:var(--ci-blue);color:#fff;font-style:normal;font-weight:900;display:flex;align-items:center;justify-content:center}
+.steps li>div{line-height:1.6;font-size:.95rem}
+.key{display:inline-flex;align-items:center;gap:.2rem;padding:0 .45rem;border-radius:8px;background:#fff;border:1px solid var(--line);box-shadow:0 1px 0 var(--line);font-weight:800;white-space:nowrap}
+.key svg{width:1rem;height:1rem;color:var(--ci-blue)}
+.ios-arrow{position:fixed;left:50%;bottom:6px;transform:translateX(-50%);z-index:60;width:2.6rem;height:2.6rem;border-radius:50%;background:var(--ci-orange);color:#fff;display:flex;align-items:center;justify-content:center;animation:bob 1s ease-in-out infinite;box-shadow:0 6px 16px rgba(247,148,29,.45)}
+.ios-arrow svg{width:1.4rem;height:1.4rem}
+@keyframes bob{50%{transform:translate(-50%,7px)}}
+.keep{display:flex;align-items:center;gap:.45rem;justify-content:center;font-size:.84rem;color:var(--sub);margin-top:.7rem}
+.keep input{width:1.15rem;height:1.15rem;padding:0;margin:0}
+.ver{text-align:center;font-size:.66rem;color:var(--sub);opacity:.75;margin-top:.2rem}
+.chk{margin:.3rem 0 0;padding-left:1.1rem;font-size:.86rem;line-height:1.55}
+/* ===== 회계 ===== */
+.stat-big.fin b{font-size:1.15rem}
+.fcard{display:block;width:100%;text-align:left}
+.ftbl{width:100%;border-collapse:collapse;font-size:.84rem}
+.ftbl th,.ftbl td{padding:.3rem .3rem;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+.ftbl th:first-child,.ftbl td:first-child{text-align:left}
+.ftbl td.l{text-align:left;white-space:normal}
+.ftbl thead th{color:var(--sub);font-size:.72rem;font-weight:800}
+.ftbl tfoot th,.ftbl tfoot td{font-weight:900;border-top:2px solid var(--ink);border-bottom:0}
+.meter{height:.6rem;border-radius:99px;background:var(--line);overflow:hidden;margin-top:.35rem}
+.meter i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--ci-sky),var(--ci-blue))}
+.meter.sm{height:.42rem;margin:.3rem 0 .2rem}
+.meter.over i{background:linear-gradient(90deg,#f7941d,#e0456a)}
+.fbars{display:flex;align-items:flex-end;gap:4px;height:6.5rem;margin-top:.4rem}
+.fb{flex:1;display:flex;flex-direction:column;align-items:center;height:100%;min-width:0}
+.fb .pair{flex:1;width:100%;display:flex;align-items:flex-end;justify-content:center;gap:1px}
+.fb .pair i{width:45%;border-radius:4px 4px 2px 2px;min-height:2px}
+i.in{background:#7ccbf0} i.out{background:#ffb866}
+.fb em{font-style:normal;font-size:.6rem;color:var(--sub);margin-top:2px}
+.legend{display:flex;gap:.8rem;justify-content:flex-end;font-size:.72rem;color:var(--sub);margin-top:.3rem}
+.legend i{display:inline-block;width:.6rem;height:.6rem;border-radius:3px;margin-right:.25rem;vertical-align:-1px}
+.fin-it .fd{width:2.6rem;font-weight:900;font-size:.86rem;flex:none}
+.fa{font-weight:900;white-space:nowrap;font-size:.95rem;flex:none}
+.fa.in{color:var(--ok)} .fa.out{color:var(--ink)}
+.badge.fg1{background:var(--p-lime);color:#4d6b0f} .badge.fg2{background:var(--p-peach);color:#a55a00}
+.seg2{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:.2rem}
+.seg2 button{padding:.55rem;border-radius:13px;background:var(--bg);border:1px solid var(--line);font-weight:900;font-size:1rem;color:var(--sub)}
+.seg2 button.on.out{background:var(--warn-soft);border-color:#f7c08a;color:#a55a00}
+.seg2 button.on.in{background:var(--ok-soft);border-color:#b9dd7d;color:var(--ok)}
+.budget .pc{font-weight:900;font-size:.95rem;flex:none}
+.frow{display:flex;gap:6px;margin-top:.35rem}
+.frow select{flex:1;min-width:0}
+.sumline{display:flex;flex-wrap:wrap;gap:.2rem .8rem;font-size:.86rem;margin:.4rem 0 0;align-items:center}
+.report{background:#fff;border-radius:16px;padding:.8rem .8rem 1rem;margin-top:.45rem;border:1px solid var(--line)}
+.report h2{font-size:1.12rem;margin:0}
+.report h4{margin:.9rem 0 .25rem;font-size:.92rem}
+@media print{
+  .tools,.top,.noprint,#sync,.sig,.foot,#toast,#loading,.savebar,#modal{display:none!important}
+  html,body,#app{background:#fff!important;padding:0!important;margin:0!important}
+  .report{border:0;padding:0}
+  .ftbl{font-size:9.5pt}
+  .ftbl tr{break-inside:avoid}
+  .tblwrap{overflow:visible!important}
+}
 </style>
 </head>
 <body>
@@ -448,6 +526,12 @@ var ICONS = {
   music: '<path d="M9 17.5V6l10-2v11.5"/><circle cx="6.5" cy="17.5" r="2.5" fill="currentColor" fill-opacity=".2"/><circle cx="16.5" cy="15.5" r="2.5"/>',
   star: '<path d="M12 3.8l2.5 5.1 5.6.8-4 4 .9 5.6-5-2.6-5 2.6.9-5.6-4-4 5.6-.8z" fill="currentColor" fill-opacity=".18"/>',
   gear: '<circle cx="12" cy="12" r="3.1" fill="currentColor" fill-opacity=".18"/><path d="M12 3.5v2.2M12 18.3v2.2M20.5 12h-2.2M5.7 12H3.5M18 6l-1.6 1.6M7.6 16.4L6 18M18 18l-1.6-1.6M7.6 7.6L6 6"/>',
+  share: '<path d="M12 3.5v11M8 7.5l4-4 4 4"/><path d="M8.5 10.5h-2a1.5 1.5 0 0 0-1.5 1.5v7a1.5 1.5 0 0 0 1.5 1.5h11a1.5 1.5 0 0 0 1.5-1.5v-7a1.5 1.5 0 0 0-1.5-1.5h-2"/>',
+  plusapp: '<rect x="4" y="4" width="16" height="16" rx="4" fill="currentColor" fill-opacity=".16"/><path d="M12 8.5v7M8.5 12h7"/>',
+  down: '<path d="M12 4.5v14M6.5 13l5.5 5.5 5.5-5.5"/>',
+  coin: '<ellipse cx="12" cy="7" rx="7" ry="3" fill="currentColor" fill-opacity=".18"/><path d="M5 7v5c0 1.7 3.1 3 7 3s7-1.3 7-3V7M5 12v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5"/>',
+  shield: '<path d="M12 3.5l7 2.8v5.2c0 4.4-3 7.8-7 9-4-1.2-7-4.6-7-9V6.3z" fill="currentColor" fill-opacity=".16"/><path d="M8.8 12.2l2.2 2.2 4.2-4.4"/>',
+  refresh: '<path d="M19 12a7 7 0 1 1-2.05-4.95M19 4.5v4h-4"/>',
   phone: '<path d="M6.6 3.6h2.5l1.4 3.9-2 1.3a11.3 11.3 0 0 0 6.7 6.7l1.3-2 3.9 1.4v2.5a2 2 0 0 1-2.2 2A16.4 16.4 0 0 1 4.6 5.8a2 2 0 0 1 2-2.2z"/>'
 };
 function ic(n) { return '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONS[n] || '') + '</svg>'; }
@@ -469,10 +553,11 @@ function call(action, payload, quiet) {
       loading(false);
       if (!res || !res.ok) {
         // 들어와 있는데 인증이 풀렸으면 (예: 관리자가 연락처를 바꿈) 로그인 화면으로
-        if (res && res.auth && S.user) { toast(res.error || '다시 로그인해 주세요'); logout(true); reject(res); return; }
+        if (res && res.auth && S.user) { toast(res.error || '다시 로그인해 주세요'); logout(true, true); reject(res); return; }
         if (quiet !== 'silent') toast((res && res.error) || '오류가 났어요'); reject(res || {}); return;
       }
-      if (res.role) { S.role = res.role; S.isSuper = !!res.isSuper; }
+      if (res.role) { S.role = res.role; S.isSuper = !!res.isSuper; S.fin = !!res.fin; }
+      if (res.token) S._token = res.token;   // 번호로 들어오면 서버가 주는 로그인 열쇠
       resolve(res.data);
     };
     var fail = function (e) { loading(false); if (quiet !== 'silent') toast('인터넷 연결을 확인해 주세요'); reject(e); };
@@ -529,6 +614,7 @@ function loadSpec(view, p) {
     case 'prayer': return { key: 'prayer', action: 'getTab', payload: { tab: '기도봉헌' } };
     case 'worship': return { key: 'worship', action: 'getTab', payload: { tabs: ['찬양팀', '찬양인도', '찬양콘티'] } };
     case 'officers': return { key: 'officers', action: 'getTab', payload: { tabs: ['임역원', '임역원회의'] } };
+    case 'finance': return { key: 'finance', action: 'getTab', payload: { tabs: ['회계', '예산'] } };
   }
   return null;
 }
@@ -682,7 +768,8 @@ function viewLogin() {
     return head + '<div class="who"><span class="av">' + esc(LOGIN.name.charAt(0)) + '</span><div><b>' + esc(LOGIN.name) + ' 선생님</b><span>' + esc(LOGIN.year) + '년</span></div></div>' +
       '<p style="text-align:center;margin:.9rem 0 0">내 <b>전화번호 뒷자리 4자리</b>를 눌러 주세요</p>' +
       '<div class="pin-dots">' + dots + '</div><div class="pad">' + keys + '</div>' +
-      '<p class="muted" style="text-align:center;margin-top:1rem">한 번 들어오면 다음부터는 바로 열립니다.</p>' + sigFooter();
+      '<label class="keep"><input type="checkbox" ' + (LOGIN.keep !== false ? 'checked' : '') + ' onchange="LOGIN.keep=this.checked">이 기기에 로그인 유지 (30일)</label>' +
+      '<p class="muted" style="text-align:center;margin:.2rem 0 0">다른 사람 휴대폰 · 교회 PC라면 체크를 끄고 들어오세요.</p>' + sigFooter();
   }
 
   var years = '<div class="yearsel">' + LOGIN.years.map(function (y) {
@@ -695,7 +782,7 @@ function viewLogin() {
       '<span class="av">' + esc((t.이름 || '?').charAt(0)) + '</span><span class="grow"><b>' + esc(t.이름) + '</b> <span class="muted">' + esc(t.직분 || '') + '</span>' +
       '<br><span class="muted">' + esc(t.ok ? sub : '연락처 없음') + '</span></span></button>';
   }).join('');
-  return head + (LOGIN.years.length > 1 ? years : '') +
+  return head + appIntro() + (LOGIN.years.length > 1 ? years : '') +
     '<h3 style="margin:1rem 0 .2rem">어느 선생님이세요?</h3><p class="muted" style="margin:0">내 이름을 눌러 주세요</p>' + rows + sigFooter();
 }
 function pickYear(y) { LOGIN.year = y; LOGIN.step = 'name'; render(); if (!LOGIN.lists[y]) loadLoginInfo(y); else loadLoginInfo(y); }
@@ -711,9 +798,10 @@ function codeKey(k) {
 function tryLogin() {
   S.auth = { year: LOGIN.year, name: LOGIN.name, code: LOGIN.code };
   LOGIN.busy = true;
-  call('boot').then(function (b) {
-    LOGIN.busy = false; afterBoot(b);
-    store('hs_login', { name: LOGIN.name, code: LOGIN.code });
+  call('boot', { dev: devName() }).then(function (b) {
+    LOGIN.busy = false;
+    saveLogin(LOGIN.name);   // 번호는 버리고 열쇠만 보관
+    afterBoot(b);
     toast(S.user + ' 선생님, 환영합니다!');
   }).catch(function () { LOGIN.busy = false; LOGIN.code = ''; S.auth = null; render(); });
 }
@@ -723,11 +811,15 @@ function afterBoot(b) {
   S.view = 'home'; S.params = {}; S.history = [];
   render(); loadOut();
 }
-function logout(silent) {
+function logout(silent, again) {
   if (!silent && OUT.q.length) { flushOut(); toast('저장 중인 내용이 있어요. 잠시 후 다시 눌러 주세요'); return; }
   if (!silent && !confirm('로그아웃 할까요?')) return;
-  unstore('hs_login'); S.user = null; S.auth = null; S.boot = null; CACHE = {}; ATT = {}; S._warm = false;
+  var nm = S.auth && S.auth.name, yr = S.auth && S.auth.year;
+  // 이 기기에 남은 로그인·화면 자료를 지움
+  clearLogin(); S.user = null; S.auth = null; S.boot = null; S.role = ''; S.isSuper = false; S.fin = false; CACHE = {}; ATT = {}; S._warm = false; S.att = null; S.params = {};
+  closeModal();
   LOGIN.step = 'name'; LOGIN.code = ''; LOGIN.busy = false; LOGIN.year = LOGIN.defaultYear || LOGIN.year;
+  if (again && nm) { LOGIN.name = nm; LOGIN.step = 'code'; LOGIN.year = yr || LOGIN.year; }   // 열쇠가 만료됨 → 번호만 다시
   render();
 }
 /** 들어온 뒤 연도 바꾸기 (같은 이름·번호로) */
@@ -751,10 +843,10 @@ function isPastYear() { return S.boot && S.boot.latestYear && S.boot.year < S.bo
 function isSuper() { return !!S.isSuper; }
 
 /* ========================= 관리자 ========================= */
-var ROLES = ['교사', '관리자', '최고관리자'];
+var ROLES = ['교사', '회계', '관리자', '최고관리자'];
 /* 화면에는 권한 이름 대신 쉬운 말로 (시트에는 그대로 교사/관리자/최고관리자) */
-var ROLE_LABEL = { '교사': '일반', '관리자': '구성 관리', '최고관리자': '구성 관리 + 권한 지정' };
-function roleBadge(r) { return r === '최고관리자' || r === '관리자' ? ' <span title="' + ROLE_LABEL[r] + '" style="color:var(--ci-orange);display:inline-flex;vertical-align:-2px">' + ic('gear') + '</span>' : ''; }
+var ROLE_LABEL = { '교사': '일반', '회계': '일반 + 회계', '관리자': '구성 관리 (+ 회계)', '최고관리자': '구성 관리 + 권한 지정' };
+function roleBadge(r) { if (r === '회계') return ' <span title="회계" style="color:var(--ok);display:inline-flex;vertical-align:-2px">' + ic('coin') + '</span>'; return r === '최고관리자' || r === '관리자' ? ' <span title="' + ROLE_LABEL[r] + '" style="color:var(--ci-orange);display:inline-flex;vertical-align:-2px">' + ic('gear') + '</span>' : ''; }
 function reloadBoot() { return call('boot', {}, true).then(function (b) { S.boot = b; }).catch(function () {}); }
 
 VIEWS.admin = function () {
@@ -770,6 +862,7 @@ VIEWS.admin = function () {
     item('calendar', 't-lilac', '연도 관리', '연도별 시트, 새 연도 시작하기', 'admYears') +
     item('gear', 't-peach', '앱 설정', '부서명, 교사 단톡방 링크', 'admSettings') +
     item('check', 't-rose', '시트 반영 기록', '언제·누가·몇 건 구글시트에 저장했는지', 'admSync') +
+    item('shield', 't-blue', '보안 · 접속 기록', '누가 언제 들어왔는지, 모든 기기 다시 로그인', 'admSecurity') +
     '</div>';
 };
 
@@ -972,7 +1065,7 @@ VIEWS.home = function () {
   var banner = n ? '<button class="nb1" onclick="go(\'notices\')"><span class="ib">' + ic('megaphone') + '</span><b>' + esc(n.제목) + '</b><small>' + esc(shortD(n.날짜)) + '</small></button>' : '';
   return '<div class="brand">' + wordmark(false) + '<button class="yearchip" onclick="yearMenu()">' + esc(b.year) + ' <i>▼</i></button></div>' + past +
     '<button class="cta2" onclick="openAttend()"><span><small>' + esc(S.user) + ' 선생님 · ' + shortD(sun) + ' 주일</small><b>' + (hc ? hc + '반 출석 체크' : '출석 체크') + '</b></span><span class="arr">' + ic('arrow') + '</span></button>' +
-    banner +
+    banner + installBanner() +
     '<div class="qgrid">' +
     T('sprout', '새신자', 'newcomers', 't-lime') +
     T('chat', '면담', 'notes', 't-peach') +
@@ -986,13 +1079,16 @@ VIEWS.home = function () {
     T('pray', '기도·봉헌', 'prayer', 't-rose') +
     T('music', '찬양팀', 'worship', 't-sky') +
     T('star', '임역원', 'officers', 't-lilac') +
+    (isFin() ? T('coin', '회계', 'finance', 't-lime') : '') +
     (isAdmin() ? T('gear', '관리', 'admin', 't-peach') : '') +
     '</div>' +
     '<div class="foot">' +
     (b.chatLink ? '<a class="btn light small" href="' + esc(b.chatLink) + '" target="_blank">단톡방</a>' : '') +
     (isAdmin() && b.sheetUrl ? '<a class="btn light small" href="' + esc(b.sheetUrl) + '" target="_blank">구글시트</a>' : '') +
+    (PLAT.standalone ? '<button class="btn light small" onclick="safeReload(\'manual\')">' + ic('refresh') + '새로 고침</button>' : '') +
+    (canShowInstall() ? '<button class="btn light small" onclick="installGuide()">홈 화면에 추가</button>' : '') +
     '<button class="btn light small" onclick="logout()">로그아웃</button></div>' +
-    sigFooter();
+    sigFooter() + '<div class="ver">버전 ' + verText() + '</div>';
 };
 
 /* ========================= 함께 보기: 주소록 · 조직표 · 기도봉헌 · 찬양팀 · 임역원 ========================= */
@@ -1025,7 +1121,7 @@ var RF = {};
 function saveRowForm() {
   var o = {}; if (RF.id) o.ID = RF.id; if (RF.key) o.월 = RF.key;
   RF.fields.forEach(function (f) { o[f.k] = $('rf_' + f.k).value.trim(); });
-  var PFX = { '조직': 'O', '기도봉헌': 'P', '찬양팀': 'W', '찬양콘티': 'C', '임역원': 'E', '임역원회의': 'R' };
+  var PFX = { '조직': 'O', '기도봉헌': 'P', '찬양팀': 'W', '찬양콘티': 'C', '임역원': 'E', '임역원회의': 'R', '회계': 'F', '예산': 'B' };
   if (!o.ID && RF.tab !== '찬양인도') o.ID = newId(PFX[RF.tab] || 'X');
   var d = S.params._data, list = Array.isArray(d) ? d : (d[RF.tab] = d[RF.tab] || []);
   upsertLocal(list, o, RF.tab === '찬양인도' ? '월' : 'ID');
@@ -1700,6 +1796,427 @@ function saveMin(id) {
 }
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
+/* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
+var BUILD = '20261120071238';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var UA = navigator.userAgent || '';
+var PLAT = (function () {
+  var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var android = /Android/i.test(UA);
+  var inapp = /KAKAOTALK/i.test(UA) ? 'kakao' : /NAVER\(inapp|Line\/|BAND\/|Instagram|FBAN|FBAV|DaumApps|everytime/i.test(UA) ? 'other' : '';
+  var standalone = !!((window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true);
+  return { ios: ios, android: android, mobile: ios || android, inapp: inapp, standalone: standalone,
+    samsung: /SamsungBrowser/i.test(UA), crios: /CriOS|FxiOS|EdgiOS/.test(UA) };
+})();
+function devName() { return (PLAT.ios ? 'iPhone' : PLAT.android ? 'Android' : 'PC') + (PLAT.standalone ? '·앱' : ''); }
+function sessGet(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }
+function sessSet(k, v) { try { sessionStorage.setItem(k, v); } catch (e) {} }
+function sessDel(k) { try { sessionStorage.removeItem(k); } catch (e) {} }
+function copyText(t, msg) {
+  var ok = function () { toast(msg || '복사했어요'); };
+  var old = function () { var a = document.createElement('textarea'); a.value = t; a.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(a); a.select(); try { document.execCommand('copy'); } catch (e) {} a.remove(); ok(); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(ok, old); else old();
+}
+/** 카카오톡 등 앱 안 브라우저 → Safari / Chrome 으로 */
+function openExternal() {
+  var u = location.href.split('#')[0];
+  if (PLAT.inapp === 'kakao') { location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(u); return; }
+  if (PLAT.android) { location.href = 'intent://' + u.replace(/^https?:\/\//, '') + '#Intent;scheme=https;package=com.android.chrome;end'; return; }
+  copyText(u, '주소를 복사했어요. Safari 주소창에 붙여넣어 주세요');
+}
+var INSTALL = { evt: null };
+window.addEventListener('beforeinstallprompt', function (e) {   // 안드로이드 크롬·삼성 인터넷: 버튼 한 번으로 추가
+  e.preventDefault(); INSTALL.evt = e;
+  if ((!S.user || S.view === 'home') && !$('modal').innerHTML && !LOGIN.busy) render();
+});
+window.addEventListener('appinstalled', function () { INSTALL.evt = null; store('hs_installed', Date.now()); closeModal(); toast('홈 화면에 HERE. 아이콘이 생겼어요'); render(); });
+function canShowInstall() { return PLAT.mobile && !PLAT.standalone && !store('hs_installed'); }
+function installNow() {
+  if (INSTALL.evt) {
+    var e = INSTALL.evt; INSTALL.evt = null;
+    e.prompt();
+    (e.userChoice || Promise.resolve({})).then(function (c) { if (c && c.outcome === 'accepted') store('hs_installed', Date.now()); render(); });
+    return;
+  }
+  installGuide();
+}
+function skipInstall() { store('hs_inst_skip', Date.now() + 14 * 864e5); render(); toast('2주 뒤에 다시 알려 드릴게요'); }
+/** 홈: 한 줄 안내 */
+function installBanner() {
+  if (!canShowInstall() || (store('hs_inst_skip') || 0) > Date.now()) return '';
+  return '<div class="inst"><button class="inst-go" onclick="installNow()"><span class="ib">' + ic('plusapp') + '</span><b>' + (INSTALL.evt ? '한 번 눌러 홈 화면에 앱 추가' : '홈 화면에 앱으로 추가하기') + '</b><small>' + (PLAT.ios ? '아이폰' : '안드로이드') + '</small></button>' +
+    '<button class="inst-x" onclick="skipInstall()" aria-label="닫기">✕</button></div>';
+}
+/** 첫 화면(로그인): 앱 설명 + 추가 버튼 */
+function appIntro() {
+  var where = PLAT.ios ? 'Safari' : 'Chrome';
+  var inapp = PLAT.inapp && PLAT.mobile ? '<div class="hint warn">' + (PLAT.inapp === 'kakao' ? '카카오톡' : '다른 앱') + ' 안에서 열려 있어요. ' + where + '에서 열어야 로그인이 유지되고 홈 화면에 추가할 수 있어요.' +
+    '<button class="btn small" style="margin-top:.4rem;width:100%" onclick="openExternal()">' + where + '로 열기</button></div>' : '';
+  var btn = canShowInstall() && !PLAT.inapp ? '<button class="btn ' + (INSTALL.evt ? 'ok' : 'light') + ' small" onclick="installNow()">' + ic('plusapp') +
+    (INSTALL.evt ? ' 홈 화면에 앱 추가 (한 번 누르기)' : ' ' + (PLAT.ios ? '아이폰' : '안드로이드') + ' 홈 화면에 추가하는 법') + '</button>' : '';
+  return '<div class="intro"><p><b>HERE.</b> 는 목민교회 고등부 선생님들의 출석 · 새신자 · 면담 · 공지 앱입니다.' +
+    (canShowInstall() ? ' 홈 화면에 추가하면 아이콘을 눌러 앱처럼 바로 열려요.' : '') + '</p>' + btn + '</div>' + inapp;
+}
+function installGuide(os) {
+  os = os || (PLAT.android ? 'android' : 'ios');
+  var tab = function (k, l) { return '<button class="chip ' + (k === os ? 'on' : '') + '" onclick="installGuide(\'' + k + '\')">' + l + '</button>'; };
+  var step = function (n, html) { return '<li><i>' + n + '</i><div>' + html + '</div></li>'; };
+  var K = function (t) { return '<span class="key">' + t + '</span>'; };
+  var here = os === 'ios' ? PLAT.ios : PLAT.android, body = '';
+  if (here && PLAT.inapp) body += '<div class="hint warn">지금은 ' + (PLAT.inapp === 'kakao' ? '카카오톡' : '다른 앱') + ' 안이라 추가할 수 없어요.' +
+    '<button class="btn small" style="margin-top:.4rem;width:100%" onclick="openExternal()">' + (os === 'ios' ? 'Safari' : 'Chrome') + '로 열기</button></div>';
+  if (os === 'ios') {
+    body += '<ol class="steps">' +
+      step(1, here && PLAT.crios ? '주소창 오른쪽의 ' + K(ic('share') + '공유') + ' 를 누르세요'
+        : '화면 <b>아래쪽 가운데</b> ' + K(ic('share') + '공유') + ' 를 누르세요<br><span class="muted">안 보이면 오른쪽 아래 ' + K('···') + ' 를 먼저 누르세요</span>') +
+      step(2, '목록을 위로 밀어 ' + K(ic('plusapp') + '홈 화면에 추가') + ' 를 누르세요') +
+      step(3, '오른쪽 위 ' + K('추가') + ' 를 누르면 끝!') + '</ol>' +
+      '<div class="hint">홈 화면의 <b>HERE.</b> 아이콘으로 <b>처음 열 때 한 번만</b> 이름과 번호를 다시 눌러 주세요. (아이폰은 Safari와 홈 화면 앱이 따로 기억해요)</div>';
+  } else {
+    if (here && INSTALL.evt) body += '<button class="btn ok" style="margin-top:.4rem" onclick="installNow()">' + ic('plusapp') + ' 지금 홈 화면에 추가</button><p class="muted" style="text-align:center;margin:.3rem 0">누른 뒤 ' + K('설치') + ' 또는 ' + K('추가') + ' 만 누르면 끝!</p>';
+    body += '<ol class="steps">' + (here && PLAT.samsung
+      ? step(1, '화면 아래쪽 ' + K('≡') + ' 를 누르세요') + step(2, K('현재 페이지 추가') + ' → ' + K('홈 화면') + ' 을 누르세요') + step(3, K('추가') + ' 를 누르면 끝!')
+      : step(1, '오른쪽 위 ' + K('⋮') + ' 를 누르세요') + step(2, K('홈 화면에 추가') + ' 또는 ' + K('앱 설치') + ' 를 누르세요') + step(3, K('설치') + ' 또는 ' + K('추가') + ' 를 누르면 끝!')) + '</ol>' +
+      '<div class="hint">홈 화면의 <b>HERE.</b> 아이콘을 누르면 로그인된 채로 바로 열려요.</div>';
+  }
+  modal('<h2>홈 화면에 앱 추가</h2><div class="chips">' + tab('ios', '아이폰') + tab('android', '안드로이드') + '</div>' + body +
+    (S.user && isAdmin() ? '<button class="btn light small" style="margin-top:.6rem;width:100%" onclick="copyInviteText()">선생님들께 보낼 안내 문자 복사</button>' : '') +
+    '<div class="row" style="margin-top:.6rem"><button class="btn light small" onclick="store(\'hs_installed\',Date.now());closeModal();render()">이미 추가했어요</button><button class="btn light small" onclick="closeModal()">닫기</button></div>' +
+    (os === 'ios' && PLAT.ios && !PLAT.crios && !PLAT.inapp ? '<div style="height:3.2rem"></div><div class="ios-arrow">' + ic('down') + '</div>' : ''));
+}
+function copyInviteText() {
+  var u = location.href.split(/[?#]/)[0];
+  copyText('[HERE. 목민교회 고등부 선생님 앱]\n' + u + '\n\n' +
+    '주소를 누르고 → 내 이름 → 전화번호 뒷자리 4자리\n\n' +
+    '[아이폰] Safari에서 열고 아래쪽 [공유] → [홈 화면에 추가] → [추가]\n(카카오톡 안에서 열리면 오른쪽 아래 ··· → [다른 브라우저로 열기])\n\n' +
+    '[안드로이드] 크롬에서 열고 [홈 화면에 앱 추가] 버튼, 또는 오른쪽 위 ⋮ → [홈 화면에 추가]\n\n' +
+    '다음부터는 홈 화면의 HERE. 아이콘을 누르면 바로 열립니다.', '안내 문자를 복사했어요. 단톡방에 붙여넣으세요');
+}
+
+/* ========================= 자동 새로고침 (새 버전 · 오래 쉰 뒤) =========================
+   - 새로 배포하면: 열려 있는 앱이 version.json 을 보고 스스로 새로고침 (저장 중·입력 중이면 끝날 때까지 기다림)
+   - 오래 쉬었다 다시 열면: 아이폰 2시간 / 안드로이드 4시간 → 새로고침 (오늘 날짜·새 자료로)
+     (아이폰 홈 화면 앱은 새로고침 버튼이 없어서 더 자주)
+   - 새로고침하면 기기에 있는 로그인 열쇠로 자동으로 다시 들어옴 */
+var UPD = { last: 0, hiddenAt: 0, openedAt: Date.now(), t: null }, SWREG = null;
+var STALE_MS = (PLAT.ios ? 2 : 4) * 36e5;
+function checkVersion(force) {
+  if (IS_GAS || !window.APP_API || BUILD.charAt(0) === '_') return;
+  if (!force && Date.now() - UPD.last < 3 * 60e3) return;
+  UPD.last = Date.now();
+  fetch('version.json?_=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.json(); })
+    .then(function (j) { if (j && j.v && j.v !== BUILD) safeReload('update'); }).catch(function () {});
+}
+function busyNow() {
+  var a = document.activeElement;
+  return OUT.q.length || OUT.busy || S.dirty || LOGIN.busy || !!$('modal').innerHTML || (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName));
+}
+function safeReload(why) {
+  clearTimeout(UPD.t);
+  if (why !== 'manual' && busyNow()) { if (OUT.q.length) flushOut(); UPD.t = setTimeout(function () { safeReload(why); }, 20000); return; }
+  if (why === 'manual' && (OUT.q.length || S.dirty)) { flushOut(); toast('저장을 마치고 새로 고칠게요'); UPD.t = setTimeout(function () { safeReload('update'); }, 3000); return; }
+  sessSet('hs_reload', why); location.reload();
+}
+function onVisible() {
+  var away = UPD.hiddenAt ? Date.now() - UPD.hiddenAt : 0;
+  UPD.hiddenAt = 0;
+  if (away > STALE_MS || Date.now() - UPD.openedAt > 12 * 36e5) { safeReload('stale'); return; }
+  checkVersion();
+  if (SWREG) { try { SWREG.update(); } catch (e) {} }
+}
+document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') UPD.hiddenAt = Date.now(); else onVisible(); });
+window.addEventListener('pageshow', function (e) { if (e.persisted) onVisible(); });   // 아이폰: 뒤로가기 캐시에서 돌아올 때
+setInterval(function () { if (document.visibilityState === 'visible') checkVersion(); }, 10 * 60e3);
+function verText() { var b = BUILD; return /^\d{12}/.test(b) ? b.slice(2, 4) + '.' + b.slice(4, 6) + '.' + b.slice(6, 8) + ' ' + b.slice(8, 10) + ':' + b.slice(10, 12) : '미리보기'; }
+
+/* ========================= 로그인 유지 (열쇠) ========================= */
+function loadLogin() { var v = store('hs_login'); if (!v) { try { v = JSON.parse(sessGet('hs_login') || 'null'); } catch (e) { v = null; } } return v; }
+function clearLogin() { unstore('hs_login'); sessDel('hs_login'); }
+/** 번호 대신 서버가 준 열쇠를 보관 (keep=false 면 이 창을 닫으면 사라짐) */
+function saveLogin(name, keep) {
+  if (keep === undefined) keep = LOGIN.keep !== false;
+  var tok = S._token || (S.auth && S.auth.token) || '';
+  var v = { name: name, token: tok, code: tok ? '' : (S.auth && S.auth.code) || '', at: Date.now() };
+  clearLogin();
+  if (keep) store('hs_login', v); else sessSet('hs_login', JSON.stringify(v));
+  if (tok && S.auth) { S.auth.token = tok; delete S.auth.code; }
+  S._token = null;
+}
+function autoLogin() {
+  var saved = loadLogin();
+  if (!(saved && saved.name && (saved.token || saved.code))) { render(); return; }
+  LOGIN.keep = !!store('hs_login');
+  S.auth = { name: saved.name };
+  if (saved.token) S.auth.token = saved.token; else S.auth.code = saved.code;
+  $('app').innerHTML = toolStrip() + '<div class="login-hero">' + wordmark(true) + '</div><div class="empty">' + esc(saved.name) + ' 선생님, 여는 중…</div>';
+  call('boot', { dev: devName() }, 'silent').then(function (b) {
+    if (S._token) saveLogin(saved.name);   // 예전처럼 번호로 기억하던 기기 → 열쇠로 바꿔 보관
+    afterBoot(b);
+  }).catch(function (e) {
+    S.auth = null;
+    if (e && e.auth) {   // 30일이 지났거나 연락처가 바뀜 → 이름은 그대로, 번호만 다시
+      clearLogin(); LOGIN.name = saved.name; LOGIN.code = ''; LOGIN.step = 'code';
+      render(); toast(e.error || '다시 로그인해 주세요'); return;
+    }
+    $('app').innerHTML = toolStrip() + '<div class="login-hero">' + wordmark(true) + '</div><div class="empty">인터넷 연결을 확인해 주세요</div>' +
+      '<button class="btn" onclick="autoLogin()">다시 시도</button>' + sigFooter();
+  });
+}
+
+/* ========================= 회계 ========================= */
+var FG = ['예산', '후원금', '비예산'];
+function isFin() { return isAdmin() || !!S.fin; }
+function canFinEdit() { return isFin() && (!isPastYear() || isAdmin()); }
+function won(n) { n = Math.round(+n || 0); return (n < 0 ? '-' : '') + Math.abs(n).toLocaleString('ko-KR') + '원'; }
+function wonS(n) {
+  n = Math.round(+n || 0); var a = Math.abs(n);
+  if (a >= 1e8) return (n / 1e8).toFixed(1).replace(/\.0$/, '') + '억';
+  if (a >= 1e4) return (n / 1e4).toFixed(a >= 1e6 ? 0 : 1).replace(/\.0$/, '') + '만';
+  return n.toLocaleString('ko-KR');
+}
+function num(v) { return +String(v || '').replace(/\D/g, '') || 0; }
+function amt(r) { return num(r.금액); }
+function finSum(rows, kind, g) { return rows.reduce(function (a, r) { return a + ((!kind || r.구분 === kind) && (!g || r.재원 === g) ? amt(r) : 0); }, 0); }
+function budgetOf(d) { return (d['예산'] || []).reduce(function (a, b) { return a + num(b.예산액); }, 0); }
+function finSort(a, b) { if (a.날짜 !== b.날짜) return (a.날짜 || '') < (b.날짜 || '') ? 1 : -1; return (a.기록일시 || '') < (b.기록일시 || '') ? 1 : -1; }
+function fgCls(g) { return g === '후원금' ? 'fg1' : g === '비예산' ? 'fg2' : ''; }
+var PERIODS = [['all', '연간'], ['h1', '상반기'], ['h2', '하반기'], ['q1', '1분기'], ['q2', '2분기'], ['q3', '3분기'], ['q4', '4분기']]
+  .concat([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(function (m) { return ['m' + ('0' + m).slice(-2), m + '월']; }));
+function periodRange(k) {
+  var y = S.boot.year, z = function (m) { return ('0' + m).slice(-2); }, end = function (m) { return y + '-' + z(m) + '-31'; };
+  if (k === 'h1') return [y + '-01-01', end(6)];
+  if (k === 'h2') return [y + '-07-01', end(12)];
+  if (/^q\d$/.test(k)) { var q = +k.charAt(1); return [y + '-' + z(q * 3 - 2) + '-01', end(q * 3)]; }
+  if (/^m\d\d$/.test(k)) return [y + '-' + k.slice(1) + '-01', y + '-' + k.slice(1) + '-31'];
+  return [y + '-01-01', end(12)];
+}
+function periodName(k) { return (PERIODS.filter(function (p) { return p[0] === k; })[0] || PERIODS[0])[1]; }
+
+VIEWS.finance = function (p) {
+  if (!isFin()) return topbar('회계') + '<div class="empty">이 기능은 쓸 수 없어요</div>';
+  if (!S.params._data) { call('getTab', { tabs: ['회계', '예산'] }).then(function (d) { S.params._data = d; render(); }); return loadingView('회계'); }
+  var d = S.params._data, t = p.t || '요약', ed = canFinEdit();
+  var chips = ['요약', '내역', '예산', '보고서'].map(function (x) { return '<button class="chip ' + (x === t ? 'on' : '') + '" onclick="S.params.t=\'' + x + '\';render()">' + x + '</button>'; }).join('');
+  var body = t === '요약' ? finSummary(d, ed) : t === '내역' ? finList(d, p, ed) : t === '예산' ? finBudget(d, ed) : finReport(d, p);
+  return topbar(S.boot.year + '년 회계', ed ? '<button class="btn small" onclick="finForm(\'\')">+ 기록</button>' : '') + '<div class="chips noprint">' + chips + '</div>' + body;
+};
+function finItem(r) {
+  var isIn = r.구분 === '수입';
+  return '<button class="list-item fin-it" onclick="finForm(\'' + r.ID + '\')"><span class="fd">' + (r.날짜 ? shortD(r.날짜) : '') + '</span>' +
+    '<span class="grow"><b>' + esc(r.항목 || r.구분) + '</b> <span class="badge ' + fgCls(r.재원) + '">' + esc(r.재원 || '') + '</span>' + (r.내용 ? '<br><span class="muted">' + esc(r.내용) + '</span>' : '') + '</span>' +
+    '<span class="fa ' + (isIn ? 'in' : 'out') + '">' + (isIn ? '+' : '−') + won(amt(r)) + '</span></button>';
+}
+function finSummary(d, ed) {
+  var R = d['회계'], inc = finSum(R, '수입'), out = finSum(R, '지출'), B = budgetOf(d), used = finSum(R, '지출', '예산');
+  var pct = B ? Math.round(used / B * 100) : 0;
+  var head = '<div class="stat-big fin"><div><b>' + wonS(inc) + '</b><span>수입</span></div><div><b>' + wonS(out) + '</b><span>지출</span></div><div><b class="' + (inc - out < 0 ? 'r' : '') + '">' + wonS(inc - out) + '</b><span>잔액</span></div></div>';
+  var groups = '<div class="card"><h3>재원별</h3><table class="ftbl"><thead><tr><th></th><th>수입</th><th>지출</th><th>잔액</th></tr></thead><tbody>' + FG.map(function (g) {
+    var i = finSum(R, '수입', g), o = finSum(R, '지출', g);
+    return '<tr><th>' + g + '</th><td>' + won(i) + '</td><td>' + won(o) + '</td><td><b>' + won(i - o) + '</b></td></tr>';
+  }).join('') + '</tbody></table></div>';
+  var bud = '<button class="card fcard" onclick="S.params.t=\'예산\';render()"><h3>예산 집행 <span class="muted">' + pct + '%</span></h3><div class="meter' + (pct > 100 ? ' over' : '') + '"><i style="width:' + Math.min(100, pct) + '%"></i></div>' +
+    '<div class="muted" style="margin-top:.3rem">' + (B ? '예산 ' + won(B) + ' 중 ' + won(used) + ' 사용 · 남은 예산 <b>' + won(B - used) + '</b>' : '예산 항목을 넣으면 집행률이 보여요') + '</div></button>';
+  var y = S.boot.year, mx = 1, ms = [];
+  for (var m = 1; m <= 12; m++) {
+    var k = y + '-' + ('0' + m).slice(-2), a = 0, b = 0;
+    R.forEach(function (r) { if ((r.날짜 || '').slice(0, 7) === k) { if (r.구분 === '수입') a += amt(r); else b += amt(r); } });
+    ms.push([m, a, b]); mx = Math.max(mx, a, b);
+  }
+  var bars = '<div class="fbars">' + ms.map(function (x) {
+    return '<div class="fb" title="' + x[0] + '월 수입 ' + won(x[1]) + ' · 지출 ' + won(x[2]) + '"><div class="pair"><i class="in" style="height:' + (x[1] / mx * 100) + '%"></i><i class="out" style="height:' + (x[2] / mx * 100) + '%"></i></div><em>' + x[0] + '</em></div>';
+  }).join('') + '</div><div class="legend"><span><i class="in"></i>수입</span><span><i class="out"></i>지출</span></div>';
+  var recent = R.slice().sort(finSort).slice(0, 5).map(finItem).join('');
+  return head + '<div class="split"><div>' + bud + groups + '</div><div><div class="card"><h3>월별 수입 · 지출</h3>' + bars + '</div>' +
+    '<h3 class="org-h">최근 기록</h3>' + (recent || '<div class="empty">아직 기록이 없어요' + (ed ? '<br><button class="btn small" style="margin-top:.6rem" onclick="finForm(\'\')">+ 첫 기록 쓰기</button>' : '') + '</div>') +
+    (R.length > 5 ? '<button class="btn light small" onclick="S.params.t=\'내역\';render()">전체 내역 보기</button>' : '') + '</div></div>';
+}
+function finList(d, p, ed) {
+  var R = d['회계'].slice().sort(finSort), m = p.m || '', g = p.g || '', k = p.k || '';
+  var months = R.map(function (r) { return (r.날짜 || '').slice(0, 7); }).filter(function (x, i, a) { return x && a.indexOf(x) === i; });
+  var sel = function (key, cur, opts) {
+    return '<select onchange="S.params.' + key + '=this.value;render()">' + opts.map(function (o) { return '<option value="' + o[0] + '" ' + (o[0] === cur ? 'selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select>';
+  };
+  var L = R.filter(function (r) { return (!m || (r.날짜 || '').slice(0, 7) === m) && (!g || r.재원 === g) && (!k || r.구분 === k); });
+  var inc = finSum(L, '수입'), out = finSum(L, '지출'), html = '', cur = '';
+  L.forEach(function (r) { var mm = (r.날짜 || '').slice(0, 7); if (mm !== cur) { cur = mm; html += '<h3 class="org-h">' + (mm ? +mm.slice(5) + '월' : '날짜 없음') + '</h3>'; } html += finItem(r); });
+  return '<div class="frow">' + sel('m', m, [['', '모든 달']].concat(months.map(function (x) { return [x, +x.slice(5) + '월']; }))) +
+    sel('g', g, [['', '모든 재원']].concat(FG.map(function (x) { return [x, x]; }))) + sel('k', k, [['', '수입·지출'], ['수입', '수입만'], ['지출', '지출만']]) + '</div>' +
+    '<div class="sumline"><span>' + L.length + '건</span><span class="fa in">+' + won(inc) + '</span><span class="fa out">−' + won(out) + '</span><span>차액 <b>' + won(inc - out) + '</b></span></div>' +
+    (html || '<div class="empty">기록이 없어요</div>') + (ed ? '<p class="muted" style="text-align:center">기록을 누르면 고칠 수 있어요</p>' : '');
+}
+function finBudget(d, ed) {
+  var B = (d['예산'] || []).slice().sort(byOrder), R = d['회계'], used = {};
+  R.forEach(function (r) { if (r.구분 === '지출' && r.재원 === '예산') { var k = r.항목 || '(항목 없음)'; used[k] = (used[k] || 0) + amt(r); } });
+  var tot = budgetOf(d), tu = finSum(R, '지출', '예산'), pt = tot ? Math.round(tu / tot * 100) : 0;
+  var line = function (name, a, u, onclick, note) {
+    var pc = a ? Math.round(u / a * 100) : (u ? 100 : 0);
+    return '<div class="list-item budget" ' + (onclick || '') + '><span class="grow"><b>' + esc(name) + '</b> ' + (note ? '<span class="muted">' + esc(note) + '</span>' : '') +
+      '<div class="meter sm' + (pc > 100 ? ' over' : '') + '"><i style="width:' + Math.min(100, pc) + '%"></i></div><span class="muted">' + won(u) + ' / ' + won(a) + ' · 남음 <b>' + won(a - u) + '</b></span></span><span class="pc">' + pc + '%</span></div>';
+  };
+  var rows = B.map(function (b) { return line(b.항목, num(b.예산액), used[b.항목] || 0, ed ? 'onclick="budgetForm(\'' + b.ID + '\')"' : '', b.비고); }).join('');
+  var others = Object.keys(used).filter(function (k) { return !B.some(function (b) { return b.항목 === k; }); });
+  return '<div class="card"><h3>' + esc(S.boot.year) + '년 예산 ' + won(tot) + ' <span class="muted">' + pt + '%</span></h3><div class="meter' + (pt > 100 ? ' over' : '') + '"><i style="width:' + Math.min(100, pt) + '%"></i></div>' +
+    '<div class="muted" style="margin-top:.3rem">사용 ' + won(tu) + ' · 남은 예산 <b>' + won(tot - tu) + '</b></div></div>' +
+    (ed ? '<button class="btn light" onclick="budgetForm(\'\')">+ 예산 항목 추가</button>' : '') +
+    '<div class="cols">' + (rows || '<div class="empty">예산 항목이 없어요</div>') + '</div>' +
+    (others.length ? '<h3 class="org-h">예산 항목에 없는 지출</h3>' + others.map(function (k) { return line(k, 0, used[k], '', ''); }).join('') : '') +
+    '<p class="muted">예산 사용은 재원이 <b>예산</b>인 지출만 셉니다. 후원금 · 비예산 지출은 따로 집계돼요.</p>';
+}
+function budgetForm(id) {
+  var L = S.params._data['예산'], r = id ? L.filter(function (x) { return x.ID === id; })[0] : { 순서: String(L.length + 1) };
+  rowForm('예산', r, [
+    { k: '항목', label: '예산 항목', ph: '예) 간식비, 수련회, 교재비', list: ['간식비', '행사비', '수련회', '교재 · 물품', '선물 · 상품', '심방비', '교사 교육', '기타'] },
+    { k: '예산액', label: '예산액 (원, 숫자만)', type: 'number' },
+    { k: '비고', label: '비고' },
+    { k: '순서', label: '보이는 순서 (숫자)', type: 'number' }
+  ], id ? '예산 항목' : '예산 항목 추가');
+}
+/* 회계 기록 쓰기 */
+var FF = {};
+function finForm(id) {
+  if (!canFinEdit()) { toast('보기만 할 수 있어요'); return; }
+  var r = id ? S.params._data['회계'].filter(function (x) { return x.ID === id; })[0] : null;
+  r = r || { 날짜: todayStr(), 구분: '지출', 재원: '예산', 결제: '카드', 영수증: '있음' };
+  FF = { id: id || '', 구분: r.구분 || '지출', 재원: r.재원 || '예산', rec: r };
+  finFormDraw(r);
+}
+function finFormDraw(r) {
+  var d = S.params._data, isIn = FF.구분 === '수입';
+  var base = isIn ? ['교회 예산', '후원', '회비', '행사 수익', '기타 수입'] : (d['예산'] || []).map(function (b) { return b.항목; });
+  var items = base.concat(d['회계'].filter(function (x) { return x.구분 === FF.구분; }).map(function (x) { return x.항목; })).filter(function (x, i, a) { return x && a.indexOf(x) === i; });
+  var opt = function (id, cur, list) { return '<select id="' + id + '">' + list.map(function (o) { return '<option ' + (o === cur ? 'selected' : '') + '>' + o + '</option>'; }).join('') + '</select>'; };
+  var a = amt(r);
+  modal('<h2>' + (FF.id ? '회계 기록 고치기' : '회계 기록') + '</h2>' +
+    '<div class="seg2">' + ['지출', '수입'].map(function (k) { return '<button class="' + (FF.구분 === k ? 'on ' + (k === '수입' ? 'in' : 'out') : '') + '" onclick="ffSet(\'구분\',\'' + k + '\')">' + k + '</button>'; }).join('') + '</div>' +
+    '<label>재원</label><div class="chips wrap" style="padding:0">' + FG.map(function (g) { return '<button class="chip ' + (FF.재원 === g ? 'on' : '') + '" onclick="ffSet(\'재원\',\'' + g + '\')">' + g + '</button>'; }).join('') + '</div>' +
+    '<div class="row"><div><label>날짜</label><input id="f_날짜" type="date" value="' + esc(r.날짜 || '') + '"></div>' +
+    '<div><label>금액 (원)</label><input id="f_금액" inputmode="numeric" value="' + (a ? a.toLocaleString('ko-KR') : '') + '" oninput="ffAmt(this)" placeholder="0"></div></div>' +
+    '<label>항목</label><input id="f_항목" list="dl_fi" value="' + esc(r.항목 || '') + '" placeholder="' + (isIn ? '예) 교회 예산, 후원' : '예) 간식비, 수련회') + '"><datalist id="dl_fi">' + items.map(function (o) { return '<option value="' + esc(o) + '">'; }).join('') + '</datalist>' +
+    '<label>내용</label><input id="f_내용" value="' + esc(r.내용 || '') + '" placeholder="' + (isIn ? '예) ○○○ 집사님 후원' : '예) 11/17 주일 간식 (피자)') + '">' +
+    '<div class="row"><div><label>결제</label>' + opt('f_결제', r.결제, ['현금', '카드', '계좌이체', '기타']) + '</div><div><label>영수증</label>' + opt('f_영수증', r.영수증, ['있음', '없음', '제출 예정', '해당 없음']) + '</div></div>' +
+    '<label>비고</label><input id="f_비고" value="' + esc(r.비고 || '') + '">' +
+    (FF.rec.기록자 ? '<p class="muted" style="margin:.4rem 0 0">기록 ' + esc(FF.rec.기록자) + (FF.rec.기록일시 ? ' · ' + esc(FF.rec.기록일시) : '') + '</p>' : '') +
+    '<button class="btn" style="margin-top:.8rem" onclick="saveFin()">저장</button>' +
+    (FF.id ? '<button class="btn danger" style="margin-top:.5rem" onclick="delFin()">삭제</button>' : ''));
+}
+function ffRead() {
+  var o = {};
+  ['날짜', '금액', '항목', '내용', '결제', '영수증', '비고'].forEach(function (k) { var el = $('f_' + k); o[k] = el ? el.value.trim() : ''; });
+  o.금액 = o.금액.replace(/\D/g, ''); return o;
+}
+function ffSet(k, v) { var o = ffRead(); FF[k] = v; o.구분 = FF.구분; o.재원 = FF.재원; finFormDraw(o); }
+function ffAmt(el) { var v = el.value.replace(/\D/g, '').slice(0, 12); el.value = v ? (+v).toLocaleString('ko-KR') : ''; }
+function saveFin() {
+  var o = ffRead(); o.구분 = FF.구분; o.재원 = FF.재원;
+  if (!o.날짜) { toast('날짜를 넣어 주세요'); return; }
+  if (!(+o.금액 > 0)) { toast('금액을 넣어 주세요'); return; }
+  if (!o.항목) { toast('항목을 써 주세요'); return; }
+  o.ID = FF.id || newId('F');
+  var n = new Date(), loc = {};
+  for (var k in o) loc[k] = o[k];
+  loc.기록자 = S.user; loc.기록일시 = ymd(n) + ' ' + ('0' + n.getHours()).slice(-2) + ':' + ('0' + n.getMinutes()).slice(-2);
+  upsertLocal(S.params._data['회계'], loc);
+  enqueue('saveTabRow', { tab: '회계', row: o });
+  closeModal(); render(); toast((o.구분 === '수입' ? '수입 ' : '지출 ') + won(o.금액) + ' 저장했어요');
+}
+function delFin() {
+  if (!confirm('이 기록을 삭제할까요?\n(삭제한 기록은 시트에 따로 남아요)')) return;
+  removeLocal(S.params._data['회계'], FF.id);
+  enqueue('deleteTabRow', { tab: '회계', id: FF.id });
+  closeModal(); render(); toast('삭제했어요');
+}
+/* 보고서: 기간별 이월 · 수입 · 지출 · 잔액, 항목별, 예산 집행, 상세 내역 */
+function finCalc(d, pk) {
+  var rg = periodRange(pk), R = d['회계'];
+  var before = R.filter(function (r) { return (r.날짜 || '') < rg[0]; });
+  var L = R.filter(function (r) { return r.날짜 >= rg[0] && r.날짜 <= rg[1]; }).sort(function (a, b) { return -finSort(a, b); });
+  var upto = R.filter(function (r) { return (r.날짜 || '') <= rg[1]; });
+  var G = FG.map(function (g) { var b = finSum(before, '수입', g) - finSum(before, '지출', g), i = finSum(L, '수입', g), o = finSum(L, '지출', g); return [g, b, i, o, b + i - o]; });
+  var T = G.reduce(function (a, x) { return [a[0], a[1] + x[1], a[2] + x[2], a[3] + x[3], a[4] + x[4]]; }, ['합계', 0, 0, 0, 0]);
+  var byItem = function (kind) {
+    var m = {}, order = [];
+    L.forEach(function (r) { if (r.구분 !== kind) return; var k = r.항목 || '(항목 없음)'; if (!m[k]) { m[k] = { t: 0, g: {} }; order.push(k); } m[k].t += amt(r); m[k].g[r.재원] = (m[k].g[r.재원] || 0) + amt(r); });
+    return order.sort(function (a, b) { return m[b].t - m[a].t; }).map(function (k) { return [k, m[k]]; });
+  };
+  var usedTo = {}; upto.forEach(function (r) { if (r.구분 === '지출' && r.재원 === '예산') usedTo[r.항목] = (usedTo[r.항목] || 0) + amt(r); });
+  var BU = (d['예산'] || []).slice().sort(byOrder).map(function (b) { return [b.항목, num(b.예산액), usedTo[b.항목] || 0]; });
+  return { rg: rg, L: L, G: G, T: T, inc: byItem('수입'), out: byItem('지출'), BU: BU, budget: budgetOf(d), usedTo: finSum(upto, '지출', '예산') };
+}
+function finReport(d, p) {
+  var pk = p.pk || 'all', c = finCalc(d, pk);
+  var sel = '<select onchange="S.params.pk=this.value;render()">' + PERIODS.map(function (x) { return '<option value="' + x[0] + '" ' + (x[0] === pk ? 'selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select>';
+  var gtxt = function (g) { return Object.keys(g).map(function (k) { return k + ' ' + won(g[k]); }).join(', '); };
+  var itemTbl = function (list, empty) {
+    if (!list.length) return '<p class="muted">' + empty + '</p>';
+    var s = 0; list.forEach(function (x) { s += x[1].t; });
+    return '<table class="ftbl"><thead><tr><th>항목</th><th>금액</th><th>재원</th></tr></thead><tbody>' + list.map(function (x) { return '<tr><td class="l">' + esc(x[0]) + '</td><td>' + won(x[1].t) + '</td><td class="l muted">' + esc(gtxt(x[1].g)) + '</td></tr>'; }).join('') +
+      '</tbody><tfoot><tr><th>합계</th><td>' + won(s) + '</td><td></td></tr></tfoot></table>';
+  };
+  var pr = c.budget ? Math.round(c.usedTo / c.budget * 100) : 0;
+  var html = '<div class="report" id="report"><h2>' + esc(APP_SUB) + ' ' + esc(S.boot.year) + '년 회계 보고 · ' + esc(periodName(pk)) + '</h2>' +
+    '<p class="muted" style="margin:.2rem 0 0">' + esc(fmtD(c.rg[0])) + ' ~ ' + esc(fmtD(c.rg[1].replace(/-31$/, '-' + new Date(+c.rg[1].slice(0, 4), +c.rg[1].slice(5, 7), 0).getDate()))) + ' · 작성 ' + esc(todayStr()) + ' ' + esc(S.user) + '</p>' +
+    '<h4>1. 재원별 요약</h4><table class="ftbl"><thead><tr><th>재원</th><th>이월</th><th>수입</th><th>지출</th><th>잔액</th></tr></thead><tbody>' +
+    c.G.map(function (x) { return '<tr><th>' + x[0] + '</th><td>' + won(x[1]) + '</td><td>' + won(x[2]) + '</td><td>' + won(x[3]) + '</td><td><b>' + won(x[4]) + '</b></td></tr>'; }).join('') +
+    '</tbody><tfoot><tr><th>합계</th><td>' + won(c.T[1]) + '</td><td>' + won(c.T[2]) + '</td><td>' + won(c.T[3]) + '</td><td>' + won(c.T[4]) + '</td></tr></tfoot></table>' +
+    '<h4>2. 수입 내역</h4>' + itemTbl(c.inc, '이 기간 수입이 없어요') +
+    '<h4>3. 지출 내역</h4>' + itemTbl(c.out, '이 기간 지출이 없어요') +
+    '<h4>4. 예산 집행 (기간 끝까지 누계 · ' + pr + '%)</h4>' +
+    (c.BU.length ? '<table class="ftbl"><thead><tr><th>항목</th><th>예산</th><th>사용</th><th>남음</th><th>%</th></tr></thead><tbody>' + c.BU.map(function (x) {
+      return '<tr><td class="l">' + esc(x[0]) + '</td><td>' + won(x[1]) + '</td><td>' + won(x[2]) + '</td><td>' + won(x[1] - x[2]) + '</td><td>' + (x[1] ? Math.round(x[2] / x[1] * 100) : 0) + '%</td></tr>';
+    }).join('') + '</tbody><tfoot><tr><th>합계</th><td>' + won(c.budget) + '</td><td>' + won(c.usedTo) + '</td><td>' + won(c.budget - c.usedTo) + '</td><td>' + pr + '%</td></tr></tfoot></table>' : '<p class="muted">예산 항목이 없어요</p>') +
+    '<h4>5. 상세 내역 (' + c.L.length + '건)</h4>' + (c.L.length ? '<div class="tblwrap"><table class="ftbl"><thead><tr><th>날짜</th><th>구분</th><th>재원</th><th>항목 · 내용</th><th>금액</th><th>영수증</th></tr></thead><tbody>' + c.L.map(function (r) {
+      return '<tr><td>' + esc((r.날짜 || '').slice(5).replace('-', '/')) + '</td><td>' + esc(r.구분) + '</td><td>' + esc(r.재원) + '</td><td class="l">' + esc(r.항목) + (r.내용 ? ' · ' + esc(r.내용) : '') + '</td><td>' + (r.구분 === '수입' ? '' : '−') + won(amt(r)) + '</td><td>' + esc(r.영수증 || '') + '</td></tr>';
+    }).join('') + '</tbody></table></div>' : '<p class="muted">기록이 없어요</p>') + '</div>';
+  return '<div class="frow noprint">' + sel + '</div><div class="row noprint" style="flex-wrap:wrap"><button class="btn small" onclick="window.print()">인쇄 · PDF 저장</button>' +
+    '<button class="btn light small" onclick="finCsv()">엑셀(CSV) 받기</button><button class="btn light small" onclick="finShareText()">보고 문자 복사</button></div>' + html;
+}
+function finCsv() {
+  var pk = S.params.pk || 'all', c = finCalc(S.params._data, pk);
+  var q = function (v) { v = String(v == null ? '' : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+  var head = ['날짜', '구분', '재원', '항목', '내용', '금액', '결제', '영수증', '비고', '기록자'];
+  var lines = [head.join(',')].concat(c.L.map(function (r) { return head.map(function (h) { return q(h === '금액' ? amt(r) : r[h]); }).join(','); }));
+  var blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'HERE_회계_' + S.boot.year + '_' + periodName(pk) + '.csv';
+  document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+function finShareText() {
+  var pk = S.params.pk || 'all', c = finCalc(S.params._data, pk);
+  var t = '[' + APP_SUB + ' 회계 보고] ' + S.boot.year + '년 ' + periodName(pk) + '\n' +
+    '수입 ' + won(c.T[2]) + ' · 지출 ' + won(c.T[3]) + ' · 잔액 ' + won(c.T[4]) + '\n' +
+    c.G.map(function (x) { return '- ' + x[0] + ': 수입 ' + won(x[2]) + ', 지출 ' + won(x[3]) + ', 잔액 ' + won(x[4]); }).join('\n') +
+    (c.budget ? '\n예산 집행 ' + Math.round(c.usedTo / c.budget * 100) + '% (' + won(c.usedTo) + ' / ' + won(c.budget) + ')' : '') +
+    (c.out.length ? '\n주요 지출: ' + c.out.slice(0, 5).map(function (x) { return x[0] + ' ' + won(x[1].t); }).join(', ') : '');
+  copyText(t, '보고 내용을 복사했어요');
+}
+
+/* ========================= 보안 · 접속 기록 (관리자) ========================= */
+VIEWS.admSecurity = function (p) {
+  if (!S.params._data) { call('getAccessLog', {}, true).then(function (d) { S.params._data = d; render(); }); return loadingView('보안 · 접속 기록'); }
+  var f = p.f || '전체', L = S.params._data;
+  var fails = L.filter(function (x) { return x[2] === '번호 틀림'; });
+  var chips = ['전체', '로그인', '번호 틀림'].map(function (x) { return '<button class="chip ' + (x === f ? 'on' : '') + '" onclick="S.params.f=\'' + x + '\';render()">' + x + '</button>'; }).join('');
+  var rows = L.filter(function (x) { return f === '전체' || x[2] === f; }).map(function (x) {
+    return '<div class="list-item"><span class="grow"><b>' + esc(x[1]) + '</b> <span class="muted">' + esc(x[3] || '') + '</span><br><span class="muted">' + esc(x[0]) + '</span></span>' +
+      '<span class="badge ' + (x[2] === '번호 틀림' ? 'r' : x[2] === '로그인' ? 'g' : '') + '">' + esc(x[2]) + '</span></div>';
+  }).join('') || '<div class="empty">기록이 없어요</div>';
+  var done = ['기기에는 전화번호 뒷자리 대신 <b>30일짜리 로그인 열쇠</b>만 보관 (30일 지나면 번호 다시)',
+    '번호를 여러 번 틀리면 잠금 (10분에 10번 · 6시간에 20번)', '연락처를 바꾸면 그 선생님의 예전 로그인은 바로 무효',
+    '학생 · 교사 자료는 구글시트에만 있고, 공개 주소(GitHub)에는 화면 파일만', '회계는 회계 담당 · 구성 관리 선생님만 · 기록자와 시각 자동 기록 · 지워도 시트에 남김',
+    '지난 해 자료는 보기만 (구성 관리 선생님 제외)', '다른 사람 기기에서는 번호 화면의 [이 기기에 로그인 유지]를 끄고 들어오기'];
+  return topbar('보안 · 접속 기록') +
+    '<div class="card"><h3>지금 지키고 있는 것</h3><ul class="chk">' + done.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul></div>' +
+    (isSuper() ? '<div class="card"><h3>휴대폰을 잃어버렸을 때</h3><p class="muted" style="margin:.2rem 0 .5rem">모든 선생님 기기에서 로그인이 풀리고, 다음에 열 때 번호를 다시 누릅니다. (지금 이 기기는 그대로)</p>' +
+      '<button class="btn danger small" onclick="resetSessions()">모든 기기 다시 로그인</button></div>' : '') +
+    (fails.length ? '<div class="hint warn">최근 번호 틀림 ' + fails.length + '번 — 같은 이름이 여러 번이면 그 선생님께 확인해 보세요.</div>' : '') +
+    '<h3 class="org-h">' + esc(S.boot.year) + '년 접속 기록 (최근 120번)</h3><div class="chips">' + chips + '</div>' + rows;
+};
+function resetSessions() {
+  if (!confirm('모든 선생님 기기에서 로그인을 풀까요?\n다들 다음에 열 때 전화번호 뒷자리를 다시 누르게 됩니다.')) return;
+  call('resetSessions').then(function (d) {
+    if (d && d.token) { S._token = d.token; saveLogin(S.user, !!store('hs_login')); }
+    S.params._data = null; render(); toast('모든 기기의 로그인을 풀었어요');
+  });
+}
+
 /* ---------- 글씨 크기 ---------- */
 var SIZES = [14, 15, 16, 17, 18, 20, 22, 24, 26], DEF_FS = 17;
 function fontStep(d) {
@@ -1714,11 +2231,15 @@ function applyFont() { document.documentElement.style.setProperty('--fs', (store
 function start() {
   applyFont(); applyWide();
   window.addEventListener('resize', function () { if (store('hs_pc') === null) { var w = document.body.classList.contains('wide'); applyWide(); if (w !== isWide()) render(); } });
-  var saved = store('hs_login');
-  if (saved && saved.name && saved.code) {
-    S.auth = { name: saved.name, code: saved.code };   // 연도는 서버의 기본 연도
-    call('boot').then(afterBoot).catch(function () { unstore('hs_login'); S.auth = null; render(); });
-  } else { render(); }
+  var why = sessGet('hs_reload'); sessDel('hs_reload');
+  if (why === 'update') setTimeout(function () { toast('새 버전으로 바뀌었어요'); }, 1200);
+  // 카카오톡 안에서 열리면 한 번 자동으로 Safari/Chrome 으로 내보냄 (로그인 유지 · 홈 화면 추가가 되도록)
+  if (PLAT.inapp === 'kakao' && PLAT.mobile && !sessGet('hs_kx')) { sessSet('hs_kx', '1'); setTimeout(openExternal, 600); }
+  if ('serviceWorker' in navigator && window.APP_API && !IS_GAS && location.protocol === 'https:') {
+    navigator.serviceWorker.register('sw.js').then(function (r) { SWREG = r; }).catch(function () {});
+  }
+  autoLogin();   // 기기에 열쇠가 있으면 바로 들어옴 (연도는 서버의 기본 연도)
+  setTimeout(function () { checkVersion(true); }, 4000);
   window.addEventListener('beforeunload', function (e) { if (S.dirty || OUT.q.length) { e.preventDefault(); e.returnValue = ''; } });
 }
 if (IS_GAS) start();

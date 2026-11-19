@@ -499,10 +499,9 @@ function viewLogin() {
     return '<button class="' + (y === LOGIN.year ? 'on' : '') + '" onclick="pickYear(\'' + y + '\')"><b>' + y + '</b><small>' + tag + '</small></button>';
   }).join('') + '</div>';
   var rows = !list ? '<div class="empty">불러오는 중…</div>' : list.map(function (t) {
-    var badge = t.권한 === '최고관리자' || t.권한 === '관리자' ? ' <span class="badge w">' + esc(t.권한) + '</span>' : '';
     var sub = t.담당반 ? t.담당반 + '반 담임' : (t.역할 || '');
-    return '<button class="list-item" ' + (t.ok ? 'onclick="pickTeacher(\'' + esc(t.이름) + '\')"' : 'onclick="toast(\'연락처가 등록되어 있지 않아요. 관리자에게 문의해 주세요\')" style="opacity:.55"') + '>' +
-      '<span class="av">' + esc((t.이름 || '?').charAt(0)) + '</span><span class="grow"><b>' + esc(t.이름) + '</b> <span class="muted">' + esc(t.직분 || '') + '</span>' + badge +
+    return '<button class="list-item" ' + (t.ok ? 'onclick="pickTeacher(\'' + esc(t.이름) + '\')"' : 'onclick="toast(\'연락처가 등록되어 있지 않아요. 담당 선생님께 문의해 주세요\')" style="opacity:.55"') + '>' +
+      '<span class="av">' + esc((t.이름 || '?').charAt(0)) + '</span><span class="grow"><b>' + esc(t.이름) + '</b> <span class="muted">' + esc(t.직분 || '') + '</span>' +
       '<br><span class="muted">' + esc(t.ok ? sub : '연락처 없음') + '</span></span></button>';
   }).join('');
   return head + (LOGIN.years.length > 1 ? years : '') +
@@ -542,7 +541,7 @@ function logout(silent) {
 /** 들어온 뒤 연도 바꾸기 (같은 이름·번호로) */
 function yearMenu() {
   var ys = S.boot.years || [S.boot.year];
-  modal('<h2>연도 선택</h2><p class="muted">지난 해 자료는 참고용입니다. 수정은 관리자만 할 수 있어요.</p><div class="yearsel">' + ys.map(function (y) {
+  modal('<h2>연도 선택</h2><p class="muted">지난 해 자료는 참고용입니다.</p><div class="yearsel">' + ys.map(function (y) {
     return '<button class="' + (y === S.boot.year ? 'on' : '') + '" onclick="switchYear(\'' + y + '\')"><b>' + y + '</b><small>' + (y === S.boot.latestYear ? '최신' : '지난 자료') + '</small></button>';
   }).join('') + '</div>');
 }
@@ -560,17 +559,19 @@ function isSuper() { return !!S.isSuper; }
 
 /* ========================= 관리자 ========================= */
 var ROLES = ['교사', '관리자', '최고관리자'];
-function roleBadge(r) { return r === '최고관리자' ? '<span class="badge r">최고관리자</span>' : r === '관리자' ? '<span class="badge w">관리자</span>' : ''; }
+/* 화면에는 권한 이름 대신 쉬운 말로 (시트에는 그대로 교사/관리자/최고관리자) */
+var ROLE_LABEL = { '교사': '일반', '관리자': '구성 관리', '최고관리자': '구성 관리 + 권한 지정' };
+function roleBadge(r) { return r === '최고관리자' || r === '관리자' ? ' <span title="' + ROLE_LABEL[r] + '" style="color:var(--ci-orange);display:inline-flex;vertical-align:-2px">' + ic('gear') + '</span>' : ''; }
 function reloadBoot() { return call('boot', {}, true).then(function (b) { S.boot = b; }).catch(function () {}); }
 
 VIEWS.admin = function () {
   var item = function (icon, cls, title, desc, view) {
     return '<button class="tile ' + cls + ' wide" onclick="go(\'' + view + '\')" style="min-height:4.4rem"><span class="ib">' + ic(icon) + '</span><span><b>' + title + '</b><small style="text-transform:none;letter-spacing:0;font-size:.78rem;font-weight:600;color:var(--sub)">' + desc + '</small></span></button>';
   };
-  return topbar('관리자') +
-    '<div class="hint" style="margin-top:.7rem">' + esc(S.boot.year) + '년 구성을 고치는 곳입니다 · 내 권한: <b>' + esc(S.boot.me.권한) + '</b>' + (isSuper() ? '' : '<br>선생님 권한(관리자 지정)은 최고관리자만 바꿀 수 있어요.') + '</div>' +
+  return topbar('구성 관리') +
+    '<div class="hint" style="margin-top:.7rem">' + esc(S.boot.year) + '년 구성을 고치는 곳입니다.</div>' +
     '<div class="tiles">' +
-    item('people', 't-blue', '선생님 · 권한', '명단, 연락처(로그인 번호), 관리자 지정', 'admTeachers') +
+    item('people', 't-blue', '선생님 · 권한', '명단, 연락처(로그인 번호), 구성 관리 권한', 'admTeachers') +
     item('grid', 't-lime', '반 편성 · 담임 배정', '반 추가/삭제, 반마다 담임 선생님', 'admClasses') +
     item('check', 't-sky', '학생 반 배정', '학생마다 반·상태(재적/장결/졸업) 한꺼번에', 'admStudents') +
     item('calendar', 't-lilac', '연도 관리', '연도별 시트, 새 연도 시작하기', 'admYears') +
@@ -591,13 +592,13 @@ VIEWS.admTeachers = function () {
 function teacherForm(name) {
   var t = name ? S.params._data.filter(function (x) { return x.이름 === name; })[0] : { 권한: '교사' };
   var clsOpts = ['<option value="">(반 없음)</option>'].concat(S.boot.classes.map(function (c) { return '<option ' + (c.반 === t.담당반 ? 'selected' : '') + '>' + esc(c.반) + '</option>'; })).join('');
-  var roleOpts = ROLES.map(function (r) { return '<option ' + (r === (t.권한 || '교사') ? 'selected' : '') + '>' + r + '</option>'; }).join('');
+  var roleOpts = ROLES.map(function (r) { return '<option value="' + r + '" ' + (r === (t.권한 || '교사') ? 'selected' : '') + '>' + ROLE_LABEL[r] + '</option>'; }).join('');
   var f = function (k, ph, type) { return '<label>' + k + '</label><input id="t_' + k + '" type="' + (type || 'text') + '" value="' + esc(t[k] || '') + '" placeholder="' + (ph || '') + '">'; };
   modal('<h2>' + (name ? '선생님 정보' : '선생님 추가') + '</h2>' + f('이름') +
     '<div class="row"><div>' + f('직분', '집사, 권사, 청년…') + '</div><div>' + f('역할', '부장, 총무, 회계…') + '</div></div>' +
     '<label>담당반 (담임)</label><select id="t_담당반">' + clsOpts + '</select>' +
     f('연락처', '010-0000-0000', 'tel') + '<p class="muted" style="margin:.3rem 0 0">뒷자리 4자리가 로그인 번호가 됩니다.</p>' +
-    '<label>권한 ' + (isSuper() ? '' : '<span class="muted">(최고관리자만 바꿀 수 있어요)</span>') + '</label><select id="t_권한" ' + (isSuper() ? '' : 'disabled') + '>' + roleOpts + '</select>' +
+    '<label>앱 권한 ' + (isSuper() ? '' : '<span class="muted">(바꿀 수 없어요)</span>') + '</label><select id="t_권한" ' + (isSuper() ? '' : 'disabled') + '>' + roleOpts + '</select>' +
     '<button class="btn" style="margin-top:1rem" onclick="saveTeacher(\'' + esc(name) + '\')">저장</button>' +
     (name && name !== S.user ? '<button class="btn danger" style="margin-top:.5rem" onclick="delTeacher(\'' + esc(name) + '\')">이 선생님 삭제</button>' : ''));
 }
@@ -736,7 +737,7 @@ VIEWS.admYears = function () {
     ? '<div class="card" style="background:var(--p-lilac);border-color:#ddd3ff"><h3>' + next + '년 새로 시작하기</h3><div class="muted pre">' +
       '새 구글시트를 만들고 아래처럼 옮깁니다.\n· 고1 → 고2, 고2 → 고3 (재적·장결 학생)\n· 고3은 졸업으로 빠짐 · 새 고1(지금 중3)은 나중에 추가\n· 선생님은 모두 옮기고, 담임은 학생을 따라 한 학년 위 반으로 임시 배정 (고3 담임 → 고1)\n· 출석·면담·새신자·공지는 새로 시작 (' + ys[ys.length - 1].연도 + '년 자료는 그대로 남음)</div>' +
       '<button class="btn" style="margin-top:.8rem" onclick="createYear(\'' + next + '\')">' + next + '년 시트 만들기</button></div>'
-    : '<p class="muted">새 연도 만들기는 최고관리자만 할 수 있어요.</p>';
+    : '<p class="muted">새 연도 만들기는 권한 지정을 맡은 선생님만 할 수 있어요.</p>';
   return topbar('연도 관리') + '<div class="cols" style="margin-top:.6rem">' + rows + '</div>' + create;
 };
 function createYear(y) {
@@ -757,7 +758,7 @@ VIEWS.home = function () {
     return '<button class="tile ' + cls + '" onclick="' + onclick + '"><span class="ib">' + ic(icon) + '</span><span><b>' + label + '</b><small>' + en + '</small></span></button>';
   };
   var hc = homeClass(), sun = lastSunday();
-  var past = isPastYear() ? '<div class="past"><span>' + esc(b.year) + '년 자료를 보고 있어요 · 참고용' + (isAdmin() ? '' : ' (수정은 관리자만)') + '</span><button class="btn small" onclick="switchYear(\'' + b.latestYear + '\')">' + b.latestYear + '년으로</button></div>' : '';
+  var past = isPastYear() ? '<div class="past"><span>' + esc(b.year) + '년 자료를 보고 있어요 · 참고용</span><button class="btn small" onclick="switchYear(\'' + b.latestYear + '\')">' + b.latestYear + '년으로</button></div>' : '';
   return '<div class="brand">' + wordmark(false) + '<button class="yearchip" onclick="yearMenu()">' + esc(b.year) + ' <i>▼</i></button></div>' + past +
     '<div class="hero"><div class="eyebrow">This Sunday · ' + shortD(sun) + '</div>' +
     '<div class="hi">' + esc(S.user) + ' 선생님, 반가워요</div><div class="meta">' + fmtD(todayStr()) + (hc ? ' · ' + hc + '반 담임' : '') + '</div>' +
@@ -770,7 +771,7 @@ VIEWS.home = function () {
     tile('megaphone', '공지사항', 'Notice', "go('notices')", 't-rose') +
     tile('calendar', '사역 준비', 'Ministry', "go('ministry')", 't-lilac') +
     tile('grid', '출석부 전체표', 'Attendance table', "go('sheet')", isAdmin() ? 't-sky' : 't-sky wide') +
-    (isAdmin() ? tile('gear', '관리자', 'Admin', "go('admin')", 't-peach') : '') +
+    (isAdmin() ? tile('gear', '구성 관리', 'Settings', "go('admin')", 't-peach') : '') +
     '</div>' +
     '<div class="foot">' +
     (b.chatLink ? '<a class="btn light small" href="' + esc(b.chatLink) + '" target="_blank">교사 단톡방</a>' : '') +

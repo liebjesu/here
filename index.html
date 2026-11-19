@@ -282,6 +282,30 @@ svg.ic{width:1.25em;height:1.25em;flex:none;display:block}
 .who b{display:block;font-size:1.15rem;font-weight:900}
 .who span{font-size:.8rem;color:var(--sub);font-weight:700}
 .login-hero{padding-bottom:0}
+
+/* 함께 보기 (작은 타일) */
+.minis{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:8px}
+.mini{display:flex;flex-direction:column;align-items:center;gap:.3rem;padding:.6rem .2rem;border-radius:16px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);font-weight:800;font-size:.76rem;line-height:1.15;text-align:center}
+.mini .ib{width:2rem;height:2rem;border-radius:10px;display:flex;align-items:center;justify-content:center;background:var(--c);color:var(--ic)}
+.mini .ib svg{width:1.15rem;height:1.15rem}
+.wide .minis{grid-template-columns:repeat(5,1fr);gap:10px}
+.wide .mini{font-size:.9rem;padding:.9rem .4rem}
+
+/* 조직표 */
+.org-h{margin:1.2rem 0 .3rem;font-size:1rem;font-weight:900;letter-spacing:-.02em}
+.org-lead{margin-top:.8rem;padding:1rem .8rem;border-radius:24px;background:linear-gradient(135deg,#e4eeff,#edf6d3)}
+.org-row{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.org-row.top .node{min-width:9rem;background:var(--navy);color:#fff;border-color:var(--navy)}
+.org-row.top .node small{color:#c9d2ea}
+.org-line{width:2px;height:14px;background:#b9c5e6;margin:4px auto}
+.org-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(9.5rem,1fr));gap:8px}
+.node{display:flex;flex-direction:column;align-items:flex-start;gap:.1rem;text-align:left;background:#fff;border:1px solid var(--line);border-radius:16px;padding:.6rem .75rem;box-shadow:0 1px 2px rgba(21,28,51,.04);min-width:7.5rem}
+.node small{font-size:.72rem;font-weight:800;color:var(--sub);letter-spacing:.02em}
+.node b{font-size:.98rem;font-weight:800;line-height:1.3}
+.node em{font-style:normal;font-size:.74rem;color:var(--sub)}
+.node.officer{align-items:center;text-align:center;background:var(--p-lilac);border-color:#e2daff}
+.node.officer b{font-size:1.15rem}
+.lnk{display:inline-block;padding:.05rem .55rem;border-radius:999px;background:var(--p-rose);color:#d23b62;font-weight:800;font-size:.82rem;text-decoration:none}
 </style>
 </head>
 <body>
@@ -319,6 +343,11 @@ var ICONS = {
   next: '<path d="M9.5 5.5L16 12l-6.5 6.5"/>',
   arrow: '<path d="M5 12h13.5M13 6.5l5.5 5.5-5.5 5.5"/>',
   tick: '<path d="M5.5 12.6l4 4L18.5 7.6" stroke-width="3"/>',
+  book: '<path d="M5 4.5h10.5a3 3 0 0 1 3 3v12H8a3 3 0 0 1-3-3z" fill="currentColor" fill-opacity=".16"/><path d="M5 16.5a3 3 0 0 1 3-3h10.5"/><circle cx="11.5" cy="8.6" r="1.6"/>',
+  org: '<rect x="9" y="3.5" width="6" height="4.5" rx="1.5" fill="currentColor" fill-opacity=".2"/><rect x="3.5" y="15.5" width="6" height="4.5" rx="1.5"/><rect x="14.5" y="15.5" width="6" height="4.5" rx="1.5"/><path d="M12 8v3.8M6.5 15.5v-3.7h11v3.7"/>',
+  pray: '<path d="M12 20.5s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.8a4.3 4.3 0 0 1 7.5 2.5c0 5.6-7.5 10.2-7.5 10.2z" fill="currentColor" fill-opacity=".18"/><path d="M12 3v3M10.5 4.5h3"/>',
+  music: '<path d="M9 17.5V6l10-2v11.5"/><circle cx="6.5" cy="17.5" r="2.5" fill="currentColor" fill-opacity=".2"/><circle cx="16.5" cy="15.5" r="2.5"/>',
+  star: '<path d="M12 3.8l2.5 5.1 5.6.8-4 4 .9 5.6-5-2.6-5 2.6.9-5.6-4-4 5.6-.8z" fill="currentColor" fill-opacity=".18"/>',
   gear: '<circle cx="12" cy="12" r="3.1" fill="currentColor" fill-opacity=".18"/><path d="M12 3.5v2.2M12 18.3v2.2M20.5 12h-2.2M5.7 12H3.5M18 6l-1.6 1.6M7.6 16.4L6 18M18 18l-1.6-1.6M7.6 7.6L6 6"/>',
   phone: '<path d="M6.6 3.6h2.5l1.4 3.9-2 1.3a11.3 11.3 0 0 0 6.7 6.7l1.3-2 3.9 1.4v2.5a2 2 0 0 1-2.2 2A16.4 16.4 0 0 1 4.6 5.8a2 2 0 0 1 2-2.2z"/>'
 };
@@ -396,6 +425,11 @@ function loadSpec(view, p) {
     case 'notices': return { key: 'notices', action: 'getNotices', payload: {} };
     case 'ministry': return { key: 'ministry', action: 'getMinistry', payload: {} };
     case 'student': return p && p.id ? { key: 'student:' + p.id, action: 'getStudent', payload: { id: p.id } } : null;
+    case 'directory': return { key: 'directory', action: 'getDirectory', payload: {} };
+    case 'org': return { key: 'org', action: 'getTab', payload: { tab: '조직' } };
+    case 'prayer': return { key: 'prayer', action: 'getTab', payload: { tab: '기도봉헌' } };
+    case 'worship': return { key: 'worship', action: 'getTab', payload: { tabs: ['찬양팀', '찬양인도', '찬양콘티'] } };
+    case 'officers': return { key: 'officers', action: 'getTab', payload: { tabs: ['임역원', '임역원회의'] } };
   }
   return null;
 }
@@ -757,6 +791,7 @@ VIEWS.home = function () {
   var tile = function (icon, label, en, onclick, cls) {
     return '<button class="tile ' + cls + '" onclick="' + onclick + '"><span class="ib">' + ic(icon) + '</span><span><b>' + label + '</b><small>' + en + '</small></span></button>';
   };
+  var mini = function (icon, label, view, cls) { return '<button class="mini ' + cls + '" onclick="go(\'' + view + '\')"><span class="ib">' + ic(icon) + '</span>' + label + '</button>'; };
   var hc = homeClass(), sun = lastSunday();
   var past = isPastYear() ? '<div class="past"><span>' + esc(b.year) + '년 자료를 보고 있어요 · 참고용</span><button class="btn small" onclick="switchYear(\'' + b.latestYear + '\')">' + b.latestYear + '년으로</button></div>' : '';
   return '<div class="brand">' + wordmark(false) + '<button class="yearchip" onclick="yearMenu()">' + esc(b.year) + ' <i>▼</i></button></div>' + past +
@@ -773,12 +808,256 @@ VIEWS.home = function () {
     tile('grid', '출석부 전체표', 'Attendance table', "go('sheet')", isAdmin() ? 't-sky' : 't-sky wide') +
     (isAdmin() ? tile('gear', '구성 관리', 'Settings', "go('admin')", 't-peach') : '') +
     '</div>' +
+    '<div class="minis">' +
+    mini('book', '교사<br>주소록', 'directory', 't-blue') + mini('org', '조직표', 'org', 't-lime') + mini('pray', '기도<br>봉헌', 'prayer', 't-rose') +
+    mini('music', '찬양팀', 'worship', 't-sky') + mini('star', '임역원', 'officers', 't-lilac') +
+    '</div>' +
     '<div class="foot">' +
     (b.chatLink ? '<a class="btn light small" href="' + esc(b.chatLink) + '" target="_blank">교사 단톡방</a>' : '') +
     (isAdmin() ? '<a class="btn light small" href="' + esc(b.sheetUrl) + '" target="_blank">원본 구글시트</a>' : '') +
     '<button class="btn light small" onclick="logout()">로그아웃</button></div>' +
     sigFooter();
 };
+
+/* ========================= 함께 보기: 주소록 · 조직표 · 기도봉헌 · 찬양팀 · 임역원 ========================= */
+function linkify(t) {
+  return esc(t).replace(/(https?:\/\/[^\s<]+)/g, function (u) {
+    var yt = /youtu\.?be/.test(u);
+    return '<a href="' + u + '" target="_blank" class="lnk">' + (yt ? '▶ 영상 보기' : '링크 열기') + '</a>';
+  });
+}
+function nextSunday() { var d = parseD(todayStr()); if (d.getDay() !== 0) d.setDate(d.getDate() + (7 - d.getDay())); return ymd(d); }
+function byOrder(a, b) { return (+a.순서 || 999) - (+b.순서 || 999); }
+function canEdit(tab) { return tab === '조직' || tab === '임역원' ? isAdmin() : (!isPastYear() || isAdmin()); }
+
+/** 공통 입력 창: fields = [{k, label, type, opts, ph}] */
+function rowForm(tab, row, fields, title, after) {
+  row = row || {};
+  var html = fields.map(function (f) {
+    var v = row[f.k] != null ? row[f.k] : (f.def || '');
+    if (f.type === 'textarea') return '<label>' + f.label + '</label><textarea id="rf_' + f.k + '" placeholder="' + (f.ph || '') + '" style="min-height:' + (f.tall ? '14rem' : '7rem') + '">' + esc(v) + '</textarea>';
+    if (f.type === 'select') return '<label>' + f.label + '</label><select id="rf_' + f.k + '">' + f.opts.map(function (o) { return '<option ' + (o === v ? 'selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select>';
+    var dl = f.list ? '<datalist id="dl_' + f.k + '">' + f.list.map(function (o) { return '<option value="' + esc(o) + '">'; }).join('') + '</datalist>' : '';
+    return '<label>' + f.label + '</label><input id="rf_' + f.k + '" type="' + (f.type || 'text') + '" value="' + esc(v) + '" placeholder="' + (f.ph || '') + '"' + (f.list ? ' list="dl_' + f.k + '"' : '') + '>' + dl;
+  }).join('');
+  RF = { tab: tab, id: row.ID || '', key: row.월 || '', fields: fields, after: after };
+  modal('<h2>' + esc(title) + '</h2>' + html +
+    '<button class="btn" style="margin-top:1rem" onclick="saveRowForm()">저장</button>' +
+    (row.ID ? '<button class="btn danger" style="margin-top:.5rem" onclick="delRowForm()">삭제</button>' : ''));
+}
+var RF = {};
+function saveRowForm() {
+  var o = {}; if (RF.id) o.ID = RF.id; if (RF.key) o.월 = RF.key;
+  RF.fields.forEach(function (f) { o[f.k] = $('rf_' + f.k).value.trim(); });
+  call('saveTabRow', { tab: RF.tab, row: o }).then(function () { closeModal(); S.params._data = null; delete CACHE[S.view]; render(); toast('저장했어요'); if (RF.after) RF.after(); });
+}
+function delRowForm() {
+  if (!confirm('이 항목을 삭제할까요?')) return;
+  call('deleteTabRow', { tab: RF.tab, id: RF.id }).then(function () { closeModal(); S.params._data = null; delete CACHE[S.view]; render(); toast('삭제했어요'); });
+}
+function loadingView(title) { return topbar(title) + '<div class="empty">불러오는 중…</div>'; }
+
+/* ---------- 교사 주소록 ---------- */
+VIEWS.directory = function (p) {
+  if (!S.params._data) { call('getDirectory').then(function (d) { S.params._data = d; render(); }); return loadingView('교사 주소록'); }
+  var q = (p.q || '').trim(), mm = todayStr().slice(5, 7);
+  var all = S.params._data;
+  var bd = all.filter(function (t) { return (t.생일 || '').slice(0, 2) === mm; });
+  var list = all.filter(function (t) { return !q || (t.이름 + t.직분 + t.역할 + t.담당반).indexOf(q) >= 0; });
+  var card = function (t) {
+    var sub = [t.역할, t.담당반 ? t.담당반 + '반 담임' : ''].filter(Boolean).join(' · ');
+    return '<div class="card"><div style="display:flex;align-items:center;gap:.6rem"><span class="av">' + esc(t.이름.charAt(0)) + '</span><div style="flex:1;min-width:0"><b style="font-size:1.05rem">' + esc(t.이름) + '</b> <span class="muted">' + esc(t.직분 || '') + '</span>' +
+      (sub ? '<div class="muted">' + esc(sub) + '</div>' : '') + '</div></div>' +
+      '<div class="muted" style="margin-top:.45rem">' + (t.연락처 ? esc(t.연락처) : '연락처 없음') + (t.생일 ? ' · 생일 ' + esc(t.생일.replace('-', '/')) : '') + '</div>' +
+      (t.주소 ? '<div class="muted">' + esc(t.주소) + '</div>' : '') +
+      (t.연락처 ? '<div class="row" style="margin-top:.55rem"><a class="btn ok small" href="tel:' + tel(t.연락처) + '">' + ic('phone') + '전화</a><a class="btn light small" href="sms:' + tel(t.연락처) + '">문자</a></div>' : '') + '</div>';
+  };
+  return topbar('교사 주소록') +
+    '<input style="margin-top:.7rem" placeholder="이름·역할로 찾기" value="' + esc(q) + '" onchange="go(\'directory\',{q:this.value},true)">' +
+    (bd.length && !q ? '<div class="hint">이번 달 생일: <b>' + bd.map(function (t) { return esc(t.이름) + ' (' + esc(t.생일.replace('-', '/')) + ')'; }).join(', ') + '</b></div>' : '') +
+    '<div class="cols">' + list.map(card).join('') + '</div>' +
+    (isAdmin() ? '<p class="muted" style="text-align:center">연락처·생일·주소는 구성 관리 → 선생님 · 권한, 또는 시트의 교사 탭에서 고칩니다.</p>' : '');
+};
+
+/* ---------- 조직표 ---------- */
+VIEWS.org = function () {
+  if (!S.params._data) { call('getTab', { tab: '조직' }).then(function (d) { S.params._data = d; render(); }); return loadingView('조직표'); }
+  var rows = S.params._data.slice().sort(byOrder), ed = canEdit('조직');
+  var groups = [], gmap = {};
+  rows.forEach(function (r) { var g = r.구분 || '기타'; if (!gmap[g]) { gmap[g] = []; groups.push(g); } gmap[g].push(r); });
+  var names = function (s) { return String(s || '').split(/[,，、/]+/).map(function (x) { return x.trim(); }).filter(Boolean); };
+  var person = function (r) {
+    return '<button class="node" ' + (ed ? 'onclick="orgForm(\'' + r.ID + '\')"' : '') + '><small>' + esc(r.역할) + '</small><b>' + (names(r.담당).map(esc).join(', ') || '<span class="muted">미정</span>') + '</b>' + (r.비고 ? '<em>' + esc(r.비고) + '</em>' : '') + '</button>';
+  };
+  // 맨 위: 섬김이(교역자·부장·총무…)
+  var lead = gmap['섬김이'] || [];
+  var top = lead.filter(function (r) { return /교역자|목사|전도사/.test(r.역할); });
+  var mid = lead.filter(function (r) { return top.indexOf(r) < 0; });
+  var html = '';
+  if (lead.length) {
+    html += '<div class="org-lead">' + (top.length ? '<div class="org-row top">' + top.map(person).join('') + '</div><div class="org-line"></div>' : '') +
+      '<div class="org-row">' + mid.map(person).join('') + '</div></div>';
+  }
+  // 담임 (반 편성에서)
+  var cls = S.boot.classes.filter(function (c) { return c.담임교사 || /^\d-\d+$/.test(c.반); });
+  html += '<h3 class="org-h">반 담임</h3><div class="org-grid">' + cls.map(function (c) {
+    return '<div class="node"><small>' + esc(c.반) + (/^\d-\d+$/.test(c.반) ? '반' : '') + (c.성별 ? ' · ' + esc(c.성별) : '') + '</small><b>' + (esc(c.담임교사) || '<span class="muted">미배정</span>') + '</b></div>';
+  }).join('') + '</div>';
+  // 팀들
+  groups.filter(function (g) { return g !== '섬김이'; }).forEach(function (g) {
+    html += '<h3 class="org-h">' + esc(g) + '</h3><div class="org-grid">' + gmap[g].map(person).join('') + '</div>';
+  });
+  return topbar('조직표') + '<p class="muted" style="margin:.7rem 0 0">' + esc(S.boot.year) + '년 고등부 섬김 · 역할 분담' + (ed ? ' · 칸을 누르면 고칠 수 있어요' : '') + '</p>' + html +
+    (ed ? '<button class="btn" style="margin-top:1rem" onclick="orgForm(\'\')">+ 역할 추가</button>' : '');
+};
+function orgForm(id) {
+  var r = id ? S.params._data.filter(function (x) { return x.ID === id; })[0] : { 구분: '', 순서: String(S.params._data.length + 1) };
+  var groups = S.params._data.map(function (x) { return x.구분; }).filter(function (g, i, a) { return g && a.indexOf(g) === i; });
+  rowForm('조직', r, [
+    { k: '구분', label: '구분 (예: 섬김이, 예배팀, 홍보팀)', list: groups.length ? groups : ['섬김이', '예배팀', '홍보팀'] },
+    { k: '역할', label: '역할', ph: '예) 음향, 헌금계수' },
+    { k: '담당', label: '담당 선생님 (여러 명은 쉼표로)', ph: '예) 김성현, 왕현우', list: S.boot.teachers.map(function (t) { return t.이름; }) },
+    { k: '비고', label: '비고' },
+    { k: '순서', label: '보이는 순서 (숫자)', type: 'number' }
+  ], id ? '역할 고치기' : '역할 추가');
+}
+
+/* ---------- 기도 · 봉헌 ---------- */
+VIEWS.prayer = function () {
+  if (!S.params._data) { call('getTab', { tab: '기도봉헌' }).then(function (d) { S.params._data = d; render(); }); return loadingView('대표기도 · 봉헌'); }
+  var rows = S.params._data.slice().sort(function (a, b) { return a.날짜 < b.날짜 ? -1 : 1; }), ns = nextSunday(), ed = canEdit('기도봉헌');
+  var cur = rows.filter(function (r) { return r.날짜 >= ns; })[0];
+  var hero = cur ? '<div class="hero" style="margin-top:.7rem"><div class="eyebrow">' + (cur.날짜 === ns ? 'This Sunday' : 'Next') + ' · ' + esc(fmtD(cur.날짜)) + '</div>' +
+    '<div class="row" style="margin-top:.6rem"><div><div class="meta">대표기도</div><div class="hi">' + (esc(cur.기도자) || '미정') + '</div></div><div><div class="meta">봉헌</div><div class="hi">' + (esc(cur.봉헌) || '미정') + '</div></div></div>' +
+    (cur.학년반 ? '<div class="meta">' + esc(cur.학년반) + '반 순서</div>' : '') + '</div>' : '';
+  var months = {}, order = [];
+  rows.forEach(function (r) { var m = r.날짜.slice(0, 7); if (!months[m]) { months[m] = []; order.push(m); } months[m].push(r); });
+  var list = order.map(function (m) {
+    return '<h3 class="org-h">' + (+m.slice(5)) + '월</h3>' + months[m].map(function (r) {
+      var past = r.날짜 < ns;
+      return '<button class="list-item" style="' + (past ? 'opacity:.55' : '') + (r === cur ? ';border-color:var(--ci-sky);background:var(--p-sky)' : '') + '" ' + (ed ? 'onclick="prayerForm(\'' + r.ID + '\')"' : '') + '>' +
+        '<span style="width:3.2rem;font-weight:900">' + shortD(r.날짜) + '</span><span class="grow"><b>' + (esc(r.기도자) || '<span class="muted">기도 미정</span>') + '</b>' + (r.학년반 ? ' <span class="badge">' + esc(r.학년반) + '</span>' : '') +
+        '<br><span class="muted">봉헌 ' + (esc(r.봉헌) || '-') + (r.비고 ? ' · ' + esc(r.비고) : '') + '</span></span></button>';
+    }).join('');
+  }).join('');
+  return topbar('대표기도 · 봉헌') + hero +
+    (ed ? '<div class="row" style="margin-top:.7rem"><button class="btn light small" onclick="prayerForm(\'\')">+ 주일 추가</button><button class="btn light small" onclick="fillSundays()">' + esc(S.boot.year) + '년 주일 모두 만들기</button></div>' : '') +
+    (list || '<div class="empty">아직 순서가 없어요</div>');
+};
+function prayerForm(id) {
+  var r = id ? S.params._data.filter(function (x) { return x.ID === id; })[0] : { 날짜: nextSunday() };
+  rowForm('기도봉헌', r, [
+    { k: '날짜', label: '날짜', type: 'date' },
+    { k: '기도자', label: '대표기도', list: S.boot.teachers.map(function (t) { return t.이름; }).concat(students().map(function (s) { return s.이름; })) },
+    { k: '봉헌', label: '봉헌 (반·팀·이름)', ph: '예) 1-1반, 서기팀' },
+    { k: '학년반', label: '순서 반 (선택)', ph: '예) 2-1' },
+    { k: '비고', label: '비고' }
+  ], id ? fmtD(r.날짜) + ' 순서' : '주일 추가');
+}
+function fillSundays() {
+  if (!confirm(S.boot.year + '년의 빈 주일을 모두 목록에 넣을까요?')) return;
+  call('fillSundays').then(function (d) { S.params._data = d; render(); toast('주일을 채웠어요'); });
+}
+
+/* ---------- 찬양팀 ---------- */
+var WT = ['찬양팀', '찬양인도', '찬양콘티'];
+VIEWS.worship = function (p) {
+  if (!S.params._data) { call('getTab', { tabs: WT }).then(function (d) { S.params._data = d; render(); }); return loadingView('찬양팀'); }
+  var d = S.params._data, t = p.t || '콘티', ed = canEdit('찬양콘티');
+  var chips = ['콘티', '인도 순서', '팀원'].map(function (x) { return '<button class="chip ' + (x === t ? 'on' : '') + '" onclick="S.params.t=\'' + x + '\';render()">' + x + '</button>'; }).join('');
+  var body = '';
+  if (t === '콘티') {
+    var cs = d['찬양콘티'].slice().sort(function (a, b) { return a.날짜 < b.날짜 ? 1 : -1; });
+    body = (ed ? '<button class="btn" onclick="contiForm(\'\')">+ 콘티 쓰기</button>' : '') + '<div class="cols">' + (cs.map(function (c) {
+      return '<div class="card"><div style="display:flex;align-items:center;gap:.5rem"><h3 style="flex:1;margin:0">' + esc(fmtD(c.날짜)) + '</h3>' + (c.인도 ? '<span class="badge">인도 ' + esc(c.인도) + '</span>' : '') +
+        (ed ? '<button class="btn light small" onclick="contiForm(\'' + c.ID + '\')">고치기</button>' : '') + '</div><div class="pre" style="margin-top:.5rem">' + linkify(c.내용) + '</div></div>';
+    }).join('') || '<div class="empty">콘티가 없어요</div>') + '</div>';
+  } else if (t === '인도 순서') {
+    var mon = d['찬양인도'], ms = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
+    var get = function (m) { return mon.filter(function (r) { return r.월 === m; })[0] || { 월: m }; };
+    body = '<p class="muted" style="margin:0 0 .3rem">' + (ed ? '칸을 누르면 고칠 수 있어요' : '') + '</p><div class="tblwrap"><table class="tbl"><thead><tr><th class="c1">월</th><th>1주</th><th>2주</th><th>3주</th><th>4주</th><th>5주</th></tr></thead><tbody>' +
+      ms.map(function (m) { var r = get(m); return '<tr ' + (ed ? 'class="clk" onclick="leadForm(\'' + m + '\')"' : '') + '><td class="c1"><b>' + m + '</b></td>' + ['1주', '2주', '3주', '4주', '5주'].map(function (w) { return '<td>' + esc(r[w] || '') + '</td>'; }).join('') + '</tr>'; }).join('') +
+      '</tbody></table></div>';
+  } else {
+    var mem = d['찬양팀'], parts = {}, po = [];
+    mem.forEach(function (m) { (m.파트 || '기타').split(/[,，(]/)[0].trim().split('/').forEach(function (pp) { pp = pp || '기타'; if (!parts[pp]) { parts[pp] = []; po.push(pp); } parts[pp].push(m); }); });
+    body = (ed ? '<button class="btn" onclick="memberForm(\'\')">+ 팀원 추가</button>' : '') + '<div class="cols">' + po.map(function (pp) {
+      return '<div class="card"><h3>' + esc(pp) + ' <span class="muted">' + parts[pp].length + '명</span></h3>' + parts[pp].map(function (m) {
+        return '<div class="list-item" ' + (ed ? 'onclick="memberForm(\'' + m.ID + '\')"' : '') + '><span class="grow"><b>' + esc(m.이름) + '</b> <span class="muted">' + (m.구분 === '교사' ? '선생님' : (m.학년 ? '고' + esc(m.학년) : '학생')) + (m.파트 && m.파트.indexOf(pp) < 0 ? '' : '') + '</span>' +
+          (m.비고 ? '<br><span class="muted">' + esc(m.비고) + '</span>' : '') + '</span>' + (m.연락처 ? '<a class="call" href="tel:' + tel(m.연락처) + '" onclick="event.stopPropagation()">' + ic('phone') + '</a>' : '') + '</div>';
+      }).join('') + '</div>';
+    }).join('') + '</div>';
+  }
+  return topbar('찬양팀') + '<div class="chips">' + chips + '</div>' + body;
+};
+function weekOf(dateStr) { var d = parseD(dateStr); return Math.ceil(d.getDate() / 7); }
+function contiForm(id) {
+  var d = S.params._data, r = id ? d['찬양콘티'].filter(function (x) { return x.ID === id; })[0] : null;
+  if (!r) {
+    var ns = nextSunday(), m = (+ns.slice(5, 7)) + '월', lr = d['찬양인도'].filter(function (x) { return x.월 === m; })[0] || {};
+    r = { 날짜: ns, 인도: lr[weekOf(ns) + '주'] || '', 내용: '1. \n\n2. \n\n3. \n\n<헌금>\n' };
+  }
+  rowForm('찬양콘티', r, [
+    { k: '날짜', label: '날짜', type: 'date' },
+    { k: '인도', label: '인도' },
+    { k: '내용', label: '콘티 (곡 제목, 키, 유튜브 링크를 줄마다)', type: 'textarea', tall: true },
+    { k: '비고', label: '비고' }
+  ], id ? '콘티 고치기' : '콘티 쓰기');
+}
+function leadForm(m) {
+  var r = S.params._data['찬양인도'].filter(function (x) { return x.월 === m; })[0] || { 월: m };
+  rowForm('찬양인도', r, ['1주', '2주', '3주', '4주', '5주'].map(function (w) { return { k: w, label: m + ' ' + w + ' 인도' }; }), m + ' 찬양 인도');
+}
+function memberForm(id) {
+  var r = id ? S.params._data['찬양팀'].filter(function (x) { return x.ID === id; })[0] : { 구분: '학생' };
+  rowForm('찬양팀', r, [
+    { k: '이름', label: '이름', list: students().map(function (s) { return s.이름; }).concat(S.boot.teachers.map(function (t) { return t.이름; })) },
+    { k: '구분', label: '구분', type: 'select', opts: ['학생', '교사'] },
+    { k: '학년', label: '학년 (학생)', type: 'number' },
+    { k: '파트', label: '파트 (예: 싱어, 건반, 드럼)' },
+    { k: '연락처', label: '연락처', type: 'tel' },
+    { k: '비고', label: '비고' }
+  ], id ? '팀원 정보' : '팀원 추가');
+}
+
+/* ---------- 임역원 ---------- */
+VIEWS.officers = function (p) {
+  if (!S.params._data) { call('getTab', { tabs: ['임역원', '임역원회의'] }).then(function (d) { S.params._data = d; render(); }); return loadingView('임역원'); }
+  var d = S.params._data, edO = canEdit('임역원'), edM = canEdit('임역원회의');
+  var offs = d['임역원'].slice().sort(byOrder);
+  var stuOf = function (n) { return students().filter(function (s) { return s.이름 === n; })[0] || {}; };
+  var cards = offs.map(function (o) {
+    var st = stuOf(o.이름), phone = o.연락처 || st.연락처, cls = o.반 || st.반;
+    return '<div class="node officer" ' + (edO ? 'onclick="officerForm(\'' + o.ID + '\')"' : '') + '><small>' + esc(o.직책) + '</small><b>' + esc(o.이름) + '</b><em>' + (cls ? esc(cls) + '반' : '') + (o.비고 ? ' · ' + esc(o.비고) : '') + '</em>' +
+      (phone ? '<a class="call" href="tel:' + tel(phone) + '" onclick="event.stopPropagation()" style="margin-top:.4rem">' + ic('phone') + '전화</a>' : '') + '</div>';
+  }).join('');
+  var meets = d['임역원회의'].slice().sort(function (a, b) { return a.날짜 < b.날짜 ? 1 : -1; }).map(function (m) {
+    return '<div class="card" ' + (edM ? 'onclick="meetForm(\'' + m.ID + '\')"' : '') + '><div class="muted"><b>' + esc(fmtD(m.날짜)) + '</b>' + (m.기록자 ? ' · ' + esc(m.기록자) : '') + '</div><h3 style="margin-top:.2rem">' + esc(m.제목) + '</h3><div class="pre">' + linkify(m.내용) + '</div></div>';
+  }).join('');
+  return topbar('임역원') + '<h3 class="org-h">' + esc(S.boot.year) + '년 임역원</h3><div class="org-grid">' + (cards || '<span class="muted">아직 없어요</span>') + '</div>' +
+    (edO ? '<button class="btn light" style="margin-top:.6rem" onclick="officerForm(\'\')">+ 임역원 추가</button>' : '') +
+    '<h3 class="org-h">회의 · 논의 기록</h3>' + (edM ? '<button class="btn" onclick="meetForm(\'\')">+ 회의 기록</button>' : '') + '<div class="cols">' + (meets || '<div class="empty">기록이 없어요</div>') + '</div>';
+};
+function officerForm(id) {
+  var r = id ? S.params._data['임역원'].filter(function (x) { return x.ID === id; })[0] : { 직책: '임원', 순서: String(S.params._data['임역원'].length + 1) };
+  rowForm('임역원', r, [
+    { k: '직책', label: '직책', list: ['회장', '부회장', '총무', '서기', '회계', '임원'] },
+    { k: '이름', label: '이름 (학생)', list: students().map(function (s) { return s.이름; }) },
+    { k: '반', label: '반 (비우면 학생 명단에서 자동)' },
+    { k: '연락처', label: '연락처 (비우면 학생 명단에서 자동)', type: 'tel' },
+    { k: '비고', label: '비고' },
+    { k: '순서', label: '보이는 순서', type: 'number' }
+  ], id ? '임역원 정보' : '임역원 추가');
+}
+function meetForm(id) {
+  var r = id ? S.params._data['임역원회의'].filter(function (x) { return x.ID === id; })[0] : { 날짜: todayStr(), 기록자: S.user };
+  rowForm('임역원회의', r, [
+    { k: '날짜', label: '날짜', type: 'date' },
+    { k: '제목', label: '제목', ph: '예) 12월 생일파티 논의' },
+    { k: '내용', label: '내용', type: 'textarea', tall: true },
+    { k: '기록자', label: '기록자' }
+  ], id ? '회의 기록' : '회의 기록하기');
+}
 
 /* ---------- 출석 체크 ---------- */
 function openAttend() { S.att = null; go('attend'); }

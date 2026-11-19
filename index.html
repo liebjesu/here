@@ -482,6 +482,20 @@ i.in{background:#7ccbf0} i.out{background:#ffb866}
   .ftbl tr{break-inside:avoid}
   .tblwrap{overflow:visible!important}
 }
+
+/* ===== 교사 출석 ===== */
+.myatt{display:flex;align-items:center;gap:6px;margin-top:.4rem;padding:.35rem .4rem .35rem .65rem;border-radius:13px;background:#fff;border:1px solid var(--line);flex-wrap:wrap}
+.myatt .lbl{display:flex;flex-direction:column;line-height:1.15;margin-right:auto}
+.myatt .lbl b{font-size:.88rem;font-weight:900}
+.myatt .lbl small{font-size:.7rem;color:var(--sub);font-weight:700}
+.ma{display:inline-flex;align-items:center;gap:.25rem;padding:.42rem .75rem;border-radius:11px;background:var(--p-blue);color:var(--ci-blue);font-weight:800;font-size:.86rem}
+.ma.on{background:var(--ok-soft);color:var(--ok)}
+.ma svg{width:.95rem;height:.95rem}
+.tbig{width:100%;min-height:2.9rem;font-size:1.02rem}
+.trow{display:flex;align-items:center;gap:.5rem;font-size:.84rem;padding:.15rem 0}
+.trow span{width:2.6rem;font-weight:800}
+.trow .meter{flex:1;margin:0}
+.trow b{width:2.6rem;text-align:right}
 </style>
 </head>
 <body>
@@ -614,6 +628,7 @@ function loadSpec(view, p) {
     case 'prayer': return { key: 'prayer', action: 'getTab', payload: { tab: '기도봉헌' } };
     case 'worship': return { key: 'worship', action: 'getTab', payload: { tabs: ['찬양팀', '찬양인도', '찬양콘티'] } };
     case 'officers': return { key: 'officers', action: 'getTab', payload: { tabs: ['임역원', '임역원회의'] } };
+    case 'tatt': return { key: 'tatt', action: 'getTab', payload: { tabs: ['교사모임', '교사출석'] } };
     case 'finance': return { key: 'finance', action: 'getTab', payload: { tabs: ['회계', '예산'] } };
   }
   return null;
@@ -634,6 +649,7 @@ function warmUp() {
   call('prefetch', { date: sun }, true).then(function (d) {
     CACHE.stats = d.stats; CACHE.newcomers = d.newcomers; CACHE.notes = d.notes; CACHE.notices = d.notices; CACHE.ministry = d.ministry;
     if (!ATT[sun]) ATT[sun] = d.attendance;
+    if (d.tatt) { CACHE.tatt = d.tatt; if (S.view === 'home' && !$('modal').innerHTML) render(); }
   }).catch(function () { S._warm = false; });
 }
 
@@ -1002,7 +1018,7 @@ function saveBulk() {
 
 /* ---- 시트 반영 기록 ---- */
 var KIND = { saveAttendance: '출석', saveNote: '면담', saveNewcomer: '새신자', saveStudent: '학생', saveNotice: '공지', deleteNotice: '공지 삭제', saveMinistry: '사역', deleteMinistry: '사역 삭제',
-  saveTabRow: '기록', deleteTabRow: '기록 삭제', assignTeacher: '담임 배정', bulkStudents: '반 배정' };
+  saveTeacherAtt: '교사 출석', saveTabRow: '기록', deleteTabRow: '기록 삭제', assignTeacher: '담임 배정', bulkStudents: '반 배정' };
 VIEWS.admSync = function () {
   if (!S.params._data) { call('getSyncLog', {}, true).then(function (d) { S.params._data = d; render(); }); return topbar('시트 반영 기록') + '<div class="empty">불러오는 중…</div>'; }
   var rows = S.params._data.map(function (l) {
@@ -1065,8 +1081,9 @@ VIEWS.home = function () {
   var banner = n ? '<button class="nb1" onclick="go(\'notices\')"><span class="ib">' + ic('megaphone') + '</span><b>' + esc(n.제목) + '</b><small>' + esc(shortD(n.날짜)) + '</small></button>' : '';
   return '<div class="brand">' + wordmark(false) + '<button class="yearchip" onclick="yearMenu()">' + esc(b.year) + ' <i>▼</i></button></div>' + past +
     '<button class="cta2" onclick="openAttend()"><span><small>' + esc(S.user) + ' 선생님 · ' + shortD(sun) + ' 주일</small><b>' + (hc ? hc + '반 출석 체크' : '출석 체크') + '</b></span><span class="arr">' + ic('arrow') + '</span></button>' +
-    banner + installBanner() +
+    banner + myAttLine() + installBanner() +
     '<div class="qgrid">' +
+    T('check', '교사출석', 'tatt', 't-blue') +
     T('sprout', '새신자', 'newcomers', 't-lime') +
     T('chat', '면담', 'notes', 't-peach') +
     T('chart', '통계', 'stats', 't-sky') +
@@ -1121,7 +1138,7 @@ var RF = {};
 function saveRowForm() {
   var o = {}; if (RF.id) o.ID = RF.id; if (RF.key) o.월 = RF.key;
   RF.fields.forEach(function (f) { o[f.k] = $('rf_' + f.k).value.trim(); });
-  var PFX = { '조직': 'O', '기도봉헌': 'P', '찬양팀': 'W', '찬양콘티': 'C', '임역원': 'E', '임역원회의': 'R', '회계': 'F', '예산': 'B' };
+  var PFX = { '조직': 'O', '기도봉헌': 'P', '찬양팀': 'W', '찬양콘티': 'C', '임역원': 'E', '임역원회의': 'R', '회계': 'F', '예산': 'B', '교사모임': 'TM' };
   if (!o.ID && RF.tab !== '찬양인도') o.ID = newId(PFX[RF.tab] || 'X');
   var d = S.params._data, list = Array.isArray(d) ? d : (d[RF.tab] = d[RF.tab] || []);
   upsertLocal(list, o, RF.tab === '찬양인도' ? '월' : 'ID');
@@ -1797,7 +1814,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261120071238';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261120072642';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -2215,6 +2232,121 @@ function resetSessions() {
     if (d && d.token) { S._token = d.token; saveLogin(S.user, !!store('hs_login')); }
     S.params._data = null; render(); toast('모든 기기의 로그인을 풀었어요');
   });
+}
+
+/* ========================= 교사 출석 (주일예배 기본 + 기도회 · 행사) =========================
+   교사모임 탭: 모임 목록 (매주 요일 / 한 번 날짜) · 교사출석 탭: 출석한 사람만 한 줄씩
+   선생님은 자기 출석만, 구성 관리 선생님은 모든 선생님 출석을 체크 */
+var TA_DEF = { '교사모임': [{ ID: 'TM1', 이름: '주일예배', 반복: '매주', 요일: '일', 날짜: '', 순서: '1' }], '교사출석': [] };
+function tData() { var d = S.view === 'tatt' && S.params._data ? S.params._data : CACHE.tatt; return d || null; }
+function meetsOn(d, date) {
+  var wd = WD[parseD(date).getDay()];
+  return (d['교사모임'] || []).filter(function (m) { return m.반복 === '한 번' ? m.날짜 === date : m.요일 === wd; }).sort(byOrder);
+}
+/** 오늘 모임이 있으면 오늘, 없으면 가장 가까운 지난 모임 날 */
+function tDefaultDate(d) {
+  var t = todayStr();
+  for (var i = 0; i < 21; i++) { var x = addDays(t, -i); if (meetsOn(d, x).length) return x; }
+  return lastSunday();
+}
+function tStep(d, from, dir) {
+  for (var i = 1; i <= 120; i++) { var x = addDays(from, dir * i); if (meetsOn(d, x).length) return x; }
+  return from;
+}
+function tIsIn(d, date, mid, name) { return (d['교사출석'] || []).some(function (r) { return r.날짜 === date && r.모임ID === mid && r.이름 === name; }); }
+function tToggle(date, mid, name) {
+  var d = tData(); if (!d) return;
+  if (name !== S.user && !isAdmin()) { toast('다른 선생님 출석은 바꿀 수 없어요'); return; }
+  if (isPastYear() && !isAdmin()) { toast('지난 해 자료는 보기만 할 수 있어요'); return; }
+  var m = (d['교사모임'] || []).filter(function (x) { return x.ID === mid; })[0] || {};
+  var on = !tIsIn(d, date, mid, name);
+  if (on) d['교사출석'].push({ 날짜: date, 모임ID: mid, 모임: m.이름 || '', 이름: name, 상태: '출석', 기록자: S.user });
+  else d['교사출석'] = d['교사출석'].filter(function (r) { return !(r.날짜 === date && r.모임ID === mid && r.이름 === name); });
+  enqueue('saveTeacherAtt', { date: date, meetId: mid, meet: m.이름 || '', name: name, on: on });
+  render();
+  if (name === S.user) toast(on ? (m.이름 || '모임') + ' 출석했어요' : '출석을 취소했어요');
+}
+/** 홈: 한 줄로 바로 체크 */
+function myAttLine() {
+  var d = CACHE.tatt; if (!d) return '';
+  // 지난 7일 안의 모임마다 가장 최근 한 번 (오늘 모임 포함)
+  var seen = {}, list = [];
+  for (var i = 0; i < 7; i++) {
+    var dt = addDays(todayStr(), -i);
+    meetsOn(d, dt).forEach(function (m) { if (!seen[m.ID]) { seen[m.ID] = 1; list.push([dt, m]); } });
+  }
+  if (!list.length) return '';
+  list.sort(function (a, b) { return a[0] < b[0] ? -1 : 1; });
+  return '<div class="myatt"><span class="lbl"><b>내 출석</b><small>눌러서 체크</small></span>' + list.map(function (x) {
+    var dt = x[0], m = x[1], on = tIsIn(d, dt, m.ID, S.user);
+    return '<button class="ma ' + (on ? 'on' : '') + '" onclick="tToggle(\'' + dt + '\',\'' + m.ID + '\',S.user)">' + (on ? ic('tick') : '') + (dt === todayStr() ? '오늘' : shortD(dt)) + ' ' + esc(m.이름) + '</button>';
+  }).join('') + '</div>';
+}
+VIEWS.tatt = function (p) {
+  if (!S.params._data) { call('getTab', { tabs: ['교사모임', '교사출석'] }).then(function (d) { S.params._data = d; render(); }); return loadingView('교사 출석'); }
+  var d = S.params._data, t = p.t || '출석 체크';
+  var tabs = ['출석 체크', '통계'].concat(isAdmin() ? ['모임 관리'] : []);
+  var chips = tabs.map(function (x) { return '<button class="chip ' + (x === t ? 'on' : '') + '" onclick="S.params.t=\'' + x + '\';render()">' + x + '</button>'; }).join('');
+  var body = t === '통계' ? tStats(d, p) : t === '모임 관리' ? tManage(d) : tCheck(d, p);
+  return topbar('교사 출석') + '<div class="chips">' + chips + '</div>' + body;
+};
+function tCheck(d, p) {
+  var date = p.date || tDefaultDate(d), ms = meetsOn(d, date), names = S.boot.teachers.map(function (x) { return x.이름; });
+  var bar = '<div class="datebar"><button onclick="S.params.date=tStep(S.params._data,\'' + date + '\',-1);render()" aria-label="이전 모임">' + ic('back') + '</button>' +
+    '<div class="d">' + fmtD(date) + '<small>' + (date === todayStr() ? '오늘' : '화살표로 모임 날 바꾸기') + '</small></div>' +
+    '<button onclick="S.params.date=tStep(S.params._data,\'' + date + '\',1);render()" aria-label="다음 모임">' + ic('next') + '</button></div>';
+  var cards = ms.map(function (m) {
+    var on = tIsIn(d, date, m.ID, S.user);
+    var here = names.filter(function (n) { return tIsIn(d, date, m.ID, n); });
+    var all = isAdmin() ? '<div class="chips wrap" style="padding:.4rem 0 0">' + names.map(function (n) {
+      return '<button class="chip ' + (here.indexOf(n) >= 0 ? 'on' : '') + '" onclick="tToggle(\'' + date + '\',\'' + m.ID + '\',\'' + esc(n) + '\')">' + esc(n) + '</button>';
+    }).join('') + '</div><p class="muted" style="margin:.3rem 0 0">이름을 누르면 그 선생님 출석이 바뀌어요</p>'
+      : (here.length ? '<p class="muted" style="margin:.45rem 0 0">함께한 선생님: ' + here.map(esc).join(', ') + '</p>' : '');
+    return '<div class="card"><div style="display:flex;align-items:center;gap:.5rem"><h3 style="flex:1;margin:0">' + esc(m.이름) + '</h3><span class="badge g">' + here.length + ' / ' + names.length + '명</span></div>' +
+      '<button class="btn ' + (on ? 'ok' : 'light') + ' tbig" style="margin-top:.5rem" onclick="tToggle(\'' + date + '\',\'' + m.ID + '\',S.user)">' + (on ? ic('tick') + ' 출석했어요 (누르면 취소)' : '나 출석 체크하기') + '</button>' + all + '</div>';
+  }).join('');
+  return bar + '<div class="cols">' + (cards || '<div class="empty">이 날은 모임이 없어요</div>') + '</div>' +
+    (isAdmin() ? '<p class="muted" style="text-align:center">기도회 · 행사는 [모임 관리]에서 추가해요</p>' : '');
+}
+function tStats(d, p) {
+  var ms = (d['교사모임'] || []).slice().sort(byOrder), mid = p.mid || (ms[0] && ms[0].ID) || '';
+  var rows = (d['교사출석'] || []).filter(function (r) { return r.모임ID === mid && r.날짜 <= todayStr(); });
+  var held = rows.map(function (r) { return r.날짜; }).filter(function (x, i, a) { return a.indexOf(x) === i; }).sort();
+  var names = S.boot.teachers.map(function (x) { return x.이름; });
+  var per = names.map(function (n) { var c = rows.filter(function (r) { return r.이름 === n; }).length; return [n, c, held.length ? Math.round(c / held.length * 100) : 0]; })
+    .sort(function (a, b) { return b[1] - a[1] || (a[0] < b[0] ? -1 : 1); });
+  if (!isAdmin()) per = per.filter(function (x) { return x[0] === S.user; });   // 일반 선생님은 내 기록만
+  var chips = ms.map(function (m) { return '<button class="chip ' + (m.ID === mid ? 'on' : '') + '" onclick="S.params.mid=\'' + m.ID + '\';render()">' + esc(m.이름) + '</button>'; }).join('');
+  var recent = held.slice(-12).reverse().map(function (dt) {
+    var n = rows.filter(function (r) { return r.날짜 === dt; }).length;
+    return '<div class="trow"><span>' + shortD(dt) + '</span><div class="meter sm"><i style="width:' + (names.length ? n / names.length * 100 : 0) + '%"></i></div><b>' + n + '명</b></div>';
+  }).join('');
+  var avg = held.length ? Math.round(rows.length / held.length * 10) / 10 : 0;
+  return '<div class="chips wrap">' + chips + '</div>' +
+    '<div class="stat-big"><div><b>' + held.length + '</b><span>모인 날</span></div><div><b>' + avg + '</b><span>평균 인원</span></div><div><b>' + (per.filter(function (x) { return x[0] === S.user; })[0] || [0, 0, 0])[2] + '%</b><span>내 출석률</span></div></div>' +
+    '<div class="split"><div><div class="card"><h3>' + (isAdmin() ? '선생님별 출석' : '내 출석') + '</h3>' + (held.length ? '<table class="ftbl"><thead><tr><th>이름</th><th>출석</th><th>출석률</th></tr></thead><tbody>' + per.map(function (x) {
+      return '<tr' + (x[0] === S.user ? ' style="background:var(--p-sky)"' : '') + '><td class="l">' + esc(x[0]) + '</td><td>' + x[1] + ' / ' + held.length + '</td><td><b>' + x[2] + '%</b></td></tr>';
+    }).join('') + '</tbody></table>' : '<p class="muted">아직 기록이 없어요</p>') + '</div></div>' +
+    '<div><div class="card"><h3>최근 모임 인원</h3>' + (recent || '<p class="muted">아직 기록이 없어요</p>') + '</div></div></div>' +
+    '<p class="muted">모인 날 = 한 명이라도 출석 체크한 날</p>';
+}
+function tManage(d) {
+  var ms = (d['교사모임'] || []).slice().sort(byOrder);
+  return '<div class="hint">모임을 추가하면 그 요일 · 날짜에 출석 체크 칸이 생겨요. 주일예배처럼 매주 하는 모임은 [매주], 행사는 [한 번]으로 넣어요.</div>' +
+    ms.map(function (m) {
+      return '<button class="list-item" onclick="meetForm2(\'' + m.ID + '\')"><span class="grow"><b>' + esc(m.이름) + '</b><br><span class="muted">' + (m.반복 === '한 번' ? esc(fmtD(m.날짜)) + ' 하루' : '매주 ' + esc(m.요일) + '요일') + '</span></span><span class="muted">고치기</span></button>';
+    }).join('') +
+    '<button class="btn" style="margin-top:.6rem" onclick="meetForm2(\'\')">+ 모임 추가 (기도회 · 행사)</button>';
+}
+function meetForm2(id) {
+  var L = S.params._data['교사모임'], r = id ? L.filter(function (x) { return x.ID === id; })[0] : { 반복: '한 번', 요일: '수', 날짜: todayStr(), 순서: String(L.length + 1) };
+  rowForm('교사모임', r, [
+    { k: '이름', label: '모임 이름', ph: '예) 교사 기도회, 여름수련회, 교사 리트릿', list: ['교사 기도회', '교사 회의', '교사 교육', '수련회', '교사 리트릿'] },
+    { k: '반복', label: '언제', type: 'select', opts: ['매주', '한 번'] },
+    { k: '요일', label: '매주라면: 요일', type: 'select', opts: WD },
+    { k: '날짜', label: '한 번이라면: 날짜', type: 'date' },
+    { k: '순서', label: '보이는 순서 (숫자)', type: 'number' }
+  ], id ? '모임 고치기' : '모임 추가');
 }
 
 /* ---------- 글씨 크기 ---------- */

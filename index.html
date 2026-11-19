@@ -306,11 +306,21 @@ svg.ic{width:1.25em;height:1.25em;flex:none;display:block}
 .node.officer{align-items:center;text-align:center;background:var(--p-lilac);border-color:#e2daff}
 .node.officer b{font-size:1.15rem}
 .lnk{display:inline-block;padding:.05rem .55rem;border-radius:999px;background:var(--p-rose);color:#d23b62;font-weight:800;font-size:.82rem;text-decoration:none}
+
+#sync{position:fixed;top:10px;right:12px;z-index:45;display:none;align-items:center;gap:.35rem;padding:.3rem .7rem;border-radius:999px;font-size:.78rem;font-weight:800;box-shadow:var(--shadow);pointer-events:none}
+#sync.on{display:flex}
+#sync.busy{background:var(--p-peach);color:#a85a00}
+#sync.wait{background:var(--p-rose);color:#c0284f}
+#sync.ok{background:var(--p-lime);color:var(--ok)}
+#sync i{width:.55rem;height:.55rem;border-radius:50%;background:currentColor;animation:blink 1s infinite}
+#sync svg{width:.95rem;height:.95rem}
+@keyframes blink{50%{opacity:.25}}
 </style>
 </head>
 <body>
 <div id="app"></div>
 <div id="toast"></div>
+<div id="sync"></div>
 <div id="loading">잠시만요…</div>
 <div id="modal"></div>
 
@@ -376,7 +386,7 @@ function call(action, payload, quiet) {
       if (res.role) { S.role = res.role; S.isSuper = !!res.isSuper; }
       resolve(res.data);
     };
-    var fail = function (e) { loading(false); toast('인터넷 연결을 확인해 주세요'); reject(e); };
+    var fail = function (e) { loading(false); if (quiet !== 'silent') toast('인터넷 연결을 확인해 주세요'); reject(e); };
     if (IS_GAS) google.script.run.withSuccessHandler(done).withFailureHandler(fail).api(S.auth, action, payload || {});
     else if (window.APP_API) {
       // GitHub Pages: Apps Script 웹앱에 직접 요청 (text/plain 이라 CORS 사전요청 없음)
@@ -434,7 +444,9 @@ function loadSpec(view, p) {
   return null;
 }
 function refreshQuiet(view, spec) {
+  if (OUT.q.length) return;   // 아직 보내지 않은 저장이 있으면 지금 화면(내가 바꾼 것)을 그대로 둠
   call(spec.action, spec.payload, true).then(function (d) {
+    if (OUT.q.length) return;
     var changed = JSON.stringify(d) !== JSON.stringify(CACHE[spec.key]);
     CACHE[spec.key] = d;
     if (changed && S.view === view && !$('modal').innerHTML) { S.params._data = d; render(); }
@@ -449,6 +461,62 @@ function warmUp() {
     if (!ATT[sun]) ATT[sun] = d.attendance;
   }).catch(function () { S._warm = false; });
 }
+
+/* ========================= 저장 대기열 (한 번에 모아서 보내기) =========================
+   누르면 화면은 바로 바뀌고, 저장은 이 기기에 쌓였다가 약 1초 뒤 한 번에 구글시트로 갑니다.
+   인터넷이 끊기면 보관했다가 다시 연결되면 보냅니다. (앱을 닫아도 다음에 열 때 보냄) */
+var OUT = { q: [], busy: false, timer: null, err: 0, okUntil: 0 };
+function outKey() { return S.auth ? 'hs_out_' + S.auth.name + '_' + S.auth.year : ''; }
+function saveOut() { if (outKey()) store(outKey(), OUT.q); }
+function loadOut() { OUT.q = (outKey() && store(outKey())) || []; OUT.err = 0; syncBadge(); if (OUT.q.length) scheduleFlush(500); }
+function newId(prefix) { return prefix + 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5); }
+function enqueue(action, p) {
+  OUT.q.push({ opId: newId('op'), action: action, p: p });
+  saveOut(); syncBadge(); scheduleFlush(900);
+}
+function scheduleFlush(ms) { clearTimeout(OUT.timer); OUT.timer = setTimeout(flushOut, ms); }
+function flushOut() {
+  if (OUT.busy && Date.now() - OUT.busy < 30000) return;   // 보내는 중 (30초 넘게 답이 없으면 다시 시도)
+  if (!OUT.q.length || !S.auth) return;
+  OUT.busy = Date.now(); syncBadge();
+  var batch = OUT.q.slice(0, 40);
+  call('batch', { ops: batch }, 'silent').then(function (res) {
+    OUT.busy = false; OUT.err = 0;
+    var done = {}, bad = [];
+    batch.forEach(function (o, i) { done[o.opId] = 1; if (res[i] && !res[i].ok) bad.push(res[i].error); });
+    OUT.q = OUT.q.filter(function (o) { return !done[o.opId]; });
+    saveOut(); delete CACHE.stats;
+    if (bad.length) toast('저장하지 못한 것이 있어요: ' + bad[0]);
+    OUT.okUntil = Date.now() + 1800; syncBadge();
+    if (OUT.q.length) scheduleFlush(300); else setTimeout(syncBadge, 1900);
+  }).catch(function (e) {
+    OUT.busy = false;
+    if (e && e.ok === false && !e.auth) { OUT.q = OUT.q.filter(function (o) { return batch.indexOf(o) < 0; }); saveOut(); toast('저장하지 못했어요: ' + (e.error || '')); syncBadge(); return; }
+    OUT.err++; syncBadge(); scheduleFlush(Math.min(30000, 2500 * OUT.err));
+  });
+}
+function syncBadge() {
+  var el = $('sync'); if (!el) return;
+  var n = OUT.q.length;
+  if (!S.user) { el.className = ''; return; }
+  if (n) { el.className = 'on ' + (OUT.err ? 'wait' : 'busy'); el.innerHTML = '<i></i>' + (OUT.err ? '연결 기다리는 중 ' : '저장 중 ') + n; }
+  else if (Date.now() < OUT.okUntil) { el.className = 'on ok'; el.innerHTML = ic('tick') + '저장됨'; }
+  else el.className = '';
+}
+/** 서버 결과가 꼭 필요한 일(학생 명단 올리기 등) 전에: 쌓인 저장부터 보냄 */
+function needSynced() {
+  if (!OUT.q.length) return true;
+  flushOut(); toast('먼저 저장하는 중이에요. 잠시 후 다시 눌러 주세요'); return false;
+}
+function upsertLocal(list, obj, key) {
+  key = key || 'ID';
+  var f = list.filter(function (x) { return x[key] === obj[key]; })[0];
+  if (f) { for (var k in obj) if (obj[k] !== undefined) f[k] = obj[k]; return f; }
+  list.push(obj); return obj;
+}
+function removeLocal(list, id) { var i = list.findIndex(function (x) { return x.ID === id; }); if (i >= 0) list.splice(i, 1); }
+window.addEventListener('online', function () { OUT.err = 0; scheduleFlush(200); });
+document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') scheduleFlush(300); });
 
 /* ========================= 화면 전환 ========================= */
 function go(view, params, noPush) {
@@ -564,9 +632,10 @@ function afterBoot(b) {
   S.boot = b; S.user = b.me.이름; S.auth.year = b.year;
   CACHE = {}; ATT = {}; S._warm = false; S.att = null;
   S.view = 'home'; S.params = {}; S.history = [];
-  render();
+  render(); loadOut();
 }
 function logout(silent) {
+  if (!silent && OUT.q.length) { flushOut(); toast('저장 중인 내용이 있어요. 잠시 후 다시 눌러 주세요'); return; }
   if (!silent && !confirm('로그아웃 할까요?')) return;
   unstore('hs_login'); S.user = null; S.auth = null; S.boot = null; CACHE = {}; ATT = {}; S._warm = false;
   LOGIN.step = 'name'; LOGIN.code = ''; LOGIN.busy = false; LOGIN.year = LOGIN.defaultYear || LOGIN.year;
@@ -582,6 +651,7 @@ function yearMenu() {
 function switchYear(y) {
   closeModal();
   if (y === S.boot.year) return;
+  if (!needSynced()) return;
   if (S.dirty && !confirm('저장하지 않은 출석이 있어요. 연도를 바꿀까요?')) return;
   S.dirty = false;
   var old = S.auth.year; S.auth.year = y;
@@ -610,6 +680,7 @@ VIEWS.admin = function () {
     item('check', 't-sky', '학생 반 배정', '학생마다 반·상태(재적/장결/졸업) 한꺼번에', 'admStudents') +
     item('calendar', 't-lilac', '연도 관리', '연도별 시트, 새 연도 시작하기', 'admYears') +
     item('gear', 't-peach', '앱 설정', '부서명, 교사 단톡방 링크', 'admSettings') +
+    item('check', 't-rose', '시트 반영 기록', '언제·누가·몇 건 구글시트에 저장했는지', 'admSync') +
     '</div>';
 };
 
@@ -679,11 +750,13 @@ function pickTeacherFor(cls) {
 }
 function assignT(name, cls) {
   closeModal();
-  call('assignTeacher', { name: name, 반: cls }).then(function (classes) {
-    S.boot.classes = classes;
-    S.boot.teachers.forEach(function (t) { if (t.이름 === name) t.담당반 = cls; });
-    render(); toast(cls ? name + ' → ' + cls + '반' : name + ' 배정 해제');
+  S.boot.teachers.forEach(function (t) { if (t.이름 === name) t.담당반 = cls; });
+  S.boot.classes.forEach(function (c) {
+    var nm = S.boot.teachers.filter(function (t) { return t.담당반 === c.반; }).map(function (t) { return t.이름; }).join(', ');
+    if (nm || /^\d-\d+$/.test(c.반)) c.담임교사 = nm;
   });
+  enqueue('assignTeacher', { name: name, 반: cls });
+  render(); toast(cls ? name + ' → ' + cls + '반' : name + ' 배정 해제');
 }
 function addClass() {
   modal('<h2>반 추가</h2><label>반 이름</label><input id="c_n" placeholder="예) 1-3"><label>구분</label><select id="c_g"><option value="">-</option><option>여</option><option>남</option><option>혼성</option></select>' +
@@ -740,10 +813,26 @@ function chStu(id, k, v) {
 function saveBulk() {
   var ch = S.params.ch, items = Object.keys(ch).map(function (id) { var o = { ID: id }; for (var k in ch[id]) o[k] = ch[id][k]; return o; });
   if (!items.length) { toast('바뀐 내용이 없어요'); return; }
-  call('bulkStudents', { items: items }).then(function (r) {
-    S.boot.students = r.students; S.params.ch = {}; CACHE = {}; render(); toast(r.updated + '명을 저장했어요');
-  });
+  items.forEach(function (it) { var st = stuById(it.ID); if (st) { if (it.반 !== undefined) st.반 = it.반; if (it.상태 !== undefined) st.상태 = it.상태; } });
+  enqueue('bulkStudents', { items: items });
+  S.params.ch = {}; delete CACHE.stats; render(); toast(items.length + '명을 바꿨어요');
 }
+
+/* ---- 시트 반영 기록 ---- */
+var KIND = { saveAttendance: '출석', saveNote: '면담', saveNewcomer: '새신자', saveStudent: '학생', saveNotice: '공지', deleteNotice: '공지 삭제', saveMinistry: '사역', deleteMinistry: '사역 삭제',
+  saveTabRow: '기록', deleteTabRow: '기록 삭제', assignTeacher: '담임 배정', bulkStudents: '반 배정' };
+VIEWS.admSync = function () {
+  if (!S.params._data) { call('getSyncLog', {}, true).then(function (d) { S.params._data = d; render(); }); return topbar('시트 반영 기록') + '<div class="empty">불러오는 중…</div>'; }
+  var rows = S.params._data.map(function (l) {
+    var k = Object.keys(l.kinds || {}).map(function (x) { return (KIND[x] || x) + ' ' + l.kinds[x]; }).join(' · ');
+    return '<div class="list-item"><span class="grow"><b>' + esc(l.t) + '</b> <span class="muted">' + esc(l.name) + '</span><br><span class="muted">' + esc(k) + '</span></span><span class="badge g">' + l.n + '건</span></div>';
+  }).join('') || '<div class="empty">아직 기록이 없어요</div>';
+  return topbar('시트 반영 기록') +
+    '<div class="hint" style="margin-top:.7rem">앱에서 바꾼 내용은 이 기기에 잠깐 모였다가 약 1초 뒤 한 번에 구글시트로 저장됩니다. 인터넷이 끊기면 기다렸다가 다시 보냅니다.</div>' +
+    '<div class="card"><h3>이 기기에서 보낼 저장</h3><p style="margin:.2rem 0 .6rem"><b>' + OUT.q.length + '건</b> ' + (OUT.q.length ? (OUT.err ? '(연결 기다리는 중)' : '(보내는 중)') : '— 모두 반영됨') + '</p>' +
+    '<button class="btn light small" onclick="flushOut();setTimeout(function(){S.params._data=null;render()},2500)">지금 바로 반영</button></div>' +
+    '<h3 class="org-h">' + esc(S.boot.year) + '년 반영 기록 (최근 40번)</h3>' + rows;
+};
 
 /* ---- 앱 설정 ---- */
 VIEWS.admSettings = function () {
@@ -849,11 +938,18 @@ var RF = {};
 function saveRowForm() {
   var o = {}; if (RF.id) o.ID = RF.id; if (RF.key) o.월 = RF.key;
   RF.fields.forEach(function (f) { o[f.k] = $('rf_' + f.k).value.trim(); });
-  call('saveTabRow', { tab: RF.tab, row: o }).then(function () { closeModal(); S.params._data = null; delete CACHE[S.view]; render(); toast('저장했어요'); if (RF.after) RF.after(); });
+  var PFX = { '조직': 'O', '기도봉헌': 'P', '찬양팀': 'W', '찬양콘티': 'C', '임역원': 'E', '임역원회의': 'R' };
+  if (!o.ID && RF.tab !== '찬양인도') o.ID = newId(PFX[RF.tab] || 'X');
+  var d = S.params._data, list = Array.isArray(d) ? d : (d[RF.tab] = d[RF.tab] || []);
+  upsertLocal(list, o, RF.tab === '찬양인도' ? '월' : 'ID');
+  enqueue('saveTabRow', { tab: RF.tab, row: o });
+  closeModal(); render(); toast('저장했어요'); if (RF.after) RF.after();
 }
 function delRowForm() {
   if (!confirm('이 항목을 삭제할까요?')) return;
-  call('deleteTabRow', { tab: RF.tab, id: RF.id }).then(function () { closeModal(); S.params._data = null; delete CACHE[S.view]; render(); toast('삭제했어요'); });
+  var d = S.params._data; removeLocal(Array.isArray(d) ? d : d[RF.tab], RF.id);
+  enqueue('deleteTabRow', { tab: RF.tab, id: RF.id });
+  closeModal(); render(); toast('삭제했어요');
 }
 function loadingView(title) { return topbar(title) + '<div class="empty">불러오는 중…</div>'; }
 
@@ -1116,7 +1212,9 @@ function loadAttendance() {
 }
 /** 다른 선생님이 그사이 저장했을 수 있으니 조용히 확인 (내가 고치는 중이면 건드리지 않음) */
 function refreshAtt(date) {
+  if (OUT.q.length) return;
   call('getAttendance', { date: date }, true).then(function (rows) {
+    if (OUT.q.length) return;
     var changed = JSON.stringify(rows) !== JSON.stringify(ATT[date]);
     ATT[date] = rows;
     if (changed && S.view === 'attend' && S.att && S.att.date === date && !S.dirty) { applyAtt(rows); render(); }
@@ -1156,12 +1254,11 @@ function saveAtt() {
   var recs = students().filter(function (s) { return a.touched[s.반] && (s.상태 === '재적' || a.marks[s.ID]); }).map(function (s) {
     return { 학생ID: s.ID, 이름: s.이름, 반: s.반, 상태: a.marks[s.ID] === '출석' ? '출석' : '결석', 사유: a.reasons[s.ID] || '' };
   });
-  call('saveAttendance', { date: a.date, teacher: S.user, records: recs }).then(function () {
-    recs.forEach(function (r) { a.marks[r.학생ID] = r.상태; });
-    ATT[a.date] = Object.keys(a.marks).map(function (id) { var st = stuById(id) || {}; return { 날짜: a.date, 학생ID: id, 이름: st.이름, 반: st.반, 상태: a.marks[id], 사유: a.reasons[id] || '' }; });
-    delete CACHE.stats;
-    a.touched = {}; S.dirty = false; render(); toast('저장했어요. 수고하셨습니다!');
-  });
+  enqueue('saveAttendance', { date: a.date, teacher: S.user, records: recs });
+  recs.forEach(function (r) { a.marks[r.학생ID] = r.상태; });
+  ATT[a.date] = Object.keys(a.marks).map(function (id) { var st = stuById(id) || {}; return { 날짜: a.date, 학생ID: id, 이름: st.이름, 반: st.반, 상태: a.marks[id], 사유: a.reasons[id] || '' }; });
+  delete CACHE.stats;
+  a.touched = {}; S.dirty = false; render(); toast('저장했어요. 수고하셨습니다!');
 }
 
 /* ---------- 학생 명단 / 상세 ---------- */
@@ -1234,12 +1331,11 @@ function saveStudent(id) {
   var o = { ID: id || undefined };
   ['이름', '반', '상태', '연락처', '학교', '생년월일', '보호자', '보호자연락처', '특이사항'].forEach(function (k) { o[k] = $('f_' + k).value.trim(); });
   if (!o.이름) { toast('이름을 써 주세요'); return; }
-  call('saveStudent', o).then(function (saved) {
-    var list = S.boot.students, i = list.findIndex(function (x) { return x.ID === saved.ID; });
-    if (i >= 0) list[i] = saved; else list.push(saved);
-    if (S.params._data) S.params._data.student = saved;
-    closeModal(); render(); toast('저장했어요');
-  });
+  if (!o.ID) { o.ID = newId('S' + (S.boot.year !== (S.boot.years || [])[0] ? S.boot.year.slice(2) + '-' : '')); o.등록일 = todayStr(); }
+  var saved = upsertLocal(S.boot.students, o);
+  if (S.params._data && S.params._data.student) S.params._data.student = saved;
+  enqueue('saveStudent', o);
+  closeModal(); render(); toast('저장했어요');
 }
 
 /* ---------- 새신자 ---------- */
@@ -1268,7 +1364,7 @@ VIEWS.newcomers = function (p) {
 function ncById(id) { return S.params._data.filter(function (n) { return n.ID === id; })[0]; }
 function toggleWeek(id, w) {
   var n = ncById(id), o = { ID: id }; o[w] = n[w] ? '' : 'O';
-  call('saveNewcomer', o, true).then(function (s) { Object.assign(n, s); render(); });
+  enqueue('saveNewcomer', o);
   n[w] = o[w]; render();
 }
 function newcomerForm(id) {
@@ -1285,9 +1381,14 @@ function saveNewcomer(id) {
   var o = { ID: id || undefined };
   ['이름', '등록일', '배정반', '학교/학년', '연락처', '전도자', '생년월일', '메모'].forEach(function (k) { o[k] = $('n_' + k).value.trim(); });
   if (!o.이름) { toast('이름을 써 주세요'); return; }
-  call('saveNewcomer', o).then(function () { S.params._data = null; closeModal(); render(); toast('저장했어요'); });
+  if (!o.ID) { o.ID = newId('N'); o.상태 = '정착중'; }
+  if (!o.등록일) o.등록일 = todayStr();
+  if (S.params._data) upsertLocal(S.params._data, o);
+  enqueue('saveNewcomer', o);
+  closeModal(); render(); toast('저장했어요');
 }
 function promote(id) {
+  if (!needSynced()) return;
   var n = ncById(id);
   var cls = n.배정반 && /^\d-\d$/.test(n.배정반) ? n.배정반 : prompt('어느 반으로 올릴까요? (예: 1-2)', myClass());
   if (!cls) return;
@@ -1339,8 +1440,13 @@ function saveNote() {
   var s = NF.sid ? stuById(NF.sid) : null, c = $('nt_c').value.trim();
   if (!s) { toast('학생을 골라 주세요'); return; }
   if (!c) { toast('내용을 써 주세요'); return; }
-  call('saveNote', { 날짜: $('nt_d').value, 학생ID: s.ID, 이름: s.이름, 반: s.반, 유형: NF.type, 교사: S.user, 장소: $('nt_p').value.trim(), 내용: c })
-    .then(function () { closeModal(); S.params._data = null; render(); toast('기록했어요'); });
+  var note = { 날짜: $('nt_d').value, 학생ID: s.ID, 이름: s.이름, 반: s.반, 유형: NF.type, 교사: S.user, 장소: $('nt_p').value.trim(), 내용: c };
+  enqueue('saveNote', note);
+  if (CACHE.notes) CACHE.notes.unshift(note);
+  if (CACHE['student:' + s.ID]) CACHE['student:' + s.ID].notes.unshift(note);
+  if (S.view === 'notes' && S.params._data && S.params._data !== CACHE.notes) S.params._data.unshift(note);
+  if (S.view === 'student' && S.params._data && S.params._data !== CACHE['student:' + s.ID]) S.params._data.notes.unshift(note);
+  closeModal(); render(); toast('기록했어요');
 }
 
 /* ---------- 통계 ---------- */
@@ -1442,9 +1548,13 @@ function noticeForm(id) {
 function saveNotice(id) {
   var o = { ID: id || undefined, 제목: $('g_t').value.trim(), 날짜: $('g_d').value, 내용: $('g_c').value.trim(), 중요: $('g_i').checked ? 'Y' : '', 작성자: S.user };
   if (!o.제목) { toast('제목을 써 주세요'); return; }
-  call('saveNotice', o).then(function () { closeModal(); S.params._data = null; render(); toast('공지를 올렸어요'); });
+  if (!o.ID) o.ID = newId('G');
+  if (S.params._data) upsertLocal(S.params._data, o);
+  if (!S.boot.latestNotice || o.날짜 >= S.boot.latestNotice.날짜) S.boot.latestNotice = o;
+  enqueue('saveNotice', o);
+  closeModal(); render(); toast('공지를 올렸어요');
 }
-function delNotice(id) { if (confirm('이 공지를 삭제할까요?')) call('deleteNotice', { id: id }).then(function () { S.params._data = null; render(); }); }
+function delNotice(id) { if (!confirm('이 공지를 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteNotice', { id: id }); render(); }
 
 /* ---------- 사역 준비 ---------- */
 var MIN_ST = ['준비전', '준비중', '완료'];
@@ -1471,9 +1581,10 @@ VIEWS.ministry = function () {
 function minById(id) { return S.params._data.filter(function (m) { return m.ID === id; })[0]; }
 function cycleMin(id) {
   var m = minById(id), nx = MIN_ST[(MIN_ST.indexOf(m.진행상태 || '준비전') + 1) % MIN_ST.length];
-  m.진행상태 = nx; render(); call('saveMinistry', { ID: id, 진행상태: nx }, true);
+  m.진행상태 = nx; render(); enqueue('saveMinistry', { ID: id, 진행상태: nx });
 }
 function makeSheet(id) {
+  if (!needSynced()) return;
   if (!confirm('사역준비 구글시트에 이 사역의 탭을 만들까요?' + (S.boot.ministryBookUrl ? '' : '\n(처음 한 번은 사역준비 구글시트가 새로 만들어지고, 링크가 있는 사람은 편집할 수 있게 공유됩니다)'))) return;
   call('createMinistrySheet', { id: id }).then(function (url) {
     minById(id).구글시트링크 = url;
@@ -1495,9 +1606,12 @@ function saveMin(id) {
   var o = { ID: id || undefined, 사역명: $('m_n').value.trim(), 시기: $('m_s').value, 담당: $('m_w').value.trim(), 구글시트링크: $('m_l').value.trim(), 메모: $('m_m').value.trim() };
   if (!id) o.진행상태 = '준비전';
   if (!o.사역명) { toast('사역 이름을 써 주세요'); return; }
-  call('saveMinistry', o).then(function () { closeModal(); S.params._data = null; render(); toast('저장했어요'); });
+  if (!o.ID) o.ID = newId('M');
+  if (S.params._data) upsertLocal(S.params._data, o);
+  enqueue('saveMinistry', o);
+  closeModal(); render(); toast('저장했어요');
 }
-function delMin(id) { if (confirm('이 사역을 삭제할까요?')) call('deleteMinistry', { id: id }).then(function () { closeModal(); S.params._data = null; render(); }); }
+function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ---------- 글씨 크기 ---------- */
 var SIZES = [14, 15, 16, 17, 18, 20, 22, 24, 26], DEF_FS = 17;
@@ -1518,7 +1632,7 @@ function start() {
     S.auth = { name: saved.name, code: saved.code };   // 연도는 서버의 기본 연도
     call('boot').then(afterBoot).catch(function () { unstore('hs_login'); S.auth = null; render(); });
   } else { render(); }
-  window.addEventListener('beforeunload', function (e) { if (S.dirty) { e.preventDefault(); e.returnValue = ''; } });
+  window.addEventListener('beforeunload', function (e) { if (S.dirty || OUT.q.length) { e.preventDefault(); e.returnValue = ''; } });
 }
 if (IS_GAS) start();
 else {

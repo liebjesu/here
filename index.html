@@ -315,6 +315,95 @@ svg.ic{width:1.25em;height:1.25em;flex:none;display:block}
 #sync i{width:.55rem;height:.55rem;border-radius:50%;background:currentColor;animation:blink 1s infinite}
 #sync svg{width:.95rem;height:.95rem}
 @keyframes blink{50%{opacity:.25}}
+
+/* ===== 컴팩트: 여백 최소화 (모든 화면). 크기는 rem → 글씨를 키우면 자연스럽게 아래로 밀림 ===== */
+#app{padding:0 12px 96px}
+.top{margin:0 -12px;padding:.3rem 12px;gap:.45rem}
+.top h1{font-size:1.08rem}
+.back{width:2.1rem;height:2.1rem}
+.tools{padding:6px 0 0;gap:5px}
+.tools .seg{padding:2px}
+.tools .seg button{height:2.05rem;font-size:.86rem}
+.brand{padding:.45rem 0 0;gap:.5rem}
+.wm b{font-size:1.45rem}
+.wm .bar{margin-top:.25rem}
+.wm small{margin-top:.25rem;font-size:.66rem}
+.yearchip{padding:.25rem .65rem;font-size:.84rem}
+.past{margin-top:.35rem;padding:.35rem .6rem;font-size:.8rem}
+.hello{padding:.35rem 0 0}
+.card{padding:.65rem .7rem;margin:.4rem 0;border-radius:16px}
+.card h3{font-size:.98rem;margin-bottom:.15rem}
+.list-item{padding:.42rem .65rem;margin:.3rem 0;border-radius:13px;gap:.5rem}
+.list-item b{font-size:.98rem}
+.av{width:2rem;height:2rem;font-size:.9rem}
+.btn{min-height:2.45rem;padding:.35rem .8rem;border-radius:13px;font-size:.95rem}
+.btn.small{min-height:2rem;padding:.2rem .65rem;font-size:.82rem}
+.chips{padding:.35rem 0;gap:.3rem}
+.chip{padding:.22rem .7rem;font-size:.85rem}
+.datebar{margin-top:.35rem;padding:.25rem}
+.datebar button{width:2.15rem;height:2.15rem}
+.datebar .d{font-size:.98rem}
+.stu{margin:4px 0}
+.stu .tg{padding:.3rem .5rem;border-radius:13px;gap:.5rem}
+.stu .tg .ck{width:1.6rem;height:1.6rem}
+.stu .tg b{font-size:1rem}
+.stu .memo{border-radius:13px;padding:0 .5rem}
+.savebar{padding:.4rem 12px calc(.4rem + env(safe-area-inset-bottom))}
+.hint{padding:.4rem .6rem;margin-top:.35rem;font-size:.8rem}
+label{margin:.55rem 0 .2rem;font-size:.82rem}
+input,textarea,select{padding:.45rem .65rem}
+.stat-big{gap:6px;margin-top:.4rem}
+.stat-big div{padding:.5rem .3rem;border-radius:14px}
+.stat-big b{font-size:1.35rem}
+.bars{height:6.5rem;margin-top:.35rem}
+.org-h{margin:.75rem 0 .25rem;font-size:.95rem}
+.org-lead{margin-top:.5rem;padding:.6rem;border-radius:18px}
+.org-grid{gap:6px;grid-template-columns:repeat(auto-fill,minmax(8rem,1fr))}
+.node{padding:.42rem .6rem;border-radius:13px;min-width:6.5rem}
+.weeks{gap:.3rem;margin-top:.3rem}
+.wk{height:2.1rem}
+.empty{padding:1rem 0}
+.foot{margin-top:.6rem;gap:.3rem}
+.sig{margin:1rem 0 .2rem}
+.sig img{width:min(11rem,55%)}
+.sheet{padding:.5rem 12px calc(.8rem + env(safe-area-inset-bottom))}
+.sheet::before{margin-bottom:.45rem}
+.sheet h2{font-size:1.08rem;margin-bottom:.3rem}
+.tblwrap{margin-top:.3rem}
+.cols{margin-top:.2rem}
+.yearsel{margin-top:.5rem;gap:6px}
+.yearsel button{padding:.4rem .3rem}
+.login-hero{padding:.6rem 0 0}
+.wm.lg b{font-size:2.9rem}
+.pad{gap:7px;margin-top:.5rem}
+.pad button{height:3rem;border-radius:15px}
+.pin-dots{margin:.6rem 0 .3rem}
+.who{margin-top:.4rem}
+.notice-banner{padding:.45rem .65rem;margin-top:.4rem}
+
+/* 첫 화면: 출석 버튼 · 공지 한 줄 · 같은 크기 타일 */
+.cta2{display:flex;align-items:center;gap:.6rem;width:100%;margin-top:.45rem;padding:.6rem .7rem .6rem .95rem;border-radius:18px;text-align:left;color:#fff;
+  background:linear-gradient(120deg,#151c33 0%,#1d3a78 60%,#1475bc 100%);box-shadow:0 6px 16px rgba(21,28,51,.2)}
+.cta2>span:first-child{flex:1;min-width:0}
+.cta2 small{display:block;font-size:.76rem;font-weight:700;color:#c9d6f2}
+.cta2 b{display:block;font-size:1.12rem;font-weight:900;letter-spacing:-.02em}
+.cta2 .arr{width:2rem;height:2rem;border-radius:50%;background:#fff;color:var(--navy);display:flex;align-items:center;justify-content:center;flex:none}
+.cta2:active{transform:scale(.985)}
+.nb1{display:flex;align-items:center;gap:.5rem;width:100%;margin-top:.4rem;padding:.38rem .6rem;border-radius:13px;background:#fff;border:1px solid var(--line);text-align:left}
+.nb1 .ib{width:1.6rem;height:1.6rem;border-radius:8px;background:var(--p-peach);color:#e07a00;display:flex;align-items:center;justify-content:center;flex:none}
+.nb1 .ib svg{width:1rem;height:1rem}
+.nb1 b{flex:1;min-width:0;font-size:.88rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nb1 small{flex:none;font-size:.74rem;color:var(--sub);font-weight:700}
+.qgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(4.4rem,1fr));gap:6px;margin-top:.45rem}
+.qt{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.22rem;padding:.5rem .15rem .45rem;border-radius:15px;background:var(--c,#fff);min-width:0}
+.qt .ib{width:1.85rem;height:1.85rem;border-radius:10px;background:#fff;color:var(--ic,var(--ci-blue));display:flex;align-items:center;justify-content:center}
+.qt .ib svg{width:1.15rem;height:1.15rem}
+.qt b{font-size:.8rem;font-weight:800;letter-spacing:-.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.qt:active{transform:scale(.96)}
+.wide .qgrid{grid-template-columns:repeat(auto-fill,minmax(6.5rem,1fr));gap:8px}
+.wide .qt{padding:.8rem .3rem}
+.wide #app{padding:0 22px 96px}
+.wide .top{margin:0 -22px;padding:.35rem 22px}
 </style>
 </head>
 <body>
@@ -876,34 +965,32 @@ function createYear(y) {
 
 VIEWS.home = function () {
   var b = S.boot, n = b.latestNotice;
-  var banner = n ? '<button class="notice-banner" onclick="go(\'notices\')"><span class="ib">' + ic('megaphone') + '</span><span class="nb"><small>최근 공지 · ' + esc(fmtD(n.날짜)) + '</small><b>' + esc(n.제목) + '</b></span></button>' : '';
-  var tile = function (icon, label, en, onclick, cls) {
-    return '<button class="tile ' + cls + '" onclick="' + onclick + '"><span class="ib">' + ic(icon) + '</span><span><b>' + label + '</b><small>' + en + '</small></span></button>';
-  };
-  var mini = function (icon, label, view, cls) { return '<button class="mini ' + cls + '" onclick="go(\'' + view + '\')"><span class="ib">' + ic(icon) + '</span>' + label + '</button>'; };
   var hc = homeClass(), sun = lastSunday();
-  var past = isPastYear() ? '<div class="past"><span>' + esc(b.year) + '년 자료를 보고 있어요 · 참고용</span><button class="btn small" onclick="switchYear(\'' + b.latestYear + '\')">' + b.latestYear + '년으로</button></div>' : '';
+  // 모든 기능을 같은 크기의 작은 타일로: 화면 폭과 글씨 크기에 맞춰 줄 수가 자동으로 바뀜
+  var T = function (icon, label, view, cls) { return '<button class="qt ' + cls + '" onclick="go(\'' + view + '\')"><span class="ib">' + ic(icon) + '</span><b>' + label + '</b></button>'; };
+  var past = isPastYear() ? '<div class="past"><span>' + esc(b.year) + '년 자료 · 참고용</span><button class="btn small" onclick="switchYear(\'' + b.latestYear + '\')">' + b.latestYear + '년으로</button></div>' : '';
+  var banner = n ? '<button class="nb1" onclick="go(\'notices\')"><span class="ib">' + ic('megaphone') + '</span><b>' + esc(n.제목) + '</b><small>' + esc(shortD(n.날짜)) + '</small></button>' : '';
   return '<div class="brand">' + wordmark(false) + '<button class="yearchip" onclick="yearMenu()">' + esc(b.year) + ' <i>▼</i></button></div>' + past +
-    '<div class="hero"><div class="eyebrow">This Sunday · ' + shortD(sun) + '</div>' +
-    '<div class="hi">' + esc(S.user) + ' 선생님, 반가워요</div><div class="meta">' + fmtD(todayStr()) + (hc ? ' · ' + hc + '반 담임' : '') + '</div>' +
-    '<button class="cta" onclick="openAttend()"><span>' + (hc ? hc + '반 출석 체크' : '출석 체크하기') + '</span><span class="arr">' + ic('arrow') + '</span></button></div>' + banner +
-    '<div class="tiles">' +
-    tile('sprout', '새신자', 'Newcomer', "go('newcomers')", 't-lime') +
-    tile('chat', '면담 기록', 'Care notes', "go('notes')", 't-peach') +
-    tile('chart', '출석 통계', 'Stats', "go('stats')", 't-sky') +
-    tile('people', '학생 명단', 'Students', "go('students')", 't-blue') +
-    tile('megaphone', '공지사항', 'Notice', "go('notices')", 't-rose') +
-    tile('calendar', '사역 준비', 'Ministry', "go('ministry')", 't-lilac') +
-    tile('grid', '출석부 전체표', 'Attendance table', "go('sheet')", isAdmin() ? 't-sky' : 't-sky wide') +
-    (isAdmin() ? tile('gear', '구성 관리', 'Settings', "go('admin')", 't-peach') : '') +
-    '</div>' +
-    '<div class="minis">' +
-    mini('book', '교사<br>주소록', 'directory', 't-blue') + mini('org', '조직표', 'org', 't-lime') + mini('pray', '기도<br>봉헌', 'prayer', 't-rose') +
-    mini('music', '찬양팀', 'worship', 't-sky') + mini('star', '임역원', 'officers', 't-lilac') +
+    '<button class="cta2" onclick="openAttend()"><span><small>' + esc(S.user) + ' 선생님 · ' + shortD(sun) + ' 주일</small><b>' + (hc ? hc + '반 출석 체크' : '출석 체크') + '</b></span><span class="arr">' + ic('arrow') + '</span></button>' +
+    banner +
+    '<div class="qgrid">' +
+    T('sprout', '새신자', 'newcomers', 't-lime') +
+    T('chat', '면담', 'notes', 't-peach') +
+    T('chart', '통계', 'stats', 't-sky') +
+    T('people', '명단', 'students', 't-blue') +
+    T('megaphone', '공지', 'notices', 't-rose') +
+    T('calendar', '사역', 'ministry', 't-lilac') +
+    T('grid', '출석부', 'sheet', 't-sky') +
+    T('book', '주소록', 'directory', 't-blue') +
+    T('org', '조직표', 'org', 't-lime') +
+    T('pray', '기도·봉헌', 'prayer', 't-rose') +
+    T('music', '찬양팀', 'worship', 't-sky') +
+    T('star', '임역원', 'officers', 't-lilac') +
+    (isAdmin() ? T('gear', '관리', 'admin', 't-peach') : '') +
     '</div>' +
     '<div class="foot">' +
-    (b.chatLink ? '<a class="btn light small" href="' + esc(b.chatLink) + '" target="_blank">교사 단톡방</a>' : '') +
-    (isAdmin() ? '<a class="btn light small" href="' + esc(b.sheetUrl) + '" target="_blank">원본 구글시트</a>' : '') +
+    (b.chatLink ? '<a class="btn light small" href="' + esc(b.chatLink) + '" target="_blank">단톡방</a>' : '') +
+    (isAdmin() && b.sheetUrl ? '<a class="btn light small" href="' + esc(b.sheetUrl) + '" target="_blank">구글시트</a>' : '') +
     '<button class="btn light small" onclick="logout()">로그아웃</button></div>' +
     sigFooter();
 };
@@ -1023,7 +1110,7 @@ VIEWS.prayer = function () {
   if (!S.params._data) { call('getTab', { tab: '기도봉헌' }).then(function (d) { S.params._data = d; render(); }); return loadingView('대표기도 · 봉헌'); }
   var rows = S.params._data.slice().sort(function (a, b) { return a.날짜 < b.날짜 ? -1 : 1; }), ns = nextSunday(), ed = canEdit('기도봉헌');
   var cur = rows.filter(function (r) { return r.날짜 >= ns; })[0];
-  var hero = cur ? '<div class="hero" style="margin-top:.7rem"><div class="eyebrow">' + (cur.날짜 === ns ? 'This Sunday' : 'Next') + ' · ' + esc(fmtD(cur.날짜)) + '</div>' +
+  var hero = cur ? '<div class="hero" style="margin-top:.7rem"><div class="eyebrow">' + (cur.날짜 === ns ? '이번 주일' : '다음 순서') + ' · ' + esc(fmtD(cur.날짜)) + '</div>' +
     '<div class="row" style="margin-top:.6rem"><div><div class="meta">대표기도</div><div class="hi">' + (esc(cur.기도자) || '미정') + '</div></div><div><div class="meta">봉헌</div><div class="hi">' + (esc(cur.봉헌) || '미정') + '</div></div></div>' +
     (cur.학년반 ? '<div class="meta">' + esc(cur.학년반) + '반 순서</div>' : '') + '</div>' : '';
   var months = {}, order = [];
@@ -1160,7 +1247,7 @@ function openAttend() { S.att = null; go('attend'); }
 VIEWS.attend = function () {
   if (!S.att) S.att = { date: lastSunday(), cls: homeClass(), marks: {}, reasons: {}, touched: {}, showAll: false, loaded: false };
   var a = S.att;
-  var datebar = '<div class="datebar"><button onclick="attDate(-7)" aria-label="지난주">' + ic('back') + '</button><div class="d">' + fmtD(a.date) + '<small>' + (a.date === lastSunday() ? 'THIS SUNDAY' : '화살표로 날짜 바꾸기') + '</small></div><button onclick="attDate(7)" aria-label="다음주">' + ic('next') + '</button></div>';
+  var datebar = '<div class="datebar"><button onclick="attDate(-7)" aria-label="지난주">' + ic('back') + '</button><div class="d">' + fmtD(a.date) + '<small>' + (a.date === lastSunday() ? '이번 주일' : '화살표로 날짜 바꾸기') + '</small></div><button onclick="attDate(7)" aria-label="다음주">' + ic('next') + '</button></div>';
   if (!a.loaded && ATT[a.date]) { applyAtt(ATT[a.date]); refreshAtt(a.date); }
   if (!a.loaded) { loadAttendance(); return topbar('출석 체크') + datebar + '<div class="empty">불러오는 중…</div>'; }
 

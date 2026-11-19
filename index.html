@@ -266,6 +266,22 @@ svg.ic{width:1.25em;height:1.25em;flex:none;display:block}
 .av{width:2.4rem;height:2.4rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;flex:none;background:var(--p-blue);color:var(--ci-blue)}
 .list-item:nth-child(6n+2) .av{background:var(--p-sky);color:#0094c6} .list-item:nth-child(6n+3) .av{background:var(--p-peach);color:#e07a00}
 .list-item:nth-child(6n+4) .av{background:var(--p-lime);color:#5d8f12} .list-item:nth-child(6n+5) .av{background:var(--p-lilac);color:#6b4fd8} .list-item:nth-child(6n+6) .av{background:var(--p-rose);color:#d23b62}
+
+.yearsel{display:flex;gap:8px;margin-top:.9rem}
+.yearsel button{flex:1;background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:.55rem .4rem;text-align:center;box-shadow:var(--shadow)}
+.yearsel button b{display:block;font-size:1.2rem;font-weight:900;letter-spacing:-.02em}
+.yearsel button small{font-size:.7rem;font-weight:700;color:var(--sub)}
+.yearsel button.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.yearsel button.on small{color:#c9d2ea}
+.yearchip{margin-left:auto;align-self:center;display:flex;align-items:center;gap:.25rem;padding:.4rem .8rem;border-radius:999px;background:#fff;border:1.5px solid var(--line);font-weight:900;font-size:.92rem;box-shadow:var(--shadow)}
+.yearchip i{font-style:normal;font-size:.7rem;color:var(--sub)}
+.past{display:flex;align-items:center;gap:.6rem;background:var(--p-peach);color:#8a4a00;border-radius:14px;padding:.55rem .75rem;font-size:.84rem;font-weight:700;margin-top:.5rem}
+.past span{flex:1}
+.who{display:flex;align-items:center;justify-content:center;gap:.6rem;margin-top:.6rem}
+.who .av{width:2.8rem;height:2.8rem;font-size:1.15rem}
+.who b{display:block;font-size:1.15rem;font-weight:900}
+.who span{font-size:.8rem;color:var(--sub);font-weight:700}
+.login-hero{padding-bottom:0}
 </style>
 </head>
 <body>
@@ -303,13 +319,14 @@ var ICONS = {
   next: '<path d="M9.5 5.5L16 12l-6.5 6.5"/>',
   arrow: '<path d="M5 12h13.5M13 6.5l5.5 5.5-5.5 5.5"/>',
   tick: '<path d="M5.5 12.6l4 4L18.5 7.6" stroke-width="3"/>',
+  gear: '<circle cx="12" cy="12" r="3.1" fill="currentColor" fill-opacity=".18"/><path d="M12 3.5v2.2M12 18.3v2.2M20.5 12h-2.2M5.7 12H3.5M18 6l-1.6 1.6M7.6 16.4L6 18M18 18l-1.6-1.6M7.6 7.6L6 6"/>',
   phone: '<path d="M6.6 3.6h2.5l1.4 3.9-2 1.3a11.3 11.3 0 0 0 6.7 6.7l1.3-2 3.9 1.4v2.5a2 2 0 0 1-2.2 2A16.4 16.4 0 0 1 4.6 5.8a2 2 0 0 1 2-2.2z"/>'
 };
 function ic(n) { return '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONS[n] || '') + '</svg>'; }
 
 var IS_GAS = typeof google !== 'undefined' && google.script && google.script.run;
 var S = {           // 앱 상태
-  user: null, pin: '', role: '', boot: null,
+  user: null, auth: null, role: '', isSuper: false, boot: null,
   view: 'home', params: {}, history: [],
   att: null, dirty: false
 };
@@ -322,17 +339,22 @@ function call(action, payload, quiet) {
   return new Promise(function (resolve, reject) {
     var done = function (res) {
       loading(false);
-      if (!res || !res.ok) { if (quiet !== 'silent') toast((res && res.error) || '오류가 났어요'); reject(res || {}); return; }
-      S.role = res.role; resolve(res.data);
+      if (!res || !res.ok) {
+        // 들어와 있는데 인증이 풀렸으면 (예: 관리자가 연락처를 바꿈) 로그인 화면으로
+        if (res && res.auth && S.user) { toast(res.error || '다시 로그인해 주세요'); logout(true); reject(res); return; }
+        if (quiet !== 'silent') toast((res && res.error) || '오류가 났어요'); reject(res || {}); return;
+      }
+      if (res.role) { S.role = res.role; S.isSuper = !!res.isSuper; }
+      resolve(res.data);
     };
     var fail = function (e) { loading(false); toast('인터넷 연결을 확인해 주세요'); reject(e); };
-    if (IS_GAS) google.script.run.withSuccessHandler(done).withFailureHandler(fail).api(S.pin, action, payload || {});
+    if (IS_GAS) google.script.run.withSuccessHandler(done).withFailureHandler(fail).api(S.auth, action, payload || {});
     else if (window.APP_API) {
       // GitHub Pages: Apps Script 웹앱에 직접 요청 (text/plain 이라 CORS 사전요청 없음)
-      fetch(window.APP_API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ pin: S.pin, action: action, p: payload || {} }), redirect: 'follow' })
+      fetch(window.APP_API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ auth: S.auth, action: action, p: payload || {} }), redirect: 'follow' })
         .then(function (r) { return r.json(); }).then(done).catch(fail);
     }
-    else setTimeout(function () { done(MOCK.api(S.pin, action, payload || {})); }, 250);
+    else setTimeout(function () { done(MOCK.api(S.auth, action, payload || {})); }, 250);
   });
 }
 
@@ -435,72 +457,298 @@ function render() {
 function modal(html) { $('modal').innerHTML = '<div class="sheet-bg" onclick="if(event.target===this)closeModal()"><div class="sheet">' + html + '</div></div>'; }
 function closeModal() { $('modal').innerHTML = ''; }
 
-/* ========================= 로그인 ========================= */
-var LOGIN = { step: 'name', name: '', pin: '', teachers: null };
-function viewLogin() {
-  if (LOGIN.step === 'pin' || !LOGIN.teachers) {
-    var dots = '';
-    var lens = pinLens();
-    if (!lens && !LOGIN._asked) askPinLens();
-    for (var i = 0; i < Math.max(4, lens ? lens[lens.length - 1] : 0, LOGIN.pin.length); i++) dots += '<i class="' + (LOGIN.pin.length > i ? 'on' : '') + '"></i>';
-    var keys = [1, 2, 3, 4, 5, 6, 7, 8, 9, '지우기', 0, '확인'].map(function (k) {
-      return '<button class="' + (k === '확인' ? 'k-ok' : k === '지우기' ? 'k-del' : '') + '" onclick="pinKey(\'' + k + '\')">' + k + '</button>';
-    }).join('');
-    return '<div class="login-hero">' + wordmark(true) + '<p style="margin-top:1.1rem">비밀번호를 눌러 주세요</p></div>' +
-      '<div class="pin-dots">' + dots + '</div><div class="pad">' + keys + '</div>' +
-      '<p class="muted" style="text-align:center;margin-top:1.2rem">비밀번호는 부장/총무 선생님께 문의하세요.<br>한 번 입력하면 다음부터는 바로 열립니다.</p>' + sigFooter();
-  }
-  var list = LOGIN.teachers.map(function (t) {
-    return '<button class="list-item" onclick="pickName(\'' + esc(t.이름) + '\')"><span class="av">' + esc((t.이름 || '?').charAt(0)) + '</span><span class="grow"><b>' + esc(t.이름) + '</b> <span class="muted">' + esc(t.직분 || '') + '</span><br><span class="muted">' + esc(t.담당반 ? t.담당반 + '반 담임' : (t.역할 || '')) + '</span></span></button>';
-  }).join('');
-  return '<div class="brand"><div class="bt"><b>어느 선생님이세요?</b><span>내 이름을 눌러 주세요</span></div></div>' + list + sigFooter();
-}
-/** 비밀번호 자릿수 (서버가 알려줌, 이 기기에 기억) → 다 누르면 [확인] 없이 바로 로그인 */
-function pinLens() { var l = LOGIN.lens || store('hs_pinlens'); return l && l.length ? l : null; }
-function askPinLens() {
-  LOGIN._asked = true;
-  call('pinInfo', {}, 'silent').then(function (d) {
-    LOGIN.lens = d.lens; store('hs_pinlens', d.lens);
+var VIEWS = {};   // 화면들 (관리자 화면이 먼저 등록되므로 여기서 선언)
+
+/* ========================= 로그인: 연도 → 이름 → 전화번호 뒷자리 ========================= */
+var LOGIN = { step: 'name', year: '', years: null, defaultYear: '', lists: {}, name: '', code: '', busy: false };
+function loadLoginInfo(year) {
+  // 이 기기에 기억해 둔 이름 목록을 먼저 보여주고, 서버에서 새로 받아 바꿈
+  var cached = store('hs_li');
+  if (cached && !LOGIN.years) { LOGIN.years = cached.years; LOGIN.defaultYear = cached.defaultYear; LOGIN.lists = cached.lists || {}; LOGIN.year = LOGIN.year || cached.defaultYear; }
+  LOGIN._loading = true;
+  call('loginInfo', { year: year || '' }, 'silent').then(function (d) {
+    LOGIN._loading = false;
+    LOGIN.years = d.years; LOGIN.defaultYear = d.defaultYear;
+    if (!LOGIN.year || LOGIN.year === d.year || !year) LOGIN.year = d.year;
+    LOGIN.lists[d.year] = d.teachers;
+    store('hs_li', { years: d.years, defaultYear: d.defaultYear, lists: LOGIN.lists });
     if (!S.user) render();
-  }).catch(function () { LOGIN._asked = false; });
+  }).catch(function () { LOGIN._loading = false; if (!S.user) render(); });
 }
-function pinKey(k) {
+function viewLogin() {
+  if (!LOGIN.years && !LOGIN._loading) loadLoginInfo('');
+  var head = '<div class="login-hero">' + wordmark(true) + '</div>';
+  if (!LOGIN.years) return head + '<div class="empty">불러오는 중…</div>' + sigFooter();
+  var list = LOGIN.lists[LOGIN.year];
+  if (!list && !LOGIN._loading) loadLoginInfo(LOGIN.year);
+
+  if (LOGIN.step === 'code') {
+    var dots = '';
+    for (var i = 0; i < 4; i++) dots += '<i class="' + (LOGIN.code.length > i ? 'on' : '') + '"></i>';
+    var keys = [1, 2, 3, 4, 5, 6, 7, 8, 9, '처음', 0, '지우기'].map(function (k) {
+      return '<button class="' + (k === '지우기' || k === '처음' ? 'k-del' : '') + '" onclick="codeKey(\'' + k + '\')">' + k + '</button>';
+    }).join('');
+    return head + '<div class="who"><span class="av">' + esc(LOGIN.name.charAt(0)) + '</span><div><b>' + esc(LOGIN.name) + ' 선생님</b><span>' + esc(LOGIN.year) + '년</span></div></div>' +
+      '<p style="text-align:center;margin:.9rem 0 0">내 <b>전화번호 뒷자리 4자리</b>를 눌러 주세요</p>' +
+      '<div class="pin-dots">' + dots + '</div><div class="pad">' + keys + '</div>' +
+      '<p class="muted" style="text-align:center;margin-top:1rem">한 번 들어오면 다음부터는 바로 열립니다.</p>' + sigFooter();
+  }
+
+  var years = '<div class="yearsel">' + LOGIN.years.map(function (y) {
+    var tag = y === LOGIN.defaultYear ? '기본' : y < LOGIN.defaultYear ? '지난 자료' : '준비 중';
+    return '<button class="' + (y === LOGIN.year ? 'on' : '') + '" onclick="pickYear(\'' + y + '\')"><b>' + y + '</b><small>' + tag + '</small></button>';
+  }).join('') + '</div>';
+  var rows = !list ? '<div class="empty">불러오는 중…</div>' : list.map(function (t) {
+    var badge = t.권한 === '최고관리자' || t.권한 === '관리자' ? ' <span class="badge w">' + esc(t.권한) + '</span>' : '';
+    var sub = t.담당반 ? t.담당반 + '반 담임' : (t.역할 || '');
+    return '<button class="list-item" ' + (t.ok ? 'onclick="pickTeacher(\'' + esc(t.이름) + '\')"' : 'onclick="toast(\'연락처가 등록되어 있지 않아요. 관리자에게 문의해 주세요\')" style="opacity:.55"') + '>' +
+      '<span class="av">' + esc((t.이름 || '?').charAt(0)) + '</span><span class="grow"><b>' + esc(t.이름) + '</b> <span class="muted">' + esc(t.직분 || '') + '</span>' + badge +
+      '<br><span class="muted">' + esc(t.ok ? sub : '연락처 없음') + '</span></span></button>';
+  }).join('');
+  return head + (LOGIN.years.length > 1 ? years : '') +
+    '<h3 style="margin:1rem 0 .2rem">어느 선생님이세요?</h3><p class="muted" style="margin:0">내 이름을 눌러 주세요</p>' + rows + sigFooter();
+}
+function pickYear(y) { LOGIN.year = y; LOGIN.step = 'name'; render(); if (!LOGIN.lists[y]) loadLoginInfo(y); else loadLoginInfo(y); }
+function pickTeacher(n) { LOGIN.name = n; LOGIN.code = ''; LOGIN.step = 'code'; render(); }
+function codeKey(k) {
   if (LOGIN.busy) return;
-  if (k === '지우기') LOGIN.pin = LOGIN.pin.slice(0, -1);
-  else if (k === '확인') return tryPin(false);
-  else if (LOGIN.pin.length < 8) LOGIN.pin += k;
+  if (k === '처음') { LOGIN.step = 'name'; LOGIN.code = ''; render(); return; }
+  if (k === '지우기') LOGIN.code = LOGIN.code.slice(0, -1);
+  else if (LOGIN.code.length < 4) LOGIN.code += k;
   render();
-  var lens = pinLens();
-  if (k !== '지우기' && lens && lens.indexOf(LOGIN.pin.length) >= 0) tryPin(true);
+  if (LOGIN.code.length === 4) tryLogin();
 }
-function tryPin(auto) {
-  if (LOGIN.pin.length < 4) { toast('비밀번호를 끝까지 눌러 주세요'); return; }
-  var lens = pinLens() || [], longer = lens.some(function (n) { return n > LOGIN.pin.length; });
-  // 자동 시도인데 더 긴 비밀번호(예: 관리자)도 있으면, 틀려도 조용히 계속 누를 수 있게
-  var quietFail = auto && longer;
-  S.pin = LOGIN.pin; LOGIN.busy = true;
-  call('boot', {}, quietFail ? 'silent' : false).then(function (b) {
-    LOGIN.busy = false; S.boot = b; LOGIN.teachers = b.teachers; LOGIN.step = 'name'; render();
-  }).catch(function (e) {
-    LOGIN.busy = false;
-    if (quietFail && e && e.ok === false) return;   // 계속 누르면 됨
-    LOGIN.pin = ''; render();
-    // 비밀번호 자릿수가 바뀌었을 수도 있으니 조용히 다시 확인 (기존 값은 그대로 두고 덮어쓰기만)
-    if (e && e.error && /맞지 않/.test(e.error)) askPinLens();
+function tryLogin() {
+  S.auth = { year: LOGIN.year, name: LOGIN.name, code: LOGIN.code };
+  LOGIN.busy = true;
+  call('boot').then(function (b) {
+    LOGIN.busy = false; afterBoot(b);
+    store('hs_login', { name: LOGIN.name, code: LOGIN.code });
+    toast(S.user + ' 선생님, 환영합니다!');
+  }).catch(function () { LOGIN.busy = false; LOGIN.code = ''; S.auth = null; render(); });
+}
+function afterBoot(b) {
+  S.boot = b; S.user = b.me.이름; S.auth.year = b.year;
+  CACHE = {}; ATT = {}; S._warm = false; S.att = null;
+  S.view = 'home'; S.params = {}; S.history = [];
+  render();
+}
+function logout(silent) {
+  if (!silent && !confirm('로그아웃 할까요?')) return;
+  unstore('hs_login'); S.user = null; S.auth = null; S.boot = null; CACHE = {}; ATT = {}; S._warm = false;
+  LOGIN.step = 'name'; LOGIN.code = ''; LOGIN.busy = false; LOGIN.year = LOGIN.defaultYear || LOGIN.year;
+  render();
+}
+/** 들어온 뒤 연도 바꾸기 (같은 이름·번호로) */
+function yearMenu() {
+  var ys = S.boot.years || [S.boot.year];
+  modal('<h2>연도 선택</h2><p class="muted">지난 해 자료는 참고용입니다. 수정은 관리자만 할 수 있어요.</p><div class="yearsel">' + ys.map(function (y) {
+    return '<button class="' + (y === S.boot.year ? 'on' : '') + '" onclick="switchYear(\'' + y + '\')"><b>' + y + '</b><small>' + (y === S.boot.latestYear ? '최신' : '지난 자료') + '</small></button>';
+  }).join('') + '</div>');
+}
+function switchYear(y) {
+  closeModal();
+  if (y === S.boot.year) return;
+  if (S.dirty && !confirm('저장하지 않은 출석이 있어요. 연도를 바꿀까요?')) return;
+  S.dirty = false;
+  var old = S.auth.year; S.auth.year = y;
+  call('boot').then(function (b) { afterBoot(b); toast(y + '년 자료를 보고 있어요'); })
+    .catch(function () { S.auth.year = old; });
+}
+function isPastYear() { return S.boot && S.boot.latestYear && S.boot.year < S.boot.latestYear; }
+function isSuper() { return !!S.isSuper; }
+
+/* ========================= 관리자 ========================= */
+var ROLES = ['교사', '관리자', '최고관리자'];
+function roleBadge(r) { return r === '최고관리자' ? '<span class="badge r">최고관리자</span>' : r === '관리자' ? '<span class="badge w">관리자</span>' : ''; }
+function reloadBoot() { return call('boot', {}, true).then(function (b) { S.boot = b; }).catch(function () {}); }
+
+VIEWS.admin = function () {
+  var item = function (icon, cls, title, desc, view) {
+    return '<button class="tile ' + cls + ' wide" onclick="go(\'' + view + '\')" style="min-height:4.4rem"><span class="ib">' + ic(icon) + '</span><span><b>' + title + '</b><small style="text-transform:none;letter-spacing:0;font-size:.78rem;font-weight:600;color:var(--sub)">' + desc + '</small></span></button>';
+  };
+  return topbar('관리자') +
+    '<div class="hint" style="margin-top:.7rem">' + esc(S.boot.year) + '년 구성을 고치는 곳입니다 · 내 권한: <b>' + esc(S.boot.me.권한) + '</b>' + (isSuper() ? '' : '<br>선생님 권한(관리자 지정)은 최고관리자만 바꿀 수 있어요.') + '</div>' +
+    '<div class="tiles">' +
+    item('people', 't-blue', '선생님 · 권한', '명단, 연락처(로그인 번호), 관리자 지정', 'admTeachers') +
+    item('grid', 't-lime', '반 편성 · 담임 배정', '반 추가/삭제, 반마다 담임 선생님', 'admClasses') +
+    item('check', 't-sky', '학생 반 배정', '학생마다 반·상태(재적/장결/졸업) 한꺼번에', 'admStudents') +
+    item('calendar', 't-lilac', '연도 관리', '연도별 시트, 새 연도 시작하기', 'admYears') +
+    item('gear', 't-peach', '앱 설정', '부서명, 교사 단톡방 링크', 'admSettings') +
+    '</div>';
+};
+
+/* ---- 선생님 · 권한 ---- */
+VIEWS.admTeachers = function () {
+  if (!S.params._data) { call('getTeachers').then(function (d) { S.params._data = d; render(); }); return topbar('선생님 · 권한') + '<div class="empty">불러오는 중…</div>'; }
+  var rows = S.params._data.map(function (t) {
+    return '<button class="list-item" onclick="teacherForm(\'' + esc(t.이름) + '\')"><span class="av">' + esc(t.이름.charAt(0)) + '</span><span class="grow"><b>' + esc(t.이름) + '</b> <span class="muted">' + esc(t.직분 || '') + '</span> ' + roleBadge(t.권한) +
+      '<br><span class="muted">' + esc(t.담당반 ? t.담당반 + '반 담임' : (t.역할 || '반 없음')) + ' · ' + (t.연락처 ? esc(t.연락처) : '<span class="r">연락처 없음 (로그인 불가)</span>') + '</span></span></button>';
+  }).join('');
+  return topbar('선생님 · 권한') + '<button class="btn" style="margin-top:.7rem" onclick="teacherForm(\'\')">+ 선생님 추가</button>' +
+    '<p class="muted">연락처 <b>뒷자리 4자리</b>가 그 선생님의 로그인 번호입니다.</p><div class="cols">' + rows + '</div>';
+};
+function teacherForm(name) {
+  var t = name ? S.params._data.filter(function (x) { return x.이름 === name; })[0] : { 권한: '교사' };
+  var clsOpts = ['<option value="">(반 없음)</option>'].concat(S.boot.classes.map(function (c) { return '<option ' + (c.반 === t.담당반 ? 'selected' : '') + '>' + esc(c.반) + '</option>'; })).join('');
+  var roleOpts = ROLES.map(function (r) { return '<option ' + (r === (t.권한 || '교사') ? 'selected' : '') + '>' + r + '</option>'; }).join('');
+  var f = function (k, ph, type) { return '<label>' + k + '</label><input id="t_' + k + '" type="' + (type || 'text') + '" value="' + esc(t[k] || '') + '" placeholder="' + (ph || '') + '">'; };
+  modal('<h2>' + (name ? '선생님 정보' : '선생님 추가') + '</h2>' + f('이름') +
+    '<div class="row"><div>' + f('직분', '집사, 권사, 청년…') + '</div><div>' + f('역할', '부장, 총무, 회계…') + '</div></div>' +
+    '<label>담당반 (담임)</label><select id="t_담당반">' + clsOpts + '</select>' +
+    f('연락처', '010-0000-0000', 'tel') + '<p class="muted" style="margin:.3rem 0 0">뒷자리 4자리가 로그인 번호가 됩니다.</p>' +
+    '<label>권한 ' + (isSuper() ? '' : '<span class="muted">(최고관리자만 바꿀 수 있어요)</span>') + '</label><select id="t_권한" ' + (isSuper() ? '' : 'disabled') + '>' + roleOpts + '</select>' +
+    '<button class="btn" style="margin-top:1rem" onclick="saveTeacher(\'' + esc(name) + '\')">저장</button>' +
+    (name && name !== S.user ? '<button class="btn danger" style="margin-top:.5rem" onclick="delTeacher(\'' + esc(name) + '\')">이 선생님 삭제</button>' : ''));
+}
+function saveTeacher(orig) {
+  var o = { _orig: orig };
+  ['이름', '직분', '역할', '담당반', '연락처'].forEach(function (k) { o[k] = $('t_' + k).value.trim(); });
+  if (isSuper()) o.권한 = $('t_권한').value;
+  if (!o.이름) { toast('이름을 써 주세요'); return; }
+  call('saveTeacher', o).then(function () {
+    closeModal(); S.params._data = null; render(); toast('저장했어요');
+    reloadBoot().then(function () { if (orig === S.user && o.이름 !== orig) { toast('이름이 바뀌어 다시 로그인해 주세요'); logout(true); } });
   });
 }
-function pickName(n) {
-  S.user = n; store('hs_login', { user: n, pin: S.pin });
-  S.view = 'home'; render();
-  toast(n + ' 선생님, 환영합니다!');
+function delTeacher(name) {
+  if (!confirm(name + ' 선생님을 ' + S.boot.year + '년 명단에서 삭제할까요?')) return;
+  call('deleteTeacher', { name: name }).then(function () { closeModal(); S.params._data = null; render(); reloadBoot(); toast('삭제했어요'); });
 }
-function logout() {
-  if (!confirm('로그아웃 할까요?')) return;
-  unstore('hs_login'); S.user = null; S.boot = null; CACHE = {}; ATT = {}; S._warm = false; LOGIN = { step: 'pin', name: '', pin: '', teachers: null }; render();
+
+/* ---- 반 편성 · 담임 배정 ---- */
+VIEWS.admClasses = function () {
+  var ts = S.boot.teachers;
+  var cards = S.boot.classes.map(function (c) {
+    var mine = ts.filter(function (t) { return t.담당반 === c.반; });
+    var n = students().filter(function (s) { return s.반 === c.반 && s.상태 === '재적'; }).length;
+    return '<div class="card"><div style="display:flex;align-items:center;gap:.5rem"><h3 style="flex:1;margin:0">' + esc(c.반) + (/^\d-\d+$/.test(c.반) ? '반' : '') + ' <span class="muted">' + esc(c.성별 || '') + ' · 재적 ' + n + '명</span></h3>' +
+      '<button class="btn light small" onclick="classMenu(\'' + esc(c.반) + '\')">설정</button></div>' +
+      '<div class="chips wrap">' + (mine.map(function (t) {
+        return '<button class="chip on" onclick="assignT(\'' + esc(t.이름) + '\',\'\')" title="눌러서 배정 해제">' + esc(t.이름) + ' ✕</button>';
+      }).join('') || '<span class="muted">담임 미배정</span>') +
+      '<button class="chip" onclick="pickTeacherFor(\'' + esc(c.반) + '\')">+ 선생님</button></div></div>';
+  }).join('');
+  var free = ts.filter(function (t) { return !t.담당반; }).map(function (t) { return '<span class="chip">' + esc(t.이름) + '</span>'; }).join('');
+  return topbar('반 편성 · 담임 배정') +
+    '<div class="hint" style="margin-top:.7rem">이름을 누르면 배정이 풀리고, [+ 선생님]으로 배정합니다. 한 선생님은 한 반만 맡을 수 있어요.</div>' +
+    '<div class="cols">' + cards + '</div>' +
+    '<button class="btn light" style="margin-top:.6rem" onclick="addClass()">+ 반 추가</button>' +
+    '<h3 style="margin:1.2rem 0 .2rem">반이 없는 선생님</h3><div class="chips wrap">' + (free || '<span class="muted">없음</span>') + '</div>';
+};
+function pickTeacherFor(cls) {
+  var rows = S.boot.teachers.filter(function (t) { return t.담당반 !== cls; }).map(function (t) {
+    return '<button class="list-item" onclick="assignT(\'' + esc(t.이름) + '\',\'' + esc(cls) + '\')"><span class="av">' + esc(t.이름.charAt(0)) + '</span><span class="grow"><b>' + esc(t.이름) + '</b><br><span class="muted">' + (t.담당반 ? '지금 ' + esc(t.담당반) + '반 → ' + esc(cls) + '반으로 옮김' : '반 없음') + '</span></span></button>';
+  }).join('');
+  modal('<h2>' + esc(cls) + '반 담임 배정</h2>' + rows);
+}
+function assignT(name, cls) {
+  closeModal();
+  call('assignTeacher', { name: name, 반: cls }).then(function (classes) {
+    S.boot.classes = classes;
+    S.boot.teachers.forEach(function (t) { if (t.이름 === name) t.담당반 = cls; });
+    render(); toast(cls ? name + ' → ' + cls + '반' : name + ' 배정 해제');
+  });
+}
+function addClass() {
+  modal('<h2>반 추가</h2><label>반 이름</label><input id="c_n" placeholder="예) 1-3"><label>구분</label><select id="c_g"><option value="">-</option><option>여</option><option>남</option><option>혼성</option></select>' +
+    '<button class="btn" style="margin-top:1rem" onclick="saveClass()">추가</button>');
+}
+function saveClass() {
+  var n = $('c_n').value.trim(); if (!n) { toast('반 이름을 써 주세요'); return; }
+  call('saveClass', { 반: n, 성별: $('c_g').value }).then(function (classes) { S.boot.classes = classes; closeModal(); render(); toast(n + '반을 추가했어요'); });
+}
+function classMenu(cls) {
+  var c = S.boot.classes.filter(function (x) { return x.반 === cls; })[0] || {};
+  modal('<h2>' + esc(cls) + ' 설정</h2><label>구분</label><select id="c_g">' + ['', '여', '남', '혼성'].map(function (g) { return '<option ' + (g === (c.성별 || '') ? 'selected' : '') + ' value="' + g + '">' + (g || '-') + '</option>'; }).join('') + '</select>' +
+    '<button class="btn" style="margin-top:1rem" onclick="call(\'saveClass\',{반:\'' + esc(cls) + '\',성별:$(\'c_g\').value}).then(function(cl){S.boot.classes=cl;closeModal();render();toast(\'저장했어요\')})">저장</button>' +
+    '<button class="btn danger" style="margin-top:.5rem" onclick="delClass(\'' + esc(cls) + '\')">이 반 삭제</button>');
+}
+function delClass(cls) {
+  if (!confirm(cls + '반을 삭제할까요? (재적 학생이 있으면 삭제되지 않아요)')) return;
+  call('deleteClass', { 반: cls }).then(function (classes) {
+    S.boot.classes = classes; S.boot.teachers.forEach(function (t) { if (t.담당반 === cls) t.담당반 = ''; });
+    closeModal(); render(); toast('삭제했어요');
+  });
+}
+
+/* ---- 학생 반 배정 (한꺼번에) ---- */
+VIEWS.admStudents = function (p) {
+  p.ch = p.ch || {};
+  var f = p.f || '전체', cls = S.boot.classes.map(function (c) { return c.반; });
+  var chips = ['전체'].concat(cls).concat(['반 없음']).map(function (c) {
+    return '<button class="chip ' + (c === f ? 'on' : '') + '" onclick="S.params.f=\'' + c + '\';render()">' + esc(c) + '</button>';
+  }).join('');
+  var list = students().filter(function (s) {
+    var curCls = (p.ch[s.ID] && p.ch[s.ID].반 !== undefined) ? p.ch[s.ID].반 : s.반;
+    return f === '전체' || (f === '반 없음' ? !curCls || cls.indexOf(curCls) < 0 : s.반 === f);
+  });
+  var rows = list.map(function (s) {
+    var c = p.ch[s.ID] || {}, v반 = c.반 !== undefined ? c.반 : s.반, v상태 = c.상태 !== undefined ? c.상태 : s.상태;
+    var changed = (c.반 !== undefined && c.반 !== s.반) || (c.상태 !== undefined && c.상태 !== s.상태);
+    return '<div class="list-item" style="' + (changed ? 'border-color:var(--ci-orange);background:#fff8ef' : '') + '"><span class="grow"><b>' + esc(s.이름) + '</b><br><span class="muted">' + esc(s.학교 || '') + '</span></span>' +
+      '<select style="width:auto" onchange="chStu(\'' + s.ID + '\',\'반\',this.value)"><option value="">(없음)</option>' + cls.map(function (x) { return '<option ' + (x === v반 ? 'selected' : '') + '>' + esc(x) + '</option>'; }).join('') + '</select>' +
+      '<select style="width:auto" onchange="chStu(\'' + s.ID + '\',\'상태\',this.value)">' + ['재적', '장결', '타교회', '졸업'].map(function (x) { return '<option ' + (x === v상태 ? 'selected' : '') + '>' + x + '</option>'; }).join('') + '</select></div>';
+  }).join('') || '<div class="empty">학생이 없어요</div>';
+  var n = Object.keys(p.ch).length;
+  return topbar('학생 반 배정') + '<div class="chips">' + chips + '</div>' +
+    '<div class="row"><button class="btn light small" onclick="studentForm(null,\'' + (cls.indexOf(f) >= 0 ? f : '') + '\')">+ 새 학생 (예: 새 고1)</button></div>' +
+    '<div class="cols">' + rows + '</div>' +
+    '<div class="savebar"><div class="in"><div class="sum">바뀐 학생<br><span class="r">' + n + '명</span></div><button class="btn ' + (n ? 'ok' : 'light') + '" onclick="saveBulk()">' + (n ? '한꺼번에 저장' : '바꾼 내용 없음') + '</button></div></div>';
+};
+function chStu(id, k, v) {
+  var s = stuById(id), ch = S.params.ch;
+  ch[id] = ch[id] || {}; ch[id][k] = v;
+  if ((ch[id].반 === undefined || ch[id].반 === s.반) && (ch[id].상태 === undefined || ch[id].상태 === s.상태)) delete ch[id];
+  render();
+}
+function saveBulk() {
+  var ch = S.params.ch, items = Object.keys(ch).map(function (id) { var o = { ID: id }; for (var k in ch[id]) o[k] = ch[id][k]; return o; });
+  if (!items.length) { toast('바뀐 내용이 없어요'); return; }
+  call('bulkStudents', { items: items }).then(function (r) {
+    S.boot.students = r.students; S.params.ch = {}; CACHE = {}; render(); toast(r.updated + '명을 저장했어요');
+  });
+}
+
+/* ---- 앱 설정 ---- */
+VIEWS.admSettings = function () {
+  return topbar('앱 설정') +
+    '<label>부서명 (앱에 표시)</label><input id="s_t" value="' + esc(S.boot.title) + '">' +
+    '<label>교사 단톡방 링크 (선택)</label><input id="s_c" value="' + esc(S.boot.chatLink || '') + '" placeholder="https://open.kakao.com/...">' +
+    '<button class="btn" style="margin-top:1rem" onclick="saveSettings()">저장</button>' +
+    (S.boot.sheetUrl ? '<a class="btn light" style="margin-top:.6rem" href="' + esc(S.boot.sheetUrl) + '" target="_blank">' + esc(S.boot.year) + '년 구글시트 열기</a>' : '');
+};
+function saveSettings() {
+  var o = { 부서명: $('s_t').value.trim(), 단체톡링크: $('s_c').value.trim() };
+  call('saveSettings', o).then(function () { S.boot.title = o.부서명; S.boot.chatLink = o.단체톡링크; toast('저장했어요'); });
+}
+
+/* ---- 연도 관리 ---- */
+VIEWS.admYears = function () {
+  if (!S.params._data) { call('getYears').then(function (d) { S.params._data = d; render(); }); return topbar('연도 관리') + '<div class="empty">불러오는 중…</div>'; }
+  var ys = S.params._data, next = String(+ys[ys.length - 1].연도 + 1);
+  var rows = ys.map(function (y) {
+    return '<div class="list-item"><span class="grow"><b>' + y.연도 + '년</b> ' + (y.연도 === S.boot.year ? '<span class="badge g">보는 중</span>' : '') + '</span>' +
+      (y.연도 !== S.boot.year ? '<button class="btn light small" onclick="switchYear(\'' + y.연도 + '\')">이 연도 보기</button>' : '') +
+      '<a class="btn light small" href="' + esc(y.url) + '" target="_blank">시트</a></div>';
+  }).join('');
+  var create = isSuper()
+    ? '<div class="card" style="background:var(--p-lilac);border-color:#ddd3ff"><h3>' + next + '년 새로 시작하기</h3><div class="muted pre">' +
+      '새 구글시트를 만들고 아래처럼 옮깁니다.\n· 고1 → 고2, 고2 → 고3 (재적·장결 학생)\n· 고3은 졸업으로 빠짐 · 새 고1(지금 중3)은 나중에 추가\n· 선생님은 모두 옮기고, 담임은 학생을 따라 한 학년 위 반으로 임시 배정 (고3 담임 → 고1)\n· 출석·면담·새신자·공지는 새로 시작 (' + ys[ys.length - 1].연도 + '년 자료는 그대로 남음)</div>' +
+      '<button class="btn" style="margin-top:.8rem" onclick="createYear(\'' + next + '\')">' + next + '년 시트 만들기</button></div>'
+    : '<p class="muted">새 연도 만들기는 최고관리자만 할 수 있어요.</p>';
+  return topbar('연도 관리') + '<div class="cols" style="margin-top:.6rem">' + rows + '</div>' + create;
+};
+function createYear(y) {
+  if (!confirm(y + '년 시트를 새로 만들까요?\n(1~2분 걸릴 수 있어요)')) return;
+  call('createYear', { year: y }).then(function (r) {
+    toast(y + '년 시작! 학생 ' + r.students + '명 · 선생님 ' + r.teachers + '명');
+    S.params._data = null; unstore('hs_li'); LOGIN.years = null;
+    switchYear(r.year);
+  });
 }
 
 /* ========================= 화면들 ========================= */
-var VIEWS = {};
 
 VIEWS.home = function () {
   var b = S.boot, n = b.latestNotice;
@@ -509,7 +757,8 @@ VIEWS.home = function () {
     return '<button class="tile ' + cls + '" onclick="' + onclick + '"><span class="ib">' + ic(icon) + '</span><span><b>' + label + '</b><small>' + en + '</small></span></button>';
   };
   var hc = homeClass(), sun = lastSunday();
-  return '<div class="brand">' + wordmark(false) + '</div>' +
+  var past = isPastYear() ? '<div class="past"><span>' + esc(b.year) + '년 자료를 보고 있어요 · 참고용' + (isAdmin() ? '' : ' (수정은 관리자만)') + '</span><button class="btn small" onclick="switchYear(\'' + b.latestYear + '\')">' + b.latestYear + '년으로</button></div>' : '';
+  return '<div class="brand">' + wordmark(false) + '<button class="yearchip" onclick="yearMenu()">' + esc(b.year) + ' <i>▼</i></button></div>' + past +
     '<div class="hero"><div class="eyebrow">This Sunday · ' + shortD(sun) + '</div>' +
     '<div class="hi">' + esc(S.user) + ' 선생님, 반가워요</div><div class="meta">' + fmtD(todayStr()) + (hc ? ' · ' + hc + '반 담임' : '') + '</div>' +
     '<button class="cta" onclick="openAttend()"><span>' + (hc ? hc + '반 출석 체크' : '출석 체크하기') + '</span><span class="arr">' + ic('arrow') + '</span></button></div>' + banner +
@@ -520,7 +769,8 @@ VIEWS.home = function () {
     tile('people', '학생 명단', 'Students', "go('students')", 't-blue') +
     tile('megaphone', '공지사항', 'Notice', "go('notices')", 't-rose') +
     tile('calendar', '사역 준비', 'Ministry', "go('ministry')", 't-lilac') +
-    tile('grid', '출석부 전체표', 'Attendance table', "go('sheet')", 't-sky wide') +
+    tile('grid', '출석부 전체표', 'Attendance table', "go('sheet')", isAdmin() ? 't-sky' : 't-sky wide') +
+    (isAdmin() ? tile('gear', '관리자', 'Admin', "go('admin')", 't-peach') : '') +
     '</div>' +
     '<div class="foot">' +
     (b.chatLink ? '<a class="btn light small" href="' + esc(b.chatLink) + '" target="_blank">교사 단톡방</a>' : '') +
@@ -984,11 +1234,10 @@ function start() {
   applyFont(); applyWide();
   window.addEventListener('resize', function () { if (store('hs_pc') === null) { var w = document.body.classList.contains('wide'); applyWide(); if (w !== isWide()) render(); } });
   var saved = store('hs_login');
-  if (saved && saved.pin) {
-    S.pin = saved.pin;
-    call('boot').then(function (b) { S.boot = b; S.user = saved.user; render(); })
-      .catch(function () { unstore('hs_login'); LOGIN.step = 'pin'; render(); });
-  } else { LOGIN.step = 'pin'; render(); }
+  if (saved && saved.name && saved.code) {
+    S.auth = { name: saved.name, code: saved.code };   // 연도는 서버의 기본 연도
+    call('boot').then(afterBoot).catch(function () { unstore('hs_login'); S.auth = null; render(); });
+  } else { render(); }
   window.addEventListener('beforeunload', function (e) { if (S.dirty) { e.preventDefault(); e.returnValue = ''; } });
 }
 if (IS_GAS) start();

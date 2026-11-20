@@ -1129,6 +1129,31 @@ function call(action, payload, quiet) {
 /* ========================= 유틸 ========================= */
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 function $(id) { return document.getElementById(id); }
+/* 전화번호 칸(type=tel): 쓰는 대로 하이픈(-) 자동 · 010-1234-5678 */
+function fmtPhone(s, done) {
+  s = String(s || ''); if (/[^\d\s\-.()+]/.test(s)) return s;   // 글자가 섞이면 그대로
+  var d = s.replace(/\D/g, '').slice(0, 11);
+  if (/^02/.test(d)) {
+    if (d.length <= 2) return d;
+    if (d.length <= 5) return d.slice(0, 2) + '-' + d.slice(2);
+    if (d.length <= 9) return d.slice(0, 2) + '-' + d.slice(2, 5) + '-' + d.slice(5);
+    return d.slice(0, 2) + '-' + d.slice(2, 6) + '-' + d.slice(6, 10);
+  }
+  if (d.length === 8 && /^1[56]/.test(d)) return d.slice(0, 4) + '-' + d.slice(4);
+  if (d.length <= 3) return d;
+  if (d.length <= 7) return d.slice(0, 3) + '-' + d.slice(3);
+  if (d.length === 10 && (done || !/^010/.test(d))) return d.slice(0, 3) + '-' + d.slice(3, 6) + '-' + d.slice(6);
+  return d.slice(0, 3) + '-' + d.slice(3, 7) + '-' + d.slice(7);
+}
+document.addEventListener('input', function (e) {
+  var el = e.target; if (!el || el.type !== 'tel') return;
+  if (el.selectionStart !== el.value.length) return;   // 가운데를 고치는 중이면 건드리지 않음
+  var f = fmtPhone(el.value); if (f !== el.value) el.value = f;
+});
+document.addEventListener('change', function (e) {
+  var el = e.target; if (!el || el.type !== 'tel') return;
+  var f = fmtPhone(el.value, true); if (f !== el.value) el.value = f;
+});
 function toast(msg) { var t = $('toast'); t.textContent = msg; t.style.display = 'block'; clearTimeout(t._h); t._h = setTimeout(function () { t.style.display = 'none'; }, 2200); }
 function loading(on) { $('loading').classList.toggle('on', !!on); }
 var WD = ['일', '월', '화', '수', '목', '금', '토'];
@@ -2779,7 +2804,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261120181017';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261120182025';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

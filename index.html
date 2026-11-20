@@ -217,7 +217,7 @@ svg.ic{width:1.25em;height:1.25em;flex:none;display:block}
 
 /* 텍스트 워드마크: HERE. + 목민교회 고등부 */
 .wm{display:inline-flex;flex-direction:column;align-items:flex-start;line-height:1}
-.wm b{font-size:1.85rem;font-weight:900;letter-spacing:-.055em;background:linear-gradient(100deg,#151c33 10%,#1475bc 95%);-webkit-background-clip:text;background-clip:text;color:transparent;padding-right:.1em}
+.wm b{font-size:1.85rem;font-weight:900;letter-spacing:-.055em;color:var(--navy);-webkit-text-fill-color:var(--navy);padding-right:.1em}
 .wm b em{font-style:normal;color:var(--ci-sky);-webkit-text-fill-color:var(--ci-sky)}
 .wm .bar{display:flex;gap:3px;width:100%;margin-top:.4rem}
 .wm .bar i{flex:1;height:4px;border-radius:4px}
@@ -438,7 +438,11 @@ input,textarea,select{padding:.45rem .65rem}
 @keyframes bob{50%{transform:translate(-50%,7px)}}
 .keep{display:flex;align-items:center;gap:.45rem;justify-content:center;font-size:.84rem;color:var(--sub);margin-top:.7rem}
 .keep input{width:1.15rem;height:1.15rem;padding:0;margin:0}
-.ver{text-align:center;font-size:.66rem;color:var(--sub);opacity:.75;margin-top:.2rem}
+.ver{text-align:center;font-size:.66rem;color:var(--sub);margin-top:.2rem;display:flex;align-items:center;justify-content:center;gap:.4rem}
+.ver .vb{font-size:.86rem;font-weight:900;letter-spacing:-.04em;color:var(--navy)}
+.ver .vb em{font-style:normal;color:var(--ci-sky)}
+.welcome .wb{flex:none;font-style:normal;font-size:1.05rem;font-weight:900;letter-spacing:-.045em;color:var(--navy);line-height:1.3;margin-top:.1rem}
+.welcome .wb em{font-style:normal;color:var(--ci-sky)}
 .chk{margin:.3rem 0 0;padding-left:1.1rem;font-size:.86rem;line-height:1.55}
 /* ===== 회계 ===== */
 .stat-big.fin b{font-size:1.15rem}
@@ -620,7 +624,8 @@ i.in{background:#8cb9e6} i.out{background:#f0c27e}
 .icon-btn:active{background:#eef1f5}
 .icon-btn svg{width:1.4rem;height:1.4rem}
 .icon-btn .dot{position:absolute;top:.55rem;right:.6rem;width:.5rem;height:.5rem;border-radius:50%;background:var(--pri);box-shadow:0 0 0 2px var(--bg)}
-.welcome{margin:.65rem 0 0}
+.welcome{margin:.65rem 0 0;display:flex;align-items:flex-start;gap:.6rem}
+.welcome>div{flex:1;min-width:0}
 .welcome b{display:block;font-size:1.3rem;font-weight:800;letter-spacing:-.035em;line-height:1.3}
 .welcome span{display:block;font-size:.88rem;color:var(--sub);margin-top:.1rem}
 
@@ -746,6 +751,7 @@ var SIG = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(SIG_SVG);
 function brandName() { return esc(APP_NAME) + '<em>.</em>'; }
 /** 텍스트 타이틀 (로고 이미지 없이) */
 function wordmark(lg) { return '<div class="wm' + (lg ? ' lg' : '') + '"><b>' + brandName() + '</b><span class="bar"><i></i><i></i><i></i><i></i></span><small>' + esc(APP_SUB) + '</small></div>'; }
+function verLine(st) { return '<div class="ver"' + (st ? ' style="' + st + '"' : '') + '><b class="vb">' + brandName() + '</b><span>버전 ' + verText() + '</span></div>'; }
 function sigFooter() { return '<div class="sig"><img src="' + SIG + '" alt="대한예수교장로회 목민교회"></div>'; }
 
 /* ===== 아이콘 (둥근 선 + 옅은 면, 24px 격자) ===== */
@@ -1014,7 +1020,7 @@ function loadLoginInfo(year) {
 function viewLogin() {
   if (!LOGIN.years && !LOGIN._loading) loadLoginInfo('');
   var head = '<div class="login-hero">' + wordmark(true) + '</div>';
-  if (!LOGIN.years) return head + '<div class="empty load">불러오는 중…</div>' + sigFooter();
+  if (!LOGIN.years) return head + '<div class="empty load">불러오는 중…</div>' + verLine('margin-top:1.2rem') + sigFooter();
   var list = LOGIN.lists[LOGIN.year];
   if (!list && !LOGIN._loading) loadLoginInfo(LOGIN.year);
 
@@ -1028,7 +1034,7 @@ function viewLogin() {
       '<p style="text-align:center;margin:.9rem 0 0">내 <b>전화번호 뒷자리 4자리</b>를 눌러 주세요</p>' +
       '<div class="pin-dots">' + dots + '</div><div class="pad">' + keys + '</div>' +
       '<label class="keep"><input type="checkbox" ' + (LOGIN.keep !== false ? 'checked' : '') + ' onchange="LOGIN.keep=this.checked">이 기기에 로그인 유지 (30일)</label>' +
-      '<p class="muted" style="text-align:center;margin:.2rem 0 0">다른 사람 휴대폰 · 교회 PC라면 체크를 끄고 들어오세요.</p>' + sigFooter();
+      '<p class="muted" style="text-align:center;margin:.2rem 0 0">다른 사람 휴대폰 · 교회 PC라면 체크를 끄고 들어오세요.</p>' + verLine('margin-top:1.2rem') + sigFooter();
   }
 
   var years = '<div class="yearsel">' + LOGIN.years.map(function (y) {
@@ -1042,7 +1048,7 @@ function viewLogin() {
       '<br><span class="muted">' + esc(t.ok ? sub : '연락처 없음') + '</span></span></button>';
   }).join('');
   return head + appIntro() + (LOGIN.years.length > 1 ? years : '') +
-    '<h3 style="margin:1rem 0 .2rem">어느 선생님이세요?</h3><p class="muted" style="margin:0">내 이름을 눌러 주세요</p>' + rows + sigFooter();
+    '<h3 style="margin:1rem 0 .2rem">어느 선생님이세요?</h3><p class="muted" style="margin:0">내 이름을 눌러 주세요</p>' + rows + verLine('margin-top:1.2rem') + sigFooter();
 }
 function pickYear(y) { LOGIN.year = y; LOGIN.step = 'name'; render(); if (!LOGIN.lists[y]) loadLoginInfo(y); else loadLoginInfo(y); }
 function pickTeacher(n) { LOGIN.name = n; LOGIN.code = ''; LOGIN.step = 'code'; render(); }
@@ -1355,7 +1361,7 @@ VIEWS.home = function () {
   return '<div class="hd"><span class="logo"><img src="' + SIG + '" alt="대한예수교장로회 목민교회"></span>' +
     '<button class="yearchip" onclick="yearMenu()" aria-label="연도 바꾸기">' + esc(b.year) + ' <i>▼</i></button>' +
     '<button class="icon-btn" onclick="go(\'notices\')" aria-label="공지">' + ic('bell') + (newNotice() ? '<i class="dot"></i>' : '') + '</button></div>' + past +
-    '<div class="welcome"><b>' + esc(S.user) + ' 선생님,</b><span>' + greet() + '</span></div>' +
+    '<div class="welcome"><div><b>' + esc(S.user) + ' 선생님,</b><span>' + greet() + '</span></div><i class="wb">' + brandName() + '</i></div>' +
     '<button class="main-att" onclick="openAttend()"><span class="tx"><small>' + ic('calendar') + shortD(sun) + ' 주일예배</small>' +
     '<b>' + (hc ? esc(hc) + '반 출석 체크' : '출석 체크') + '</b><p>참석으로 예배를 함께 세워요.</p></span><span class="go">' + ic('arrow') + '</span></button>' +
     '<div class="info2">' + myAttCard() + noticeCard(n) + '</div>' + installBanner() +
@@ -1384,7 +1390,7 @@ VIEWS.home = function () {
     ((b.chatLink || canShowInstall()) ? '<div class="links">' +
       (b.chatLink ? '<a class="btn light small" href="' + esc(b.chatLink) + '" target="_blank">' + ic('chatbub') + '교사 단톡방</a>' : '') +
       (canShowInstall() ? '<button class="btn light small" onclick="installGuide()">' + ic('plusapp') + '홈 화면에 추가</button>' : '') + '</div>' : '') +
-    '<div class="ver" style="margin-top:1rem">버전 ' + verText() + '</div>';
+    verLine('margin-top:1rem');
 };
 /** 짧은 인사: 주일과 평일을 다르게 */
 function greet() {
@@ -1455,7 +1461,7 @@ VIEWS.settings = function () {
     (isAdmin() && b.sheetUrl ? '<a class="set-row" href="' + esc(b.sheetUrl) + '" target="_blank"><span class="si">' + ic('sheet') + '</span><span class="st"><b>구글시트 연동</b><small>원본 시트 열기</small></span><span class="sv">' + ic('next') + '</span></a>' : '') +
     '</div>' +
     '<div class="set-group">' + row('logout', '로그아웃', '이 기기에서 로그인 지우기', 'logout()', '', 'danger') + '</div>' +
-    '<div class="ver">버전 ' + verText() + '</div>' + sigFooter();
+    verLine() + sigFooter();
 };
 
 /* ========================= 함께 보기: 주소록 · 조직표 · 기도봉헌 · 찬양팀 · 임역원 ========================= */
@@ -2192,7 +2198,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261120094345';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261120110239';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

@@ -623,7 +623,7 @@ i.in{background:#8cb9e6} i.out{background:#f0c27e}
 .icon-btn{position:relative;width:2.75rem;height:2.75rem;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--ink);flex:none}
 .icon-btn:active{background:#eef1f5}
 .icon-btn svg{width:1.4rem;height:1.4rem}
-.icon-btn .dot{position:absolute;top:.55rem;right:.6rem;width:.5rem;height:.5rem;border-radius:50%;background:var(--pri);box-shadow:0 0 0 2px var(--bg)}
+.icon-btn .dot{position:absolute;top:.55rem;right:.6rem;width:.5rem;height:.5rem;border-radius:50%;background:var(--no);box-shadow:0 0 0 2px var(--bg)}
 .welcome{margin:.65rem 0 0;display:flex;align-items:flex-start;gap:.6rem}
 .welcome>div{flex:1;min-width:0}
 .welcome b{display:block;font-size:1.3rem;font-weight:800;letter-spacing:-.035em;line-height:1.3}
@@ -700,7 +700,10 @@ button.icard:active{transform:scale(.985);background:#fbfcfd}
 .bnav button.on{color:var(--navy);font-weight:800}
 .bnav button.on::before{content:"";position:absolute;top:0;left:30%;right:30%;height:2.5px;border-radius:0 0 3px 3px;background:var(--navy)}
 .bnav button:active{background:var(--bg)}
-.bnav .dot{position:absolute;top:8px;left:calc(50% + 7px);width:8px;height:8px;border-radius:50%;background:var(--pri)}
+.bnav .dot{position:absolute;top:8px;left:calc(50% + 7px);width:8px;height:8px;border-radius:50%;background:var(--no)}
+.nbadge{display:inline-block;background:var(--no);color:#fff;font-size:.7rem;font-weight:800;border-radius:999px;padding:.05rem .45rem;margin-right:.35rem;vertical-align:.08em}
+.ncount{display:inline-block;min-width:1.4rem;text-align:center;background:var(--no);color:#fff;font-size:.74rem;font-weight:800;border-radius:999px;padding:.05rem .4rem}
+.ncount.g{background:var(--line);color:var(--sub)}
 
 /* 설정 */
 .set-group{background:#fff;border:1px solid var(--line);border-radius:20px;margin:.55rem 0;overflow:hidden;box-shadow:var(--shadow)}
@@ -892,7 +895,8 @@ function warmUp() {
   call('prefetch', { date: sun }, true).then(function (d) {
     CACHE.stats = d.stats; CACHE.newcomers = d.newcomers; CACHE.notes = d.notes; CACHE.notices = d.notices; CACHE.ministry = d.ministry;
     if (!ATT[sun]) ATT[sun] = d.attendance;
-    if (d.tatt) { CACHE.tatt = d.tatt; if (S.view === 'home' && !$('modal').innerHTML) render(); }
+    if (d.tatt) CACHE.tatt = d.tatt;
+    if (S.view === 'home' && !$('modal').innerHTML) render();
   }).catch(function () { S._warm = false; });
 }
 
@@ -1398,7 +1402,24 @@ function greet() {
   return d === 0 ? '은혜로운 주일 보내세요.' : d === 6 ? '내일 주일 예배를 함께 준비해요.' : '오늘도 주님의 평안이 함께하길 바랍니다.';
 }
 /** 최근 7일 안에 올라온 공지가 있으면 종 아이콘에 점 */
-function newNotice() { var n = S.boot && S.boot.latestNotice; return !!(n && n.날짜 && n.날짜 >= addDays(todayStr(), -7)); }
+/* 공지 읽음 표시: 이 기기에 '읽은 공지 ID' 를 연도별로 기억 */
+function nKey() { return 'hs_nread_' + ((S.boot && S.boot.year) || ''); }
+function nRead(list) {
+  var r = store(nKey());
+  if (!r) {   // 처음 한 번: 2주 넘은 공지는 읽은 것으로 시작 (빨간 점이 계속 남지 않게)
+    r = {}; var old = addDays(todayStr(), -14);
+    (list || []).forEach(function (n) { if (n.ID && (n.날짜 || '') < old) r[n.ID] = 1; });
+    if (list) store(nKey(), r);
+  }
+  return r;
+}
+function nMark(ids) { var r = nRead(CACHE.notices); ids.forEach(function (id) { if (id) r[id] = 1; }); store(nKey(), r); }
+function unreadNotices(list) { var r = nRead(list); return (list || []).filter(function (n) { return n.ID && !r[n.ID]; }); }
+function newNotice() {
+  if (CACHE.notices) return unreadNotices(CACHE.notices).length > 0;
+  var n = S.boot && S.boot.latestNotice;   // 목록을 아직 못 받았으면: 최근 공지 1개로 판단
+  return !!(n && n.ID && !nRead(null)[n.ID] && (n.날짜 || '') >= addDays(todayStr(), -14));
+}
 function menuFilter(q) {
   q = String(q || '').replace(/\s+/g, ''); var hit = 0;
   document.querySelectorAll('.mgrid .mt').forEach(function (el) {
@@ -2114,12 +2135,20 @@ VIEWS.notices = function () {
     if (nx !== ny) return nx ? -1 : 1;
     return nx ? b[1] - a[1] : a[1] - b[1];
   }).map(function (r) { return r[0]; });
-  var list = rows.map(function (n) {
-    return '<div class="card" style="' + (n.중요 === 'Y' ? 'border-left:4px solid var(--warn-c)' : '') + '"><div class="muted">' + (n.중요 === 'Y' ? '<b>[중요]</b> · ' : '') + esc(fmtD(n.날짜)) + ' · ' + esc(n.작성자) + '</div>' +
+  // 이 화면에 들어온 순간 안 읽었던 공지는 '안 읽은 공지' 칸에 모아 보여 주고, 읽은 것으로 기억 (다음부터 빨간 점 없음)
+  var NEW = S.params._new = S.params._new || {}, un = unreadNotices(rows);
+  if (un.length) { un.forEach(function (n) { NEW[n.ID] = 1; }); nMark(un.map(function (n) { return n.ID; })); }
+  var card = function (n) {
+    return '<div class="card" style="' + (n.중요 === 'Y' ? 'border-left:4px solid var(--warn-c)' : '') + '"><div class="muted">' + (NEW[n.ID] ? '<span class="nbadge">새 공지</span>' : '') + (n.중요 === 'Y' ? '<b>[중요]</b> · ' : '') + esc(fmtD(n.날짜)) + ' · ' + esc(n.작성자) + '</div>' +
       '<h3 style="margin-top:.3rem">' + esc(n.제목) + '</h3><div class="pre">' + esc(n.내용) + '</div>' +
       (isAdmin() ? '<div class="row" style="margin-top:.6rem"><button class="btn light small" onclick="noticeForm(\'' + n.ID + '\')">고치기</button><button class="btn danger small" onclick="delNotice(\'' + n.ID + '\')">삭제</button></div>' : '') + '</div>';
-  }).join('') || '<div class="empty">공지가 없어요</div>';
-  return topbar('공지사항') + (isAdmin() ? '<button class="btn" style="margin-top:.8rem" onclick="noticeForm()">+ 공지 쓰기</button>' : '') + '<div class="cols">' + list + '</div>';
+  };
+  var fresh = rows.filter(function (n) { return NEW[n.ID]; }), seen = rows.filter(function (n) { return !NEW[n.ID]; });
+  var sec = function (title, cnt, cls) { return '<div class="sec-h"><h2>' + title + '</h2><span class="ncount' + (cls || '') + '">' + cnt + '</span></div>'; };
+  var html = !rows.length ? '<div class="empty">공지가 없어요</div>' :
+    (fresh.length ? sec('안 읽은 공지', fresh.length) + '<div class="cols">' + fresh.map(card).join('') + '</div>' : '<div class="hint" style="margin-top:.9rem">새 공지를 모두 읽었어요</div>') +
+    (seen.length ? sec('읽은 공지', seen.length, ' g') + '<div class="cols">' + seen.map(card).join('') + '</div>' : '');
+  return topbar('공지사항') + (isAdmin() ? '<button class="btn" style="margin-top:.8rem" onclick="noticeForm()">+ 공지 쓰기</button>' : '') + html;
 };
 function noticeForm(id) {
   var n = id ? S.params._data.filter(function (x) { return x.ID === id; })[0] : { 날짜: todayStr(), 작성자: S.user };
@@ -2133,6 +2162,7 @@ function saveNotice(id) {
   var o = { ID: id || undefined, 제목: $('g_t').value.trim(), 날짜: $('g_d').value, 내용: $('g_c').value.trim(), 중요: $('g_i').checked ? 'Y' : '', 작성자: S.user };
   if (!o.제목) { toast('제목을 써 주세요'); return; }
   if (!o.ID) o.ID = newId('G');
+  nMark([o.ID]);
   if (S.params._data) upsertLocal(S.params._data, o);
   if (!S.boot.latestNotice || o.날짜 >= S.boot.latestNotice.날짜) S.boot.latestNotice = o;
   enqueue('saveNotice', o);
@@ -2198,7 +2228,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261120110239';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261120112523';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

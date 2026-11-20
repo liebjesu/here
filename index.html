@@ -532,6 +532,13 @@ body.scrolled .top{border-bottom-color:var(--line)}
 .top{top:env(safe-area-inset-top);background:var(--bg);-webkit-backdrop-filter:none;backdrop-filter:none}
 body{padding-top:env(safe-area-inset-top)}
 body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top);background:var(--bg);z-index:16;pointer-events:none}
+/* 아이폰만: 시계 줄 아래 흐림 띠를 피해서 한 칸 더 내려 시작 */
+@supports (-webkit-touch-callout:none){
+  :root{--topgap:14px}
+  body{padding-top:calc(env(safe-area-inset-top) + var(--topgap))}
+  body::before{height:calc(env(safe-area-inset-top) + var(--topgap))}
+  .top{top:calc(env(safe-area-inset-top) + var(--topgap))}
+}
 
 /* 카드 · 목록 */
 .card{overflow-x:auto;-webkit-overflow-scrolling:touch}   /* 큰 글씨에서 표가 넓어지면 카드 안에서만 옆으로 밀림 */
@@ -2232,7 +2239,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261120113845';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261120114412';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

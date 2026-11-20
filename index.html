@@ -1496,7 +1496,7 @@ VIEWS.home = function () {
     '<div class="info2">' + myAttCard() + noticeCard(n) + '</div>' + birthdayCard() + installBanner() +
     '<div class="sec-h"><h2>주요 메뉴</h2><label class="msearch" style="margin:0">' + ic('search') + '<input type="search" placeholder="메뉴 검색" aria-label="메뉴 검색" oninput="menuFilter(this.value)"></label></div>' +
     '<div class="mgrid">' +
-    M('check', '교사출석', 'tatt', 't-blue', '내출석 교사 기도회') +
+    M('check', '교사출석', 'tatt', 't-blue', '내출석 교사 기도회 특송 교사대학 일정') +
     M('sprout', '새신자', 'newcomers', 't-lime', '새친구') +
     M('chat', '면담', 'notes', 't-peach', '상담 기록') +
     M('chart', '통계', 'stats', 't-sky', '출석률') +
@@ -1599,13 +1599,13 @@ function menuFilter(q) {
 function myAttCard() {
   var head = '<div class="icard"><span class="ih"><b>내 출석 현황</b><button class="more" onclick="go(\'tatt\')">자세히 보기' + ic('next') + '</button></span>';
   var d = CACHE.tatt; if (!d) return head + '<span class="skel"></span></div>';
-  if (isFutureYear()) return head + '<span class="muted">' + esc(viewYear()) + '년 모임은 ' + shortD(firstSundayOf(viewYear())) + ' 첫 주일부터 체크할 수 있어요</span></div>';
+  if (isFutureYear()) return head + '<span class="muted">' + esc(viewYear()) + '년 일정은 ' + shortD(firstSundayOf(viewYear())) + ' 첫 주일부터 체크할 수 있어요</span></div>';
   var seen = {}, list = [];
   for (var i = 0; i < 7; i++) {
     var dt = addDays(todayStr(), -i);
     meetsOn(d, dt).forEach(function (m) { if (!seen[m.ID]) { seen[m.ID] = 1; list.push([dt, m]); } });
   }
-  if (!list.length) return head + '<span class="muted">이번 주 모임이 없어요</span></div>';
+  if (!list.length) return head + '<span class="muted">이번 주 일정이 없어요</span></div>';
   list.sort(function (a, b) { return a[0] < b[0] ? -1 : 1; });
   return head + list.map(function (x) {
     var dt = x[0], m = x[1], on = tIsIn(d, dt, m.ID, S.user);
@@ -2408,7 +2408,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261120154437';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261120155051';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -2833,10 +2833,30 @@ function resetSessions() {
    선생님은 자기 출석만, 구성 관리 선생님은 모든 선생님 출석을 체크 */
 var TA_DEF = { '교사모임': [{ ID: 'TM1', 이름: '주일예배', 반복: '매주', 요일: '일', 날짜: '', 순서: '1' }], '교사출석': [] };
 function tData() { var d = S.view === 'tatt' && S.params._data ? S.params._data : CACHE.tatt; return d || null; }
-function meetsOn(d, date) {
-  var wd = WD[parseD(date).getDay()];
-  return (d['교사모임'] || []).filter(function (m) { return m.반복 === '한 번' ? m.날짜 === date : m.요일 === wd; }).sort(byOrder);
+var NTH = ['첫째', '둘째', '셋째', '넷째', '마지막'];
+/** 매월 일정의 주차: 1~4째 또는 마지막 (그 달의 마지막 같은 요일) */
+function nthOf(date) {
+  var x = parseD(date), n = Math.ceil(x.getDate() / 7), last = new Date(x.getFullYear(), x.getMonth() + 1, 0).getDate() - x.getDate() < 7;
+  return { n: NTH[n - 1] || '', last: last };
 }
+function meetHits(m, date) {
+  if (m.반복 === '한 번') return m.날짜 === date;
+  if (m.요일 !== WD[parseD(date).getDay()]) return false;
+  if (m.반복 === '매월') { var k = nthOf(date), w = m.주차 || '첫째'; return w === '마지막' ? k.last : k.n === w; }
+  return true;
+}
+function meetsOn(d, date) {
+  return (d['교사모임'] || []).filter(function (m) { return meetHits(m, date); }).sort(byOrder);
+}
+/** 일정 설명: 매주 수요일 · 매월 첫째 토요일 · 12/6(토) 하루 */
+function meetRule(m) {
+  var t = m.시간 ? ' · ' + m.시간 : '';
+  if (m.반복 === '한 번') return fmtD(m.날짜) + ' 하루' + t;
+  if (m.반복 === '매월') return '매월 ' + (m.주차 || '첫째') + ' ' + m.요일 + '요일' + t;
+  return '매주 ' + m.요일 + '요일' + t;
+}
+/** 다음에 돌아오는 날 (오늘 포함, 1년 안) */
+function meetNext(m, from) { for (var i = 0; i < 370; i++) { var x = addDays(from, i); if (meetHits(m, x)) return x; } return ''; }
 /** 오늘 모임이 있으면 오늘, 없으면 가장 가까운 지난 모임 날 */
 function tDefaultDate(d) {
   var t = todayStr(), y = viewYear(), i0;
@@ -2854,16 +2874,16 @@ function tToggle(date, mid, name) {
   var d = tData(); if (!d) return;
   if (name !== S.user && !isAdmin()) { toast('다른 선생님 출석은 바꿀 수 없어요'); return; }
   if (isPastYear() && !isAdmin()) { toast('지난 해 자료는 보기만 할 수 있어요'); return; }
-  if (!isAdmin() && date < tLimit()) { toast('2개월이 지난 모임은 체크할 수 없어요. 관리자 선생님께 말씀해 주세요'); return; }
-  if (date > todayStr()) { toast('아직 지나지 않은 모임이에요'); return; }
-  if (date.slice(0, 4) !== viewYear()) { toast(viewYear() + '년 모임만 체크할 수 있어요'); return; }
+  if (!isAdmin() && date < tLimit()) { toast('2개월이 지난 일정은 체크할 수 없어요. 관리자 선생님께 말씀해 주세요'); return; }
+  if (date > todayStr()) { toast('아직 다가올 일정이에요. 그날 함께해요!'); return; }
+  if (date.slice(0, 4) !== viewYear()) { toast(viewYear() + '년 일정만 체크할 수 있어요'); return; }
   var m = (d['교사모임'] || []).filter(function (x) { return x.ID === mid; })[0] || {};
   var on = !tIsIn(d, date, mid, name);
   if (on) d['교사출석'].push({ 날짜: date, 모임ID: mid, 모임: m.이름 || '', 이름: name, 상태: '출석', 기록자: S.user });
   else d['교사출석'] = d['교사출석'].filter(function (r) { return !(r.날짜 === date && r.모임ID === mid && r.이름 === name); });
   enqueue('saveTeacherAtt', { date: date, meetId: mid, meet: m.이름 || '', name: name, on: on });
   render();
-  if (name === S.user) toast(on ? (m.이름 || '모임') + ' 출석했어요. 함께해 주셔서 고마워요' : '출석을 취소했어요');
+  if (name === S.user) toast(on ? (m.이름 || '일정') + ' 출석했어요. 함께해 주셔서 고마워요' : '출석을 취소했어요');
 }
 /** 선생님이 직접 체크할 수 있는 가장 오래된 날 (오늘부터 2개월 전) */
 function tLimit() { var d = parseD(todayStr()); d.setMonth(d.getMonth() - 2); return ymd(d); }
@@ -2892,16 +2912,16 @@ function myAttLine() {
 VIEWS.tatt = function (p) {
   if (!S.params._data) { call('getTab', { tabs: ['교사모임', '교사출석'] }).then(function (d) { S.params._data = d; render(); }); return loadingView('교사 출석'); }
   var d = S.params._data, t = p.t || '출석 체크';
-  var tabs = ['출석 체크', '통계'].concat(isAdmin() ? ['모임 관리'] : []);
+  var tabs = ['출석 체크', '통계'].concat(isAdmin() ? ['일정 관리'] : []);
   var chips = tabs.map(function (x) { return '<button class="chip ' + (x === t ? 'on' : '') + '" onclick="S.params.t=\'' + x + '\';render()">' + x + '</button>'; }).join('');
-  var body = t === '통계' ? tStats(d, p) : t === '모임 관리' ? tManage(d) : tCheck(d, p);
+  var body = t === '통계' ? tStats(d, p) : t === '일정 관리' ? tManage(d) : tCheck(d, p);
   return topbar('교사 출석') + '<div class="chips">' + chips + '</div>' + body;
 };
 function tCheck(d, p) {
   var date = p.date || tDefaultDate(d), ms = meetsOn(d, date), names = S.boot.teachers.map(function (x) { return x.이름; });
-  var bar = '<div class="datebar"><button onclick="S.params.date=tStep(S.params._data,\'' + date + '\',-1);render()" aria-label="이전 모임">' + ic('back') + '</button>' +
-    '<div class="d">' + fmtD(date) + '<small>' + (date === todayStr() ? '오늘' : '화살표로 모임 날 바꾸기') + '</small></div>' +
-    '<button onclick="S.params.date=tStep(S.params._data,\'' + date + '\',1);render()" aria-label="다음 모임">' + ic('next') + '</button></div>';
+  var bar = '<div class="datebar"><button onclick="S.params.date=tStep(S.params._data,\'' + date + '\',-1);render()" aria-label="이전 일정">' + ic('back') + '</button>' +
+    '<div class="d">' + fmtD(date) + '<small>' + (date === todayStr() ? '오늘' : '화살표로 일정 날 바꾸기') + '</small></div>' +
+    '<button onclick="S.params.date=tStep(S.params._data,\'' + date + '\',1);render()" aria-label="다음 일정">' + ic('next') + '</button></div>';
   var cards = ms.map(function (m) {
     var on = tIsIn(d, date, m.ID, S.user);
     var here = names.filter(function (n) { return tIsIn(d, date, m.ID, n); });
@@ -2909,16 +2929,23 @@ function tCheck(d, p) {
       return '<button class="chip ' + (here.indexOf(n) >= 0 ? 'on' : '') + '" onclick="tToggle(\'' + date + '\',\'' + m.ID + '\',\'' + esc(n) + '\')">' + esc(n) + '</button>';
     }).join('') + '</div><p class="muted" style="margin:.3rem 0 0">이름을 누르면 그 선생님 출석이 바뀌어요</p>'
       : (here.length ? '<p class="muted" style="margin:.45rem 0 0">함께한 선생님: ' + here.map(esc).join(', ') + '</p>' : '');
-    return '<div class="card"><div style="display:flex;align-items:center;gap:.5rem"><h3 style="flex:1;margin:0">' + esc(m.이름) + '</h3><span class="badge g">' + here.length + ' / ' + names.length + '명</span></div>' +
-      '<button class="btn ' + (on ? 'ok' : 'light') + ' tbig" style="margin-top:.5rem" onclick="tToggle(\'' + date + '\',\'' + m.ID + '\',S.user)">' + (on ? ic('tick') + ' 출석했어요 (누르면 취소)' : '나 출석 체크하기') + '</button>' + all + '</div>';
+    return '<div class="card"><div style="display:flex;align-items:center;gap:.5rem"><h3 style="flex:1;margin:0">' + esc(m.이름) + (m.시간 ? ' <span class="muted" style="font-size:.85rem;font-weight:600">' + esc(m.시간) + '</span>' : '') + '</h3><span class="badge g">' + here.length + ' / ' + names.length + '명</span></div>' +
+      (date > todayStr() ? '<div class="hint warm" style="margin-top:.5rem">아직 다가올 일정이에요. 그날 함께해요!</div>' : '<button class="btn ' + (on ? 'ok' : 'light') + ' tbig" style="margin-top:.5rem" onclick="tToggle(\'' + date + '\',\'' + m.ID + '\',S.user)">' + (on ? ic('tick') + ' 출석했어요 (누르면 취소)' : '나 출석 체크하기') + '</button>') + all + '</div>';
   }).join('');
   // 지난 모임 중 체크 안 한 것: 한 번 눌러 체크 (2개월 전까지)
   var miss = isPastYear() && !isAdmin() ? [] : tMissed(d);
-  var missHtml = miss.length ? '<div class="card"><h3>체크 안 한 지난 모임 <span class="muted">' + miss.length + '개 · 2개월 전까지</span></h3><div class="chips wrap" style="padding:.3rem 0 0">' +
+  var missHtml = miss.length ? '<div class="card"><h3>체크 안 한 지난 일정 <span class="muted">' + miss.length + '개 · 2개월 전까지</span></h3><div class="chips wrap" style="padding:.3rem 0 0">' +
     miss.map(function (x) { return '<button class="ma" onclick="tToggle(\'' + x[0] + '\',\'' + x[1].ID + '\',S.user)">' + shortD(x[0]) + ' ' + esc(x[1].이름) + '</button>'; }).join('') +
-    '</div><p class="muted" style="margin:.35rem 0 0">참석했던 모임을 누르면 출석으로 바뀌어요</p></div>' : '';
-  return bar + '<div class="cols">' + (cards || '<div class="empty">이 날은 모임이 없어요</div>') + '</div>' + missHtml +
-    (isAdmin() ? '<p class="muted" style="text-align:center">기도회 · 행사는 [모임 관리]에서 추가해요</p>' : '');
+    '</div><p class="muted" style="margin:.35rem 0 0">참석했던 일정을 누르면 출석으로 바뀌어요</p></div>' : '';
+  // 다가오는 일정 (60일 안, 가까운 순)
+  var t0 = todayStr(), up = (d['교사모임'] || []).map(function (m) { return [meetNext(m, addDays(t0, 1)), m]; })
+    .filter(function (x) { return x[0] && x[0] <= addDays(t0, 60); }).sort(function (a, b) { return a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : byOrder(a[1], b[1]); }).slice(0, 5);
+  var upHtml = up.length ? '<div class="card"><h3>다가오는 일정</h3>' + up.map(function (x) {
+    var n = Math.round((parseD(x[0]) - parseD(t0)) / 864e5);
+    return '<button class="list-item" style="margin:0;box-shadow:none;border:0;border-top:1px solid var(--line);border-radius:0;padding:.6rem 0" onclick="S.params.date=\'' + x[0] + '\';render()"><span class="grow"><b>' + esc(x[1].이름) + '</b><br><span class="muted">' + esc(fmtD(x[0])) + (x[1].시간 ? ' · ' + esc(x[1].시간) : '') + '</span></span><span class="badge">' + (n === 1 ? '내일' : n + '일 뒤') + '</span></button>';
+  }).join('') + '</div>' : '';
+  return bar + '<div class="cols">' + (cards || '<div class="empty">이 날은 일정이 없어요</div>') + '</div>' + missHtml + upHtml +
+    (isAdmin() ? '<p class="muted" style="text-align:center">새벽기도 특송 · 교사기도회 · 교사대학 같은 일정은 [일정 관리]에서 추가해요</p>' : '');
 }
 function tStats(d, p) {
   var ms = (d['교사모임'] || []).slice().sort(byOrder), mid = p.mid || (ms[0] && ms[0].ID) || '';
@@ -2939,26 +2966,36 @@ function tStats(d, p) {
     '<div class="split"><div><div class="card"><h3>' + (isAdmin() ? '선생님별 출석' : '내 출석') + '</h3>' + (held.length ? '<table class="ftbl"><thead><tr><th>이름</th><th>출석</th><th>출석률</th></tr></thead><tbody>' + per.map(function (x) {
       return '<tr' + (x[0] === S.user ? ' style="background:var(--p-sky)"' : '') + '><td class="l">' + esc(x[0]) + '</td><td>' + x[1] + ' / ' + held.length + '</td><td><b>' + x[2] + '%</b></td></tr>';
     }).join('') + '</tbody></table>' : '<p class="muted">아직 기록이 없어요</p>') + '</div></div>' +
-    '<div><div class="card"><h3>최근 모임 인원</h3>' + (recent || '<p class="muted">아직 기록이 없어요</p>') + '</div></div></div>' +
+    '<div><div class="card"><h3>최근 인원</h3>' + (recent || '<p class="muted">아직 기록이 없어요</p>') + '</div></div></div>' +
     '<p class="muted">모인 날 = 한 명이라도 출석 체크한 날</p>';
 }
 function tManage(d) {
   var ms = (d['교사모임'] || []).slice().sort(byOrder);
-  return '<div class="hint">모임을 추가하면 그 요일 · 날짜에 출석 체크 칸이 생겨요. 주일예배처럼 매주 하는 모임은 [매주], 행사는 [한 번]으로 넣어요.</div>' +
+  var t0 = todayStr();
+  return '<div class="hint">선생님들이 함께하는 일정을 넣으면 그날 출석 체크 칸이 생겨요.<br>· <b>매주</b>: 주일예배, 교사기도회<br>· <b>매월</b>: 새벽기도 특송(예: 매월 첫째 토요일), 교사대학<br>· <b>한 번</b>: 수련회, 교사 리트릿 같은 행사</div>' +
     ms.map(function (m) {
-      return '<button class="list-item" onclick="meetForm2(\'' + m.ID + '\')"><span class="grow"><b>' + esc(m.이름) + '</b><br><span class="muted">' + (m.반복 === '한 번' ? esc(fmtD(m.날짜)) + ' 하루' : '매주 ' + esc(m.요일) + '요일') + '</span></span><span class="muted">고치기</span></button>';
+      var nx = meetNext(m, t0);
+      return '<button class="list-item" onclick="meetForm2(\'' + m.ID + '\')"><span class="grow"><b>' + esc(m.이름) + '</b><br><span class="muted">' + esc(meetRule(m)) + (nx && m.반복 !== '한 번' ? ' · 다음 ' + esc(shortD(nx)) : '') + '</span></span><span class="muted">고치기</span></button>';
     }).join('') +
-    '<button class="btn" style="margin-top:.6rem" onclick="meetForm2(\'\')">+ 모임 추가 (기도회 · 행사)</button>';
+    '<button class="btn" style="margin-top:.6rem" onclick="meetForm2(\'\')">+ 일정 추가</button>';
 }
 function meetForm2(id) {
-  var L = S.params._data['교사모임'], r = id ? L.filter(function (x) { return x.ID === id; })[0] : { 반복: '한 번', 요일: '수', 날짜: todayStr(), 순서: String(L.length + 1) };
+  var L = S.params._data['교사모임'], r = id ? L.filter(function (x) { return x.ID === id; })[0] : { 반복: '매월', 주차: '첫째', 요일: '토', 날짜: todayStr(), 순서: String(L.length + 1) };
   rowForm('교사모임', r, [
-    { k: '이름', label: '모임 이름', ph: '예) 교사 기도회, 여름수련회, 교사 리트릿', list: ['교사 기도회', '교사 회의', '교사 교육', '수련회', '교사 리트릿'] },
-    { k: '반복', label: '언제', type: 'select', opts: ['매주', '한 번'] },
-    { k: '요일', label: '매주라면: 요일', type: 'select', opts: WD },
+    { k: '이름', label: '일정 이름', ph: '예) 새벽기도 특송, 교사기도회, 교사대학', list: ['새벽기도 특송', '교사기도회', '교사대학', '교사 회의', '교사 교육', '수련회', '교사 리트릿'] },
+    { k: '반복', label: '언제', type: 'select', opts: ['매주', '매월', '한 번'] },
+    { k: '주차', label: '매월이라면: 몇째 주', type: 'select', opts: NTH, def: '첫째' },
+    { k: '요일', label: '매주 · 매월이라면: 요일', type: 'select', opts: WD },
     { k: '날짜', label: '한 번이라면: 날짜', type: 'date' },
+    { k: '시간', label: '시간 (적지 않아도 돼요)', ph: '예) 새벽 5:30, 오후 2시' },
     { k: '순서', label: '보이는 순서 (숫자)', type: 'number' }
-  ], id ? '모임 고치기' : '모임 추가');
+  ], id ? '일정 고치기' : '일정 추가');
+  // 고른 반복에 맞는 칸만 보이기
+  var sync = function () {
+    var v = $('rf_반복').value, show = function (k, on) { var el = $('rf_' + k); el.style.display = on ? '' : 'none'; el.previousElementSibling.style.display = on ? '' : 'none'; };
+    show('주차', v === '매월'); show('요일', v !== '한 번'); show('날짜', v === '한 번');
+  };
+  $('rf_반복').onchange = sync; sync();
 }
 
 /* ---------- 글씨 크기 ---------- */

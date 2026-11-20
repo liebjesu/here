@@ -1024,14 +1024,14 @@ function myInfoForm() {
       f('직분', '직분', t.직분, '집사, 권사, 청년…') +
       f('연락처', '연락처', t.연락처, '010-0000-0000', 'tel') +
       '<div class="hint warn" style="margin-top:.35rem">연락처 <b>뒷자리 4자리</b>가 로그인 번호예요. 바꾸면 다른 기기에서는 새 번호로 다시 들어와야 해요. (이 기기는 그대로)</div>' +
-      f('생일', '생일 (월-일)', t.생일, '03-15') +
+      '<div class="row"><div>' + f('생일', '생일 (월-일)', t.생일, '03-15') + '</div><div style="flex:0 0 7rem">' + luSel('mi_양음력', t.양음력) + '</div></div>' +
       f('주소', '주소', t.주소, '적지 않아도 돼요') +
       '<button class="btn" style="margin-top:1rem" onclick="saveMyInfo()">저장</button>');
   });
 }
 function saveMyInfo() {
   if (!needSynced()) return;
-  var o = {}; ['직분', '연락처', '생일', '주소'].forEach(function (k) { o[k] = $('mi_' + k).value.trim(); });
+  var o = {}; ['직분', '연락처', '생일', '양음력', '주소'].forEach(function (k) { o[k] = $('mi_' + k).value.trim(); });
   call('saveMyInfo', o).then(function (d) {
     if (d && d.token) { S._token = d.token; saveLogin(S.user, !!store('hs_login')); }
     var me = S.boot.teachers.filter(function (x) { return x.이름 === S.user; })[0]; if (me) me.직분 = o.직분;
@@ -1784,17 +1784,67 @@ function attLine(sun, fut) {
   var wd = parseD(todayStr()).getDay();
   return wd === 0 ? '오늘 함께한 친구들을 기록해 주세요.' : wd <= 2 ? '지난 주일 출석, 빠짐없이 남겨 주세요.' : '주일까지 ' + (7 - wd) + '일, 친구들을 위해 기도해요.';
 }
-/** 다가오는 생일 (오늘부터 7일 안, 재적 학생) */
+
+/* ========================= 음력 생일 =========================
+   '양음력' 이 음력이면 그 해 양력 날짜로 바꿔서 알려 줌 (휴대폰 브라우저의 한국 달력 'dangi' 사용).
+   윤달은 평달 날짜로, 그 달에 30일이 없으면 29일로. 바꿀 수 없는 기기에서는 적힌 날짜 그대로 */
+var LUN = {}, LUN_FMT;
+function lunFmt() {
+  if (LUN_FMT !== undefined) return LUN_FMT;
+  LUN_FMT = null;
+  ['dangi', 'chinese'].some(function (c) {
+    try { var f = new Intl.DateTimeFormat('en-u-ca-' + c, { timeZone: 'UTC', year: 'numeric', month: 'numeric', day: 'numeric' });
+      if (f.resolvedOptions().calendar === c && f.formatToParts) { LUN_FMT = f; return true; } } catch (e) {}
+    return false;
+  });
+  return LUN_FMT;
+}
+/** 음력 y년의 'MM-DD' → 양력 'YYYY-MM-DD' 표 */
+function lunarMap(y) {
+  if (LUN[y]) return LUN[y];
+  var f = lunFmt(); if (!f) return null;
+  var m = {}, t = Date.UTC(y, 0, 1), end = Date.UTC(y + 1, 2, 1);
+  for (; t < end; t += 864e5) {
+    var P = {}; f.formatToParts(new Date(t)).forEach(function (x) { P[x.type] = x.value; });
+    if (+(P.relatedYear || P.year) !== y || !/^\d+$/.test(P.month)) continue;   // 윤달(6bis 등)은 건너뜀
+    m[('0' + P.month).slice(-2) + '-' + ('0' + P.day).slice(-2)] = new Date(t).toISOString().slice(0, 10);
+  }
+  return (LUN[y] = m);
+}
+function lunarSolar(y, md) { var m = lunarMap(y); return m ? (m[md] || (md.slice(3) === '30' ? m[md.slice(0, 3) + '29'] : '')) || '' : ''; }
+/** from(YYYY-MM-DD) 이후 가장 가까운 생일 (양력 날짜) */
+function nextBday(md, lunar, from) {
+  if (!/^\d{2}-\d{2}$/.test(md || '')) return '';
+  var Y = +from.slice(0, 4);
+  if (lunar && lunFmt()) {
+    var c = [Y - 1, Y, Y + 1].map(function (y) { return lunarSolar(y, md); }).filter(function (d) { return d && d >= from; }).sort();
+    if (c[0]) return c[0];
+  }
+  var d = Y + '-' + md; return d >= from ? d : (Y + 1) + '-' + md;
+}
+function dayGap(a, b) { return Math.round((Date.parse(b) - Date.parse(a)) / 864e5); }
+function isLunar(o) { return (o && o.양음력) === '음력'; }
+/** 생일 글자: 양력 '3/15' · 음력 '음 3/15 (올해 양력 4/12)' */
+function bdayText(md, lunar) {
+  if (!/^\d{2}-\d{2}$/.test(md || '')) return md || '';
+  var s = (+md.slice(0, 2)) + '/' + (+md.slice(3));
+  if (!lunar) return s;
+  var n = nextBday(md, true, todayStr());
+  return '음 ' + s + (n && lunFmt() ? ' (다음 생일 ' + shortD(n) + ')' : '');
+}
+function luSel(id, v) { return '<label>양력 · 음력</label><select id="' + id + '"><option>양력</option><option' + (v === '음력' ? ' selected' : '') + '>음력</option></select>'; }
+
+/** 다가오는 생일 (오늘부터 7일 안, 재적 학생 · 음력은 양력으로 바꿔서) */
 function birthdayCard() {
   if (isFutureYear() || isPastYear()) return '';
-  var t = todayStr(), hc = homeClass(), days = {};
-  for (var i = 0; i < 7; i++) days[addDays(t, i).slice(5)] = i;
-  var list = students().filter(function (s) { return s.상태 === '재적' && /^\d{4}-\d{2}-\d{2}/.test(s.생년월일 || '') && days[s.생년월일.slice(5, 10)] !== undefined; })
-    .map(function (s) { return { s: s, i: days[s.생년월일.slice(5, 10)] }; })
+  var t = todayStr(), hc = homeClass();
+  var list = students().filter(function (s) { return s.상태 === '재적' && /^\d{4}-\d{2}-\d{2}/.test(s.생년월일 || ''); })
+    .map(function (s) { var n = nextBday(s.생년월일.slice(5, 10), isLunar(s), t); return { s: s, i: n ? dayGap(t, n) : 99 }; })
+    .filter(function (x) { return x.i >= 0 && x.i < 7; })
     .sort(function (a, b) { return ((a.s.반 === hc ? 0 : 1) - (b.s.반 === hc ? 0 : 1)) || a.i - b.i; });
   if (!list.length) return '';
   var names = list.slice(0, 6).map(function (x) {
-    return '<button class="bd-n" onclick="go(\'student\',{id:\'' + x.s.ID + '\'})"><b>' + esc(x.s.이름) + '</b><small>' + (x.i === 0 ? '오늘' : x.i === 1 ? '내일' : shortD(addDays(t, x.i))) + ' · ' + esc(x.s.반) + '반</small></button>';
+    return '<button class="bd-n" onclick="go(\'student\',{id:\'' + x.s.ID + '\'})"><b>' + esc(x.s.이름) + '</b><small>' + (x.i === 0 ? '오늘' : x.i === 1 ? '내일' : shortD(addDays(t, x.i))) + ' · ' + esc(x.s.반) + '반' + (isLunar(x.s) ? ' · 음력' : '') + '</small></button>';
   }).join('');
   return '<div class="bday"><span class="bi">' + ic('cake') + '</span><div class="bt"><b>' + (list[0].i === 0 ? '오늘 생일인 친구가 있어요!' : '이번 주 생일인 친구') + '</b><span>축하 한마디가 큰 힘이 돼요.' + (list.length > 6 ? ' 외 ' + (list.length - 6) + '명' : '') + '</span><div class="bd-l">' + names + '</div></div></div>';
 }
@@ -1945,20 +1995,22 @@ VIEWS.directory = function (p) {
   if (!S.params._data) { call('getDirectory').then(function (d) { S.params._data = d; render(); }); return loadingView('교사 주소록'); }
   var q = (p.q || '').trim(), mm = todayStr().slice(5, 7);
   var all = S.params._data;
-  var bd = all.filter(function (t) { return (t.생일 || '').slice(0, 2) === mm; });
+  var ym = todayStr().slice(0, 7);
+  var bd = all.map(function (t) { var n = nextBday(t.생일, isLunar(t), ym + '-01'); return n && n.slice(0, 7) === ym ? { t: t, n: n } : null; }).filter(Boolean)
+    .sort(function (a, b) { return a.n < b.n ? -1 : 1; });
   var list = all.filter(function (t) { return !q || (t.이름 + t.직분 + t.역할 + t.담당반).indexOf(q) >= 0; });
   var card = function (t) {
     var sub = [t.역할, t.담당반 ? t.담당반 + '반 담임' : ''].filter(Boolean).join(' · ');
     return '<div class="card"><div style="display:flex;align-items:center;gap:.6rem"><span class="av">' + esc(t.이름.charAt(0)) + '</span><div style="flex:1;min-width:0"><b style="font-size:1.05rem">' + esc(t.이름) + '</b> <span class="muted">' + esc(t.직분 || '') + '</span>' +
       (sub ? '<div class="muted">' + esc(sub) + '</div>' : '') + '</div></div>' +
-      '<div class="muted" style="margin-top:.45rem">' + (t.연락처 ? esc(t.연락처) : '연락처 없음') + (t.생일 ? ' · 생일 ' + esc(t.생일.replace('-', '/')) : '') + '</div>' +
+      '<div class="muted" style="margin-top:.45rem">' + (t.연락처 ? esc(t.연락처) : '연락처 없음') + (t.생일 ? ' · 생일 ' + esc(bdayText(t.생일, isLunar(t))) : '') + '</div>' +
       (t.주소 ? '<div class="muted">' + esc(t.주소) + '</div>' : '') +
       (t.이름 === S.user ? '<button class="btn light small" style="margin-top:.55rem" onclick="myInfoForm()">' + ic('pen') + ' 내 정보 고치기</button>' : '') +
       (t.연락처 && t.이름 !== S.user ? '<div class="row" style="margin-top:.55rem"><a class="btn ok small" href="tel:' + tel(t.연락처) + '">' + ic('phone') + '전화</a><a class="btn light small" href="sms:' + tel(t.연락처) + '">문자</a></div>' : '') + '</div>';
   };
   return topbar('교사 주소록') +
     '<input style="margin-top:.7rem" placeholder="이름·역할로 찾기" value="' + esc(q) + '" onchange="go(\'directory\',{q:this.value},true)">' +
-    (bd.length && !q ? '<div class="hint">이번 달 생일: <b>' + bd.map(function (t) { return esc(t.이름) + ' (' + esc(t.생일.replace('-', '/')) + ')'; }).join(', ') + '</b></div>' : '') +
+    (bd.length && !q ? '<div class="hint">이번 달 생일: <b>' + bd.map(function (x) { return esc(x.t.이름) + ' (' + shortD(x.n) + (isLunar(x.t) ? ' · 음력' : '') + ')'; }).join(', ') + '</b></div>' : '') +
     '<div class="cols">' + list.map(card).join('') + '</div>' +
     (isAdmin() ? '<button class="btn light" style="margin-top:.6rem" onclick="go(\'admTeachers\')">' + ic('people') + ' 선생님 정보 · 권한 고치기</button>' : '');
 };
@@ -2314,7 +2366,7 @@ VIEWS.student = function (p) {
     return topbar('학생 정보') + '<div class="empty load">불러오는 중…</div>';
   }
   var d = S.params._data, s = d.student;
-  var info = [['반', s.반 + '반'], ['상태', s.상태], ['생년월일', s.생년월일], ['학교', s.학교], ['보호자', s.보호자], ['등록일', s.등록일]]
+  var info = [['반', s.반 + '반'], ['상태', s.상태], ['생년월일', s.생년월일 ? s.생년월일 + (isLunar(s) ? ' (음력' + (lunFmt() && /^\d{4}-\d{2}-\d{2}/.test(s.생년월일) ? ' · 다음 생일 ' + shortD(nextBday(s.생년월일.slice(5, 10), true, todayStr())) : '') + ')' : '') : ''], ['학교', s.학교], ['보호자', s.보호자], ['등록일', s.등록일]]
     .filter(function (x) { return x[1]; }).map(function (x) { return '<div><span class="muted">' + x[0] + '</span> &nbsp;<b>' + esc(x[1]) + '</b></div>'; }).join('');
   var att = d.attendance.slice(0, 20).reverse();
   var dots = att.map(function (r) { return '<i class="' + (r.상태 === '출석' ? 'p' : 'a') + '" title="' + r.날짜 + '"></i>'; }).join('');
@@ -2345,13 +2397,13 @@ function studentForm(id, cls) {
   var f = function (k, ph, type) { return '<label>' + k + '</label><input id="f_' + k + '" type="' + (type || 'text') + '" value="' + esc(s[k] || '') + '" placeholder="' + (ph || '') + '">'; };
   modal('<h2>' + (id ? '학생 정보 고치기' : '새 학생 추가') + '</h2>' +
     f('이름') + '<div class="row"><div><label>반</label><select id="f_반">' + clsOpts + '</select></div><div><label>상태</label><select id="f_상태">' + stOpts + '</select></div></div>' +
-    f('연락처', '010-0000-0000', 'tel') + f('학교') + f('생년월일', '2010-01-01') + f('보호자') + f('보호자연락처', '', 'tel') +
+    f('연락처', '010-0000-0000', 'tel') + f('학교') + '<div class="row"><div>' + f('생년월일', '2010-01-01') + '</div><div style="flex:0 0 7rem">' + luSel('f_양음력', s.양음력) + '</div></div>' + f('보호자') + f('보호자연락처', '', 'tel') +
     '<label>특이사항</label><textarea id="f_특이사항">' + esc(s.특이사항 || '') + '</textarea>' +
     '<button class="btn" style="margin-top:1rem" onclick="saveStudent(\'' + (id || '') + '\')">저장</button>');
 }
 function saveStudent(id) {
   var o = { ID: id || undefined };
-  ['이름', '반', '상태', '연락처', '학교', '생년월일', '보호자', '보호자연락처', '특이사항'].forEach(function (k) { o[k] = $('f_' + k).value.trim(); });
+  ['이름', '반', '상태', '연락처', '학교', '생년월일', '양음력', '보호자', '보호자연락처', '특이사항'].forEach(function (k) { o[k] = $('f_' + k).value.trim(); });
   if (!o.이름) { toast('이름을 써 주세요'); return; }
   if (!o.ID) { o.ID = newId('S' + (S.boot.year !== (S.boot.years || [])[0] ? S.boot.year.slice(2) + '-' : '')); o.등록일 = todayStr(); }
   var saved = upsertLocal(S.boot.students, o);
@@ -2804,7 +2856,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261120182025';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261120182634';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

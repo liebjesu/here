@@ -743,6 +743,24 @@ button.set-row:active,a.set-row:active{background:var(--bg)}
 .set-row .sv{display:flex;align-items:center;gap:.25rem}
 .set-row .sv svg{width:1rem;height:1rem}
 .icard .ns{display:block}
+
+/* 감성 요소 */
+.gedit{display:inline-flex;align-items:center;justify-content:center;width:2rem;height:2rem;margin:-.4rem 0 -.5rem .1rem;vertical-align:middle;border-radius:10px;color:var(--sub)}
+.gedit svg{width:1rem;height:1rem}
+.gedit:active{background:var(--line)}
+.hint.warm{display:flex;gap:.6rem;align-items:flex-start;background:var(--warn-soft);color:#7a4d0c;line-height:1.5}
+.hint.warm svg{flex:none;width:1.2rem;height:1.2rem;margin-top:.15rem}
+.bday{display:flex;gap:.75rem;align-items:flex-start;margin-top:12px;padding:.95rem 1rem;background:linear-gradient(135deg,#fff 55%,#fdf3e3);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.bday .bi{flex:none;width:2.5rem;height:2.5rem;border-radius:14px;background:var(--warn-soft);color:#c47f12;display:flex;align-items:center;justify-content:center}
+.bday .bi svg{width:1.35rem;height:1.35rem}
+.bday .bt{flex:1;min-width:0}
+.bday .bt>b{display:block;font-size:.98rem;font-weight:800;letter-spacing:-.02em}
+.bday .bt>span{display:block;font-size:.8rem;color:var(--sub);margin-top:.1rem}
+.bd-l{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.55rem}
+.bd-n{display:flex;flex-direction:column;align-items:flex-start;padding:.4rem .7rem;min-height:44px;justify-content:center;background:#fff;border:1px solid var(--line);border-radius:12px;text-align:left}
+.bd-n b{font-size:.9rem;font-weight:800}
+.bd-n small{font-size:.72rem;color:var(--sub);font-weight:600}
+.savebar .btn[disabled]{opacity:.55}
 </style>
 </head>
 <body>
@@ -770,6 +788,8 @@ function sigFooter() { return '<div class="sig"><img src="' + SIG + '" alt="대�
 
 /* ===== 아이콘 (둥근 선 + 옅은 면, 24px 격자) ===== */
 var ICONS = {
+  cake: '<path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8"/><path d="M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2.5 2 4 2 2-1 2-1"/><path d="M2 21h20"/><path d="M7 8v3M12 8v3M17 8v3"/><path d="M7 4h.01M12 4h.01M17 4h.01"/>',
+  pen: '<path d="M12 20h9"/><path d="M16.4 3.6a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
   check: '<rect x="3.5" y="3.5" width="17" height="17" rx="6" fill="currentColor" fill-opacity=".16"/><path d="M8 12.4l2.8 2.8 5.4-5.6"/>',
   sprout: '<path d="M12 20.5v-7"/><path d="M12 13.5c.2-4.2 2.8-6.6 7.5-6.6-.1 4.4-2.9 6.6-7.5 6.6z" fill="currentColor" fill-opacity=".18"/><path d="M12 15.5c-.2-3.3-2.4-5.3-6.2-5.3.1 3.5 2.4 5.3 6.2 5.3z"/><path d="M7.5 20.5h9"/>',
   chat: '<path d="M20 11.4a7.6 7.6 0 0 1-11.2 6.7L4 19.8l1.7-4.4A7.6 7.6 0 1 1 20 11.4z" fill="currentColor" fill-opacity=".16"/><path d="M8.6 11.5h.01M12.2 11.5h.01M15.8 11.5h.01" stroke-width="2.6"/>',
@@ -854,6 +874,13 @@ function fmtD(s, withYear) { if (!s || !/^\d{4}-\d{2}-\d{2}/.test(s)) return s |
 function shortD(s) { var d = parseD(s); return (d.getMonth() + 1) + '/' + d.getDate(); }
 function todayStr() { return (S.boot && S.boot.today) || ymd(new Date()); }
 function lastSunday() { var d = parseD(todayStr()); d.setDate(d.getDate() - d.getDay()); return ymd(d); }
+/* 고른 연도 기준 주일: 올해면 지난(오늘) 주일, 다음 해면 그 해 첫 주일, 지난 해면 그 해 마지막 주일 */
+function viewYear() { return (S.boot && S.boot.year) || todayStr().slice(0, 4); }
+function isFutureYear() { return viewYear() > todayStr().slice(0, 4); }
+function firstSundayOf(y) { var d = parseD(y + '-01-01'); d.setDate(d.getDate() + (7 - d.getDay()) % 7); return ymd(d); }
+function lastSundayOf(y) { var d = parseD(y + '-12-31'); d.setDate(d.getDate() - d.getDay()); return ymd(d); }
+function yearSunday() { var y = viewYear(), ty = todayStr().slice(0, 4); return y === ty ? lastSunday() : y > ty ? firstSundayOf(y) : lastSundayOf(y); }
+function isFutureDay(d) { return d > todayStr(); }
 function addDays(s, n) { var d = parseD(s); d.setDate(d.getDate() + n); return ymd(d); }
 function tel(n) { return String(n || '').replace(/[^0-9]/g, ''); }
 function isAdmin() { return S.role === 'admin'; }
@@ -902,7 +929,7 @@ function refreshQuiet(view, spec) {
 /** 로그인 직후: 이번 주 출석과 각 화면 데이터를 한 번에 미리 받기 */
 function warmUp() {
   if (S._warm) return; S._warm = true;
-  var sun = lastSunday();
+  var sun = yearSunday();
   call('prefetch', { date: sun }, true).then(function (d) {
     CACHE.stats = d.stats; CACHE.newcomers = d.newcomers; CACHE.notes = d.notes; CACHE.notices = d.notices; CACHE.ministry = d.ministry;
     if (!ATT[sun]) ATT[sun] = d.attendance;
@@ -1063,7 +1090,7 @@ function viewLogin() {
       '<br><span class="muted">' + esc(t.ok ? sub : '연락처 없음') + '</span></span></button>';
   }).join('');
   return head + appIntro() + (LOGIN.years.length > 1 ? years : '') +
-    '<h3 style="margin:1rem 0 .2rem">어느 선생님이세요?</h3><p class="muted" style="margin:0">내 이름을 눌러 주세요</p>' + rows + verLine('margin-top:1.2rem') + sigFooter();
+    '<h3 style="margin:1rem 0 .2rem">어느 선생님이세요?</h3><p class="muted" style="margin:0">반가워요! 내 이름을 눌러 주세요</p>' + rows + verLine('margin-top:1.2rem') + sigFooter();
 }
 function pickYear(y) { LOGIN.year = y; LOGIN.step = 'name'; render(); if (!LOGIN.lists[y]) loadLoginInfo(y); else loadLoginInfo(y); }
 function pickTeacher(n) { LOGIN.name = n; LOGIN.code = ''; LOGIN.step = 'code'; render(); }
@@ -1332,12 +1359,13 @@ VIEWS.admSettings = function () {
   return topbar('앱 설정') +
     '<label>부서명 (앱에 표시)</label><input id="s_t" value="' + esc(S.boot.title) + '">' +
     '<label>교사 단톡방 링크 (선택)</label><input id="s_c" value="' + esc(S.boot.chatLink || '') + '" placeholder="https://open.kakao.com/...">' +
+    '<label>첫 화면 인사말 (한 줄에 하나, 날마다 돌아가며 · 비우면 기본 인사)</label><textarea id="s_g" style="min-height:7rem">' + esc(greetLines().join('\n')) + '</textarea>' +
     '<button class="btn" style="margin-top:1rem" onclick="saveSettings()">저장</button>' +
     (S.boot.sheetUrl ? '<a class="btn light" style="margin-top:.6rem" href="' + esc(S.boot.sheetUrl) + '" target="_blank">' + esc(S.boot.year) + '년 구글시트 열기</a>' : '');
 };
 function saveSettings() {
-  var o = { 부서명: $('s_t').value.trim(), 단체톡링크: $('s_c').value.trim() };
-  call('saveSettings', o).then(function () { S.boot.title = o.부서명; S.boot.chatLink = o.단체톡링크; toast('저장했어요'); });
+  var o = { 부서명: $('s_t').value.trim(), 단체톡링크: $('s_c').value.trim(), 인사말: $('s_g').value.split(/\r?\n/).map(function (x) { return x.trim(); }).filter(Boolean).join('\n') };
+  call('saveSettings', o).then(function () { S.boot.title = o.부서명; S.boot.chatLink = o.단체톡링크; S.boot.greeting = o.인사말; toast('저장했어요'); });
 }
 
 /* ---- 연도 관리 ---- */
@@ -1369,17 +1397,17 @@ function createYear(y) {
 
 VIEWS.home = function () {
   var b = S.boot, n = b.latestNotice;
-  var hc = homeClass(), sun = lastSunday();
+  var hc = homeClass(), sun = yearSunday(), fut = isFutureYear();
   // 메뉴: 흰 카드 + 아이콘 둘레만 옅은 색. 화면 폭 · 글씨 크기에 맞춰 줄 수가 자동으로 바뀜 (보통 4열)
   var M = function (icon, label, view, cls, keys) { return '<button class="mt ' + cls + '" data-k="' + label + ' ' + (keys || '') + '" onclick="go(\'' + view + '\')"><span class="ib">' + ic(icon) + '</span><b>' + label + '</b></button>'; };
   var past = isPastYear() ? '<div class="past"><span>' + esc(b.year) + '년 자료 · 참고용</span><button class="btn small" onclick="switchYear(\'' + (b.editYear || b.latestYear) + '\')">' + (b.editYear || b.latestYear) + '년으로</button></div>' : '';
   return '<div class="hd"><span class="logo"><img src="' + SIG + '" alt="대한예수교장로회 목민교회"></span>' +
     '<button class="yearchip" onclick="yearMenu()" aria-label="연도 바꾸기">' + esc(b.year) + ' <i>▼</i></button>' +
     '<button class="icon-btn" onclick="go(\'notices\')" aria-label="공지">' + ic('bell') + (newNotice() ? '<i class="dot"></i>' : '') + '</button></div>' + past +
-    '<div class="welcome"><div><b>' + esc(S.user) + ' 선생님,</b><span>' + greet() + '</span></div><i class="wb">' + brandName() + '</i></div>' +
+    '<div class="welcome"><div><b>' + esc(S.user) + ' 선생님,</b><span>' + greet() + (isAdmin() ? ' <button class="gedit" onclick="greetForm()" aria-label="인사말 고치기">' + ic('pen') + '</button>' : '') + '</span></div><i class="wb">' + brandName() + '</i></div>' +
     '<button class="main-att" onclick="openAttend()"><span class="tx"><small>' + ic('calendar') + shortD(sun) + ' 주일예배</small>' +
-    '<b>' + (hc ? esc(hc) + '반 출석 체크' : '출석 체크') + '</b><p>참석으로 예배를 함께 세워요.</p></span><span class="go">' + ic('arrow') + '</span></button>' +
-    '<div class="info2">' + myAttCard() + noticeCard(n) + '</div>' + installBanner() +
+    '<b>' + (hc ? esc(hc) + '반 출석 체크' : '출석 체크') + '</b><p>' + attLine(sun, fut) + '</p></span><span class="go">' + ic('arrow') + '</span></button>' +
+    '<div class="info2">' + myAttCard() + noticeCard(n) + '</div>' + birthdayCard() + installBanner() +
     '<div class="sec-h"><h2>주요 메뉴</h2><label class="msearch" style="margin:0">' + ic('search') + '<input type="search" placeholder="메뉴 검색" aria-label="메뉴 검색" oninput="menuFilter(this.value)"></label></div>' +
     '<div class="mgrid">' +
     M('check', '교사출석', 'tatt', 't-blue', '내출석 교사 기도회') +
@@ -1407,10 +1435,52 @@ VIEWS.home = function () {
       (canShowInstall() ? '<button class="btn light small" onclick="installGuide()">' + ic('plusapp') + '홈 화면에 추가</button>' : '') + '</div>' : '') +
     verLine('margin-top:1rem');
 };
-/** 짧은 인사: 주일과 평일을 다르게 */
+/** 인사말: 관리자가 '인사말' 을 적어 두면 그 문장(여러 줄이면 날마다 돌아가며), 없으면 요일 · 시간에 맞춘 기본 인사 */
+var GREET_DEF = {
+  sun: ['은혜로운 주일이에요. 친구들을 반갑게 맞아 주세요.', '오늘 만나는 한 명 한 명이 소중한 선물이에요.', '주일 예배, 함께 세워 주셔서 고마워요.'],
+  sat: ['내일은 주일! 친구들 얼굴을 떠올리며 기도해요.', '내일 예배를 함께 준비해요. 오늘도 평안하세요.'],
+  am: ['좋은 아침이에요. 오늘도 주님의 평안이 함께하길 바랍니다.', '새 아침, 우리 반 친구들을 위해 짧게 기도해 볼까요?'],
+  pm: ['오후도 힘내세요. 선생님의 수고를 주님이 기억하세요.', '바쁜 하루 속에서도 평안이 가득하길 바랍니다.'],
+  ev: ['오늘 하루도 수고 많으셨어요. 편안한 저녁 되세요.', '하루를 마치며, 우리 반 친구들을 축복해 주세요.']
+};
+function greetLines() { return String((S.boot && S.boot.greeting) || '').split(/\r?\n/).map(function (x) { return x.trim(); }).filter(Boolean); }
 function greet() {
-  var d = parseD(todayStr()).getDay();
-  return d === 0 ? '은혜로운 주일 보내세요.' : d === 6 ? '내일 주일 예배를 함께 준비해요.' : '오늘도 주님의 평안이 함께하길 바랍니다.';
+  var t = todayStr(), wd = parseD(t).getDay(), h = new Date().getHours();
+  var day = Math.floor(parseD(t).getTime() / 864e5);
+  var own = greetLines();
+  var L = own.length ? own : wd === 0 ? GREET_DEF.sun : wd === 6 ? GREET_DEF.sat : h < 12 ? GREET_DEF.am : h < 18 ? GREET_DEF.pm : GREET_DEF.ev;
+  return esc(L[day % L.length]);
+}
+function greetForm() {
+  modal('<h2>인사말 고치기</h2><p class="muted" style="margin:.2rem 0 .4rem">선생님 이름 아래에 보이는 문장이에요. <b>한 줄에 하나씩</b> 여러 개를 쓰면 날마다 돌아가며 보여요. 비워 두면 요일 · 시간에 맞춘 기본 인사가 나와요.</p>' +
+    '<textarea id="g_greet" style="min-height:9rem" placeholder="예) 오늘도 주님의 평안이 함께하길 바랍니다.">' + esc(greetLines().join('\n')) + '</textarea>' +
+    '<button class="btn" style="margin-top:1rem" onclick="saveGreet()">저장</button>');
+}
+function saveGreet() {
+  if (!needSynced()) return;
+  var v = $('g_greet').value.split(/\r?\n/).map(function (x) { return x.trim(); }).filter(Boolean).join('\n');
+  call('saveSettings', { 인사말: v }).then(function () { S.boot.greeting = v; closeModal(); render(); toast('인사말을 바꿨어요'); });
+}
+/** 출석 카드 아랫줄: 날짜에 맞는 한마디 */
+function attLine(sun, fut) {
+  if (fut) return esc(viewYear()) + '년은 ' + shortD(sun) + ' 첫 주일부터 체크할 수 있어요.';
+  if (isPastYear()) return esc(viewYear()) + '년 출석을 돌아봐요.';
+  var wd = parseD(todayStr()).getDay();
+  return wd === 0 ? '오늘 함께한 친구들을 기록해 주세요.' : wd <= 2 ? '지난 주일 출석, 빠짐없이 남겨 주세요.' : '주일까지 ' + (7 - wd) + '일, 친구들을 위해 기도해요.';
+}
+/** 다가오는 생일 (오늘부터 7일 안, 재적 학생) */
+function birthdayCard() {
+  if (isFutureYear() || isPastYear()) return '';
+  var t = todayStr(), hc = homeClass(), days = {};
+  for (var i = 0; i < 7; i++) days[addDays(t, i).slice(5)] = i;
+  var list = students().filter(function (s) { return s.상태 === '재적' && /^\d{4}-\d{2}-\d{2}/.test(s.생년월일 || '') && days[s.생년월일.slice(5, 10)] !== undefined; })
+    .map(function (s) { return { s: s, i: days[s.생년월일.slice(5, 10)] }; })
+    .sort(function (a, b) { return ((a.s.반 === hc ? 0 : 1) - (b.s.반 === hc ? 0 : 1)) || a.i - b.i; });
+  if (!list.length) return '';
+  var names = list.slice(0, 6).map(function (x) {
+    return '<button class="bd-n" onclick="go(\'student\',{id:\'' + x.s.ID + '\'})"><b>' + esc(x.s.이름) + '</b><small>' + (x.i === 0 ? '오늘' : x.i === 1 ? '내일' : shortD(addDays(t, x.i))) + ' · ' + esc(x.s.반) + '반</small></button>';
+  }).join('');
+  return '<div class="bday"><span class="bi">' + ic('cake') + '</span><div class="bt"><b>' + (list[0].i === 0 ? '오늘 생일인 친구가 있어요!' : '이번 주 생일인 친구') + '</b><span>축하 한마디가 큰 힘이 돼요.' + (list.length > 6 ? ' 외 ' + (list.length - 6) + '명' : '') + '</span><div class="bd-l">' + names + '</div></div></div>';
 }
 /** 최근 7일 안에 올라온 공지가 있으면 종 아이콘에 점 */
 /* 공지 읽음 표시: 이 기기에 '읽은 공지 ID' 를 연도별로 기억 */
@@ -1443,6 +1513,7 @@ function menuFilter(q) {
 function myAttCard() {
   var head = '<div class="icard"><span class="ih"><b>내 출석 현황</b><button class="more" onclick="go(\'tatt\')">자세히 보기' + ic('next') + '</button></span>';
   var d = CACHE.tatt; if (!d) return head + '<span class="skel"></span></div>';
+  if (isFutureYear()) return head + '<span class="muted">' + esc(viewYear()) + '년 모임은 ' + shortD(firstSundayOf(viewYear())) + ' 첫 주일부터 체크할 수 있어요</span></div>';
   var seen = {}, list = [];
   for (var i = 0; i < 7; i++) {
     var dt = addDays(todayStr(), -i);
@@ -1765,9 +1836,9 @@ function meetForm(id) {
 /* ---------- 출석 체크 ---------- */
 function openAttend() { S.att = null; go('attend'); }
 VIEWS.attend = function () {
-  if (!S.att) S.att = { date: lastSunday(), cls: homeClass(), marks: {}, reasons: {}, touched: {}, showAll: false, loaded: false };
+  if (!S.att) S.att = { date: yearSunday(), cls: homeClass(), marks: {}, reasons: {}, touched: {}, showAll: false, loaded: false };
   var a = S.att;
-  var datebar = '<div class="datebar"><button onclick="attDate(-7)" aria-label="지난주">' + ic('back') + '</button><div class="d">' + fmtD(a.date) + '<small>' + (a.date === lastSunday() ? '이번 주일' : '화살표로 날짜 바꾸기') + '</small></div><button onclick="attDate(7)" aria-label="다음주">' + ic('next') + '</button></div>';
+  var datebar = '<div class="datebar"><button onclick="attDate(-7)" aria-label="지난주">' + ic('back') + '</button><div class="d">' + fmtD(a.date) + '<small>' + (a.date === lastSunday() ? '이번 주일' : a.date === firstSundayOf(viewYear()) ? viewYear() + '년 첫 주일' : isFutureDay(a.date) ? '다가올 주일' : '화살표로 날짜 바꾸기') + '</small></div><button onclick="attDate(7)" aria-label="다음주">' + ic('next') + '</button></div>';
   if (!a.loaded && ATT[a.date]) { applyAtt(ATT[a.date]); refreshAtt(a.date); }
   if (!a.loaded) { loadAttendance(); return topbar('출석 체크') + datebar + '<div class="empty load">불러오는 중…</div>'; }
 
@@ -1795,15 +1866,17 @@ VIEWS.attend = function () {
   }).join('') || '<div class="empty">이 반에 학생이 없어요</div>';
   var nP = list.filter(function (s) { return a.marks[s.ID] === '출석'; }).length;
 
+  var fu = isFutureDay(a.date);
   return topbar(a.cls + '반 출석') + datebar +
     '<div class="chips">' + chips + '</div>' +
-    '<p class="muted" style="margin:0 0 .3rem">이름을 누르면 <b class="g">출석</b>, 한 번 더 누르면 결석으로 바뀝니다.</p>' +
+    (fu ? '<div class="hint warm" style="margin:0 0 .6rem">' + ic('calendar') + '<span><b>' + fmtD(a.date) + '</b>은 아직 오지 않은 주일이에요.<br>그날 친구들을 만나고 체크해 주세요. 지금은 명단만 볼 수 있어요.</span></div>'
+      : '<p class="muted" style="margin:0 0 .3rem">이름을 누르면 <b class="g">출석</b>, 한 번 더 누르면 결석으로 바뀝니다.</p>') +
     '<div class="stulist">' + rows + '</div>' +
     '<div class="row" style="margin-top:.6rem"><button class="btn light small" onclick="allPresent()">모두 출석</button>' +
     '<button class="btn light small" onclick="S.att.showAll=!S.att.showAll;render()">' + (a.showAll ? '재적만 보기' : '장결·타교회 (' + hiddenCnt + ')') + '</button>' +
     '<button class="btn light small" onclick="studentForm(null,\'' + a.cls + '\')">학생 추가</button></div>' +
     '<div class="savebar"><div class="in"><div class="sum"><span class="g">출석 ' + nP + '</span><br><span class="r">결석 ' + (list.length - nP) + '</span></div>' +
-    '<button class="btn ' + (S.dirty ? 'ok' : 'light') + '" onclick="saveAtt()">' + (S.dirty ? '저장하기' : '저장됨') + '</button></div></div>';
+    '<button class="btn ' + (S.dirty ? 'ok' : 'light') + '" onclick="saveAtt()"' + (fu ? ' disabled' : '') + '>' + (fu ? '주일에 체크' : S.dirty ? '저장하기' : '저장됨') + '</button></div></div>';
 };
 function applyAtt(rows) {
   S.att.marks = {}; S.att.reasons = {}; S.att.touched = {};
@@ -1829,12 +1902,16 @@ function refreshAtt(date) {
 }
 function attClass(c) { S.att.cls = c; render(); window.scrollTo(0, 0); }
 function attDate(n) {
+  var nd = addDays(S.att.date, n);
+  if (nd.slice(0, 4) !== viewYear()) { toast(viewYear() + '년 주일만 볼 수 있어요. 다른 해는 위에서 연도를 바꿔 주세요'); return; }
   if (S.dirty && !confirm('저장하지 않은 출석이 있어요.\n저장하지 않고 날짜를 바꿀까요?')) return;
-  S.att.date = addDays(S.att.date, n); S.att.loaded = false; S.dirty = false; render();
+  S.att.date = nd; S.att.loaded = false; S.dirty = false; render();
 }
 function touch(id) { var s = stuById(id); if (s) S.att.touched[s.반] = 1; S.dirty = true; }
-function mark(id) { S.att.marks[id] = S.att.marks[id] === '출석' ? '결석' : '출석'; touch(id); render(); }
+function attFutureBlock() { if (S.att && isFutureDay(S.att.date)) { toast('아직 오지 않은 주일이에요. 그날 체크해 주세요'); return true; } return false; }
+function mark(id) { if (attFutureBlock()) return; S.att.marks[id] = S.att.marks[id] === '출석' ? '결석' : '출석'; touch(id); render(); }
 function allPresent() {
+  if (attFutureBlock()) return;
   students().forEach(function (s) { if (s.반 === S.att.cls && s.상태 === '재적') S.att.marks[s.ID] = '출석'; });
   S.att.touched[S.att.cls] = 1; S.dirty = true; render();
 }
@@ -1856,6 +1933,7 @@ function setReason(id, v) {
 }
 function saveAtt() {
   var a = S.att;
+  if (attFutureBlock()) return;
   if (!Object.keys(a.touched).length) { toast('바뀐 내용이 없어요'); return; }
   // 손댄 반의 재적 학생은 모두 저장: 출석을 누르지 않은 학생은 결석
   var recs = students().filter(function (s) { return a.touched[s.반] && (s.상태 === '재적' || a.marks[s.ID]); }).map(function (s) {
@@ -1865,7 +1943,9 @@ function saveAtt() {
   recs.forEach(function (r) { a.marks[r.학생ID] = r.상태; });
   ATT[a.date] = Object.keys(a.marks).map(function (id) { var st = stuById(id) || {}; return { 날짜: a.date, 학생ID: id, 이름: st.이름, 반: st.반, 상태: a.marks[id], 사유: a.reasons[id] || '' }; });
   delete CACHE.stats;
-  a.touched = {}; S.dirty = false; render(); toast('저장했어요. 수고하셨습니다!');
+  a.touched = {}; S.dirty = false; render();
+  var nP = recs.filter(function (r) { return r.상태 === '출석'; }).length;
+  toast(nP && nP === recs.length ? '모두 출석! 기쁜 주일이에요. 수고하셨어요' : nP ? '저장했어요. ' + nP + '명의 친구와 함께 예배했어요' : '저장했어요. 못 온 친구들도 기억해 주세요');
 }
 
 /* ---------- 학생 명단 / 상세 ---------- */
@@ -2157,7 +2237,7 @@ VIEWS.notices = function () {
   var fresh = rows.filter(function (n) { return NEW[n.ID]; }), seen = rows.filter(function (n) { return !NEW[n.ID]; });
   var sec = function (title, cnt, cls) { return '<div class="sec-h"><h2>' + title + '</h2><span class="ncount' + (cls || '') + '">' + cnt + '</span></div>'; };
   var html = !rows.length ? '<div class="empty">공지가 없어요</div>' :
-    (fresh.length ? sec('안 읽은 공지', fresh.length) + '<div class="cols">' + fresh.map(card).join('') + '</div>' : '<div class="hint" style="margin-top:.9rem">새 공지를 모두 읽었어요</div>') +
+    (fresh.length ? sec('안 읽은 공지', fresh.length) + '<div class="cols">' + fresh.map(card).join('') + '</div>' : '<div class="hint" style="margin-top:.9rem">새 공지를 모두 읽었어요. 꼼꼼히 챙겨 주셔서 고마워요.</div>') +
     (seen.length ? sec('읽은 공지', seen.length, ' g') + '<div class="cols">' + seen.map(card).join('') + '</div>' : '');
   return topbar('공지사항') + (isAdmin() ? '<button class="btn" style="margin-top:.8rem" onclick="noticeForm()">+ 공지 쓰기</button>' : '') + html;
 };
@@ -2239,7 +2319,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261120114412';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261120120443';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -2670,7 +2750,9 @@ function meetsOn(d, date) {
 }
 /** 오늘 모임이 있으면 오늘, 없으면 가장 가까운 지난 모임 날 */
 function tDefaultDate(d) {
-  var t = todayStr();
+  var t = todayStr(), y = viewYear(), i0;
+  if (y > t.slice(0, 4)) { for (i0 = 0; i0 < 31; i0++) { var f = addDays(y + '-01-01', i0); if (meetsOn(d, f).length) return f; } return yearSunday(); }
+  if (y < t.slice(0, 4)) t = y + '-12-31';
   for (var i = 0; i < 21; i++) { var x = addDays(t, -i); if (meetsOn(d, x).length) return x; }
   return lastSunday();
 }
@@ -2684,14 +2766,15 @@ function tToggle(date, mid, name) {
   if (name !== S.user && !isAdmin()) { toast('다른 선생님 출석은 바꿀 수 없어요'); return; }
   if (isPastYear() && !isAdmin()) { toast('지난 해 자료는 보기만 할 수 있어요'); return; }
   if (!isAdmin() && date < tLimit()) { toast('2개월이 지난 모임은 체크할 수 없어요. 관리자 선생님께 말씀해 주세요'); return; }
-  if (!isAdmin() && date > todayStr()) { toast('아직 지나지 않은 모임이에요'); return; }
+  if (date > todayStr()) { toast('아직 지나지 않은 모임이에요'); return; }
+  if (date.slice(0, 4) !== viewYear()) { toast(viewYear() + '년 모임만 체크할 수 있어요'); return; }
   var m = (d['교사모임'] || []).filter(function (x) { return x.ID === mid; })[0] || {};
   var on = !tIsIn(d, date, mid, name);
   if (on) d['교사출석'].push({ 날짜: date, 모임ID: mid, 모임: m.이름 || '', 이름: name, 상태: '출석', 기록자: S.user });
   else d['교사출석'] = d['교사출석'].filter(function (r) { return !(r.날짜 === date && r.모임ID === mid && r.이름 === name); });
   enqueue('saveTeacherAtt', { date: date, meetId: mid, meet: m.이름 || '', name: name, on: on });
   render();
-  if (name === S.user) toast(on ? (m.이름 || '모임') + ' 출석했어요' : '출석을 취소했어요');
+  if (name === S.user) toast(on ? (m.이름 || '모임') + ' 출석했어요. 함께해 주셔서 고마워요' : '출석을 취소했어요');
 }
 /** 선생님이 직접 체크할 수 있는 가장 오래된 날 (오늘부터 2개월 전) */
 function tLimit() { var d = parseD(todayStr()); d.setMonth(d.getMonth() - 2); return ymd(d); }

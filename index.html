@@ -1751,8 +1751,8 @@ VIEWS.home = function () {
       M('bulb', '고등부 건의', 'reqIdea', 't-peach', '건의 제안 의견 접수') +
       M('doc', '사역 기안', 'reqPlan', 't-lilac', '기안 기안문 졸업여행 회식 수련회 계획 접수') +
       M('inbox', '접수함', 'requests', 't-lime', '접수 전체 답변 상태')) +
-    ((isFin() || isAdmin()) ? G('운영', (isFin() ? M('coin', '회계', 'finance', 't-lime', '예산 후원 지출 수입') : '') +
-      (isAdmin() ? M('gear', '구성 관리', 'admin', 't-peach', '관리 구성 설정 권한 반편성') : '')) : '') +
+    G('운영', M('coin', '회계', 'finance', 't-lime', '예산 후원 지출 수입') +
+      (isAdmin() ? M('gear', '구성 관리', 'admin', 't-peach', '관리 구성 설정 권한 반편성') : '')) +
     '<div class="empty" id="mnone" hidden>찾는 메뉴가 없어요</div>' +
     '<div class="qa">' +
     (isAdmin() && b.sheetUrl ? '<a class="sheet-ic" href="' + esc(b.sheetUrl) + '" target="_blank">' + ic('sheet') + '구글시트 연동</a>' : '') +
@@ -2868,7 +2868,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261120183042';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261120194509';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -3036,7 +3036,7 @@ function autoLogin() {
 /* ========================= 회계 ========================= */
 var FG = ['예산', '후원금', '비예산'];
 function isFin() { return isAdmin() || !!S.fin; }
-function canFinEdit() { return isFin() && (!isPastYear() || isAdmin()); }
+function canFinEdit() { return isFin() && !(S.boot && S.boot.guest) && (!isPastYear() || isAdmin()); }
 function won(n) { n = Math.round(+n || 0); return (n < 0 ? '-' : '') + Math.abs(n).toLocaleString('ko-KR') + '원'; }
 function wonS(n) {
   n = Math.round(+n || 0); var a = Math.abs(n);
@@ -3063,7 +3063,6 @@ function periodRange(k) {
 function periodName(k) { return (PERIODS.filter(function (p) { return p[0] === k; })[0] || PERIODS[0])[1]; }
 
 VIEWS.finance = function (p) {
-  if (!isFin()) return topbar('회계') + '<div class="empty">이 기능은 쓸 수 없어요</div>';
   if (!S.params._data) { call('getTab', { tabs: ['회계', '예산'] }).then(function (d) { S.params._data = d; render(); }); return loadingView('회계'); }
   var d = S.params._data, t = p.t || '요약', ed = canFinEdit();
   var chips = ['요약', '내역', '예산', '보고서'].map(function (x) { return '<button class="chip ' + (x === t ? 'on' : '') + '" onclick="S.params.t=\'' + x + '\';render()">' + x + '</button>'; }).join('');

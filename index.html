@@ -1511,11 +1511,22 @@ VIEWS.admin = function () {
 };
 
 /* ---- 선생님 · 권한 ---- */
+/** 볼 수 있는 연도: 시작(새로 온 선생님이 지난 자료 보기) · 끝(나가는 선생님) */
+function tyLabel(t) { return (t.시작연도 || '') + '~' + (t.끝연도 || '') + '년'; }
+function tyFields(t, can) {
+  var ys = (S.boot.years || []).slice(), last = +(ys[ys.length - 1] || todayStr().slice(0, 4));
+  for (var y = last + 1; y <= last + 3; y++) ys.push(String(y));
+  var o = function (v, cur) { return '<option value="">제한 없음</option>' + ys.map(function (y) { return '<option' + (y === cur ? ' selected' : '') + '>' + y + '</option>'; }).join(''); };
+  return '<label>볼 수 있는 연도 ' + (can ? '' : '<span class="muted">(권한 지정 선생님만 바꿀 수 있어요)</span>') + '</label>' +
+    '<div class="row"><div><select id="t_시작연도"' + (can ? '' : ' disabled') + '>' + o('', t.시작연도 || '') + '</select><p class="muted" style="margin:.2rem 0 0">부터</p></div>' +
+    '<div><select id="t_끝연도"' + (can ? '' : ' disabled') + '>' + o('', t.끝연도 || '') + '</select><p class="muted" style="margin:.2rem 0 0">까지</p></div></div>' +
+    '<div class="hint" style="margin-top:.35rem"><b>끝</b>: 그 해까지만 들어올 수 있어요 (나가는 선생님 · 새 연도 명단에서 빠짐)<br><b>시작</b>: 그 해부터 볼 수 있어요. 그 해 명단에 없으면 <b>보기만</b> (새로 온 선생님이 지난 자료 확인)<br>비워 두면 명단에 있는 해만 들어와요.</div>';
+}
 VIEWS.admTeachers = function () {
   if (!S.params._data) { call('getTeachers').then(function (d) { S.params._data = d; render(); }); return topbar('선생님 · 권한') + '<div class="empty load">불러오는 중…</div>'; }
   var rows = S.params._data.map(function (t) {
     return '<button class="list-item" onclick="teacherForm(\'' + esc(t.이름) + '\')"><span class="av">' + esc(t.이름.charAt(0)) + '</span><span class="grow"><b>' + esc(t.이름) + '</b> <span class="muted">' + esc(t.직분 || '') + '</span> ' + roleBadge(t.권한) +
-      '<br><span class="muted">' + esc(t.담당반 ? t.담당반 + '반 담임' : (t.역할 || '반 없음')) + ' · ' + (t.연락처 ? esc(t.연락처) : '<span class="r">연락처 없음 (로그인 불가)</span>') + '</span></span></button>';
+      '<br><span class="muted">' + esc(t.담당반 ? t.담당반 + '반 담임' : (t.역할 || '반 없음')) + ' · ' + (t.연락처 ? esc(t.연락처) : '<span class="r">연락처 없음 (로그인 불가)</span>') + (t.시작연도 || t.끝연도 ? ' · <span class="badge w">' + esc(tyLabel(t)) + '</span>' : '') + '</span></span></button>';
   }).join('');
   return topbar('선생님 · 권한') + '<button class="btn" style="margin-top:.7rem" onclick="teacherForm(\'\')">+ 선생님 추가</button>' +
     '<p class="muted">연락처 <b>뒷자리 4자리</b>가 그 선생님의 로그인 번호입니다.</p><div class="cols">' + rows + '</div>';
@@ -1532,7 +1543,7 @@ function teacherForm(name) {
   modal('<h2>' + (name ? '선생님 정보' : '선생님 추가') + '</h2>' + f('이름') +
     '<div class="row"><div>' + f('직분', '집사, 권사, 청년…') + '</div><div>' + f('역할', '부장, 총무, 회계…') + '</div></div>' +
     '<label>담당반 (담임)</label><select id="t_담당반">' + clsOpts + '</select>' +
-    f('연락처', '010-0000-0000', 'tel') + '<p class="muted" style="margin:.3rem 0 0">뒷자리 4자리가 로그인 번호가 됩니다.</p>' +
+    f('연락처', '010-0000-0000', 'tel') + '<p class="muted" style="margin:.3rem 0 0">뒷자리 4자리가 로그인 번호가 됩니다.</p>' + tyFields(t, can) +
     '<label>앱 권한 ' + (can ? '<span class="muted">(필요한 것만 체크)</span>' : '<span class="muted">(권한 지정 선생님만 바꿀 수 있어요)</span>') + '</label><div class="perms">' + perms + '</div>' +
     '<button class="btn" style="margin-top:1rem" onclick="saveTeacher(\'' + esc(name) + '\')">저장</button>' +
     (name && name !== S.user ? '<button class="btn danger" style="margin-top:.5rem" onclick="delTeacher(\'' + esc(name) + '\')">이 선생님 삭제</button>' : ''));
@@ -1540,7 +1551,8 @@ function teacherForm(name) {
 function saveTeacher(orig) {
   var o = { _orig: orig };
   ['이름', '직분', '역할', '담당반', '연락처'].forEach(function (k) { o[k] = $('t_' + k).value.trim(); });
-  if (isSuper()) { var f = {}; PERMS.forEach(function (p) { f[p[0]] = $('pm_' + p[0]).checked; }); o.권한 = permStr(f); }
+  if (isSuper()) { var f = {}; PERMS.forEach(function (p) { f[p[0]] = $('pm_' + p[0]).checked; }); o.권한 = permStr(f); o.시작연도 = $('t_시작연도').value; o.끝연도 = $('t_끝연도').value; }
+  if (o.시작연도 && o.끝연도 && o.시작연도 > o.끝연도) { toast('시작 연도가 끝 연도보다 늦어요'); return; }
   if (!o.이름) { toast('이름을 써 주세요'); return; }
   call('saveTeacher', o).then(function () {
     closeModal(); S.params._data = null; render(); toast('저장했어요');
@@ -1711,7 +1723,7 @@ VIEWS.home = function () {
   // 메뉴: 흰 카드 + 아이콘 둘레만 옅은 색. 화면 폭 · 글씨 크기에 맞춰 줄 수가 자동으로 바뀜 (보통 4열)
   var G = function (title, items) { return items ? '<div class="mgroup"><h3 class="mg-h">' + title + '</h3><div class="mgrid">' + items + '</div></div>' : ''; };
   var M = function (icon, label, view, cls, keys) { return '<button class="mt ' + cls + '" data-k="' + label + ' ' + (keys || '') + '" onclick="go(\'' + view + '\')"><span class="ib">' + ic(icon) + '</span><b>' + label + '</b></button>'; };
-  var past = isPastYear() ? '<div class="past"><span>' + esc(b.year) + '년 자료 · 참고용</span><button class="btn small" onclick="switchYear(\'' + (b.editYear || b.latestYear) + '\')">' + (b.editYear || b.latestYear) + '년으로</button></div>' : '';
+  var past = b.guest ? '<div class="past"><span>' + esc(b.year) + '년 명단에는 없어서 보기만 할 수 있어요</span>' + (b.editYear && b.editYear !== b.year ? '<button class="btn small" onclick="switchYear(\'' + b.editYear + '\')">' + b.editYear + '년으로</button>' : '') + '</div>' : isPastYear() ? '<div class="past"><span>' + esc(b.year) + '년 자료 · 참고용</span><button class="btn small" onclick="switchYear(\'' + (b.editYear || b.latestYear) + '\')">' + (b.editYear || b.latestYear) + '년으로</button></div>' : '';
   return '<div class="hd"><span class="logo"><img src="' + SIG + '" alt="대한예수교장로회 목민교회"></span>' +
     '<button class="yearchip" onclick="yearMenu()" aria-label="연도 바꾸기">' + esc(b.year) + ' <i>▼</i></button>' +
     '<button class="icon-btn" onclick="menuSearch()" aria-label="메뉴 검색">' + ic('search') + '</button>' +
@@ -2856,7 +2868,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261120182634';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261120183042';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

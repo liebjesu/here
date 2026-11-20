@@ -953,6 +953,22 @@ function yearSunday() { var y = viewYear(), ty = todayStr().slice(0, 4); return 
 function isFutureDay(d) { return d > todayStr(); }
 function addDays(s, n) { var d = parseD(s); d.setDate(d.getDate() + n); return ymd(d); }
 function tel(n) { return String(n || '').replace(/[^0-9]/g, ''); }
+/* 부르는 이름: 교역자는 직분으로 (이한빈 목사님), 그 밖의 선생님은 친근하게 '쌤' */
+function personOf(name) {
+  var pools = [(S.boot && S.boot.teachers) || []], li = LOGIN.lists || {}, c = store('hs_li') || {};
+  Object.keys(li).forEach(function (y) { pools.push(li[y] || []); });
+  Object.keys(c.lists || {}).forEach(function (y) { pools.push(c.lists[y] || []); });
+  for (var i = 0; i < pools.length; i++) for (var j = 0; j < pools[i].length; j++) if (pools[i][j].이름 === name) return pools[i][j];
+  return null;
+}
+function honor(name) {
+  var t = personOf(name) || {}, j = String(t.직분 || ''), r = String(t.역할 || '');
+  var m = (j + ' ' + r).match(/(담임목사|부목사|목사|강도사|전도사)/);
+  if (m) return m[1] + '님';
+  if (/교역자/.test(r)) return '목사님';
+  return '쌤';
+}
+function callName(name) { return name + ' ' + honor(name); }
 function isAdmin() { return S.role === 'admin'; }
 function students() { return S.boot.students; }
 function stuById(id) { return students().filter(function (s) { return s.ID === id; })[0]; }
@@ -1142,7 +1158,7 @@ function viewLogin() {
     var keys = [1, 2, 3, 4, 5, 6, 7, 8, 9, '처음', 0, '지우기'].map(function (k) {
       return '<button class="' + (k === '지우기' || k === '처음' ? 'k-del' : '') + '" onclick="codeKey(\'' + k + '\')">' + k + '</button>';
     }).join('');
-    return head + '<div class="who"><span class="av">' + esc(LOGIN.name.charAt(0)) + '</span><div><b>' + esc(LOGIN.name) + ' 선생님</b><span>' + esc(LOGIN.year) + '년</span></div></div>' +
+    return head + '<div class="who"><span class="av">' + esc(LOGIN.name.charAt(0)) + '</span><div><b>' + esc(callName(LOGIN.name)) + '</b><span>' + esc(LOGIN.year) + '년</span></div></div>' +
       '<p style="text-align:center;margin:.9rem 0 0">내 <b>전화번호 뒷자리 4자리</b>를 눌러 주세요</p>' +
       '<div class="pin-dots">' + dots + '</div><div class="pad">' + keys + '</div>' +
       '<label class="keep"><input type="checkbox" ' + (LOGIN.keep !== false ? 'checked' : '') + ' onchange="LOGIN.keep=this.checked">이 기기에 로그인 유지 (30일)</label>' +
@@ -1179,7 +1195,7 @@ function tryLogin() {
     LOGIN.busy = false;
     saveLogin(LOGIN.name);   // 번호는 버리고 열쇠만 보관
     afterBoot(b);
-    toast(S.user + ' 선생님, 환영합니다!');
+    toast(callName(S.user) + ', 환영합니다!');
   }).catch(function () { LOGIN.busy = false; LOGIN.code = ''; S.auth = null; render(); });
 }
 function afterBoot(b) {
@@ -1308,7 +1324,7 @@ function saveTeacher(orig) {
   });
 }
 function delTeacher(name) {
-  if (!confirm(name + ' 선생님을 ' + S.boot.year + '년 명단에서 삭제할까요?')) return;
+  if (!confirm(callName(name) + '을 ' + S.boot.year + '년 명단에서 삭제할까요?')) return;
   call('deleteTeacher', { name: name }).then(function () { closeModal(); S.params._data = null; render(); reloadBoot(); toast('삭제했어요'); });
 }
 
@@ -1474,7 +1490,7 @@ VIEWS.home = function () {
   return '<div class="hd"><span class="logo"><img src="' + SIG + '" alt="대한예수교장로회 목민교회"></span>' +
     '<button class="yearchip" onclick="yearMenu()" aria-label="연도 바꾸기">' + esc(b.year) + ' <i>▼</i></button>' +
     '<button class="icon-btn" onclick="go(\'notices\')" aria-label="공지">' + ic('bell') + (newNotice() ? '<i class="dot"></i>' : '') + '</button></div>' + past +
-    '<div class="welcome"><div><b>' + esc(S.user) + ' 선생님,</b><span>' + greet() + (isAdmin() ? ' <button class="gedit" onclick="greetForm()" aria-label="인사말 고치기">' + ic('pen') + '</button>' : '') + '</span></div><i class="wb">' + brandName() + '</i></div>' +
+    '<div class="welcome"><div><b>' + esc(callName(S.user)) + ',</b><span>' + greet() + (isAdmin() ? ' <button class="gedit" onclick="greetForm()" aria-label="인사말 고치기">' + ic('pen') + '</button>' : '') + '</span></div><i class="wb">' + brandName() + '</i></div>' +
     '<button class="main-att" onclick="openAttend()"><span class="tx"><small>' + ic('calendar') + shortD(sun) + ' 주일예배</small>' +
     '<b>' + (hc ? esc(hc) + '반 출석 체크' : '출석 체크') + '</b><p>' + attLine(sun, fut) + '</p></span><span class="go">' + ic('arrow') + '</span></button>' +
     '<div class="info2">' + myAttCard() + noticeCard(n) + '</div>' + birthdayCard() + installBanner() +
@@ -1510,7 +1526,7 @@ var GREET_DEF = {
   sun: ['은혜로운 주일이에요. 친구들을 반갑게 맞아 주세요.', '오늘 만나는 한 명 한 명이 소중한 선물이에요.', '주일 예배, 함께 세워 주셔서 고마워요.'],
   sat: ['내일은 주일! 친구들 얼굴을 떠올리며 기도해요.', '내일 예배를 함께 준비해요. 오늘도 평안하세요.'],
   am: ['좋은 아침이에요. 오늘도 주님의 평안이 함께하길 바랍니다.', '새 아침, 우리 반 친구들을 위해 짧게 기도해 볼까요?'],
-  pm: ['오후도 힘내세요. 선생님의 수고를 주님이 기억하세요.', '바쁜 하루 속에서도 평안이 가득하길 바랍니다.'],
+  pm: ['오후도 힘내세요. 오늘의 수고를 주님이 기억하세요.', '바쁜 하루 속에서도 평안이 가득하길 바랍니다.'],
   ev: ['오늘 하루도 수고 많으셨어요. 편안한 저녁 되세요.', '하루를 마치며, 우리 반 친구들을 축복해 주세요.']
 };
 function greetLines() { return String((S.boot && S.boot.greeting) || '').split(/\r?\n/).map(function (x) { return x.trim(); }).filter(Boolean); }
@@ -1622,7 +1638,7 @@ VIEWS.settings = function () {
     return '<button class="set-row ' + (cls || '') + '" onclick="' + onclick + '"><span class="si">' + ic(icon) + '</span><span class="st"><b>' + title + '</b>' + (sub ? '<small>' + sub + '</small>' : '') + '</span><span class="sv">' + (right || '') + ic('next') + '</span></button>';
   };
   return topbar('설정') +
-    '<div class="set-group"><h4>내 정보</h4><div class="set-row"><span class="si">' + ic('user') + '</span><span class="st"><b>' + esc(S.user) + ' 선생님</b><small>' + (hc ? esc(hc) + '반 담임 · ' : '') + esc(b.year) + '년</small></span></div></div>' +
+    '<div class="set-group"><h4>내 정보</h4><div class="set-row"><span class="si">' + ic('user') + '</span><span class="st"><b>' + esc(callName(S.user)) + '</b><small>' + (hc ? esc(hc) + '반 담임 · ' : '') + esc(b.year) + '년</small></span></div></div>' +
     '<div class="set-group"><h4>화면</h4><div class="set-row"><span class="si">' + ic('type') + '</span><span class="st"><b>글씨 크기</b><small>' + step + ' / ' + SIZES.length + ' 단계</small></span>' +
     '<span class="fs-ctl"><button onclick="fontStep(-1);render()" aria-label="글씨 작게"><span class="a1">가</span></button><button onclick="fontStep(1);render()" aria-label="글씨 크게"><span class="a2">가</span></button></span></div>' +
     (window.innerWidth >= 700 ? row('monitor', isWide() ? '휴대폰 화면으로 보기' : 'PC 넓게 보기', '큰 화면에서 표 · 카드를 넓게', 'togglePC()') : '') + '</div>' +
@@ -2392,7 +2408,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261120121500';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261120154437';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -2542,7 +2558,7 @@ function autoLogin() {
   LOGIN.keep = !!store('hs_login');
   S.auth = { name: saved.name };
   if (saved.token) S.auth.token = saved.token; else S.auth.code = saved.code;
-  $('app').innerHTML = toolStrip() + '<div class="login-hero">' + wordmark(true) + '</div><div class="empty">' + esc(saved.name) + ' 선생님, 여는 중…</div>';
+  $('app').innerHTML = toolStrip() + '<div class="login-hero">' + wordmark(true) + '</div><div class="empty">' + esc(callName(saved.name)) + ', 여는 중…</div>';
   call('boot', { dev: devName() }, 'silent').then(function (b) {
     if (S._token) saveLogin(saved.name);   // 예전처럼 번호로 기억하던 기기 → 열쇠로 바꿔 보관
     afterBoot(b);

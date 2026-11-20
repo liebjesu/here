@@ -854,6 +854,27 @@ button.set-row:active,a.set-row:active{background:var(--bg)}
 .msbar .msearch{flex:1;max-width:none;margin:0}
 .msbar .msearch input{min-height:2.5rem;background:#fff;border:1px solid var(--line)}
 .mclose{flex:none;min-height:2.5rem;padding:0 .6rem;font-size:.85rem;font-weight:700;color:var(--sub)}
+
+/* 메뉴 칸: 글씨가 작아도 이름이 잘리지 않을 만큼은 넓게 */
+.mgrid{grid-template-columns:repeat(auto-fill,minmax(max(64px,3.85rem),1fr))}
+/* 가로 여백이 많이 남는 화면(태블릿 · 가로 휴대폰)은 넓게 씀 */
+@media (min-width:700px){
+  body:not(.wide) #app{max-width:860px}
+  body:not(.wide) .bnav .in,body:not(.wide) .savebar .in{max-width:860px}
+  body:not(.wide) .tiles{grid-template-columns:repeat(3,1fr)}
+}
+
+/* 정보 메모 */
+.memo .mm{padding:.5rem 0;border-top:1px solid var(--line)}
+.memo .mm:first-of-type{border-top:0}
+.memo .mm p{margin:0;white-space:pre-wrap;line-height:1.5}
+.memo .mm small{color:var(--sub);font-size:.74rem}
+.memo .row .btn{min-height:2.2rem}
+.memo-home{margin-top:8px;background:#fffaf0;border-color:#f3e3c3}
+.memo-home>b{display:flex;align-items:center;gap:.35rem;font-size:.9rem;color:#8a5a0e}
+.memo-home>b svg{width:1rem;height:1rem}
+.mmrow{display:block;width:100%;text-align:left;padding:.4rem 0;border-top:1px solid #f3e3c3}
+.mmrow em{display:block;font-style:normal;font-size:.8rem;color:#5b6476;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 </style>
 </head>
 <body>
@@ -920,6 +941,79 @@ function saveAbout() {
   if (!needSynced()) return;
   var v = $('ab_t').value.trim(); if (v === ABOUT_DEF.trim()) v = '';
   call('saveAbout', { text: v }).then(function () { S.boot.about = v; store('hs_about', v); closeModal(); render(); toast('앱 소개를 바꿨어요'); });
+}
+/* ---------- 학생 정보 고치기 권한 · 정보 메모 ---------- */
+/** 내가 맡은 반들 (담당반 + 반 담임교사) */
+function myClassSet() {
+  var o = {}, t = S.boot.teachers.filter(function (x) { return x.이름 === S.user; })[0];
+  if (t && t.담당반) o[t.담당반] = 1;
+  (S.boot.classes || []).forEach(function (c) { if ((c.담임교사 || '').split(/[,\s]+/).indexOf(S.user) >= 0) o[c.반] = 1; });
+  return o;
+}
+function canEditStu(cls) { return isAdmin() || !!myClassSet()[cls || '']; }
+function memoForm(sid) {
+  var s = (S.params._data && S.params._data.student) || stuById(sid) || {};
+  modal('<h2>정보 메모 남기기</h2><p class="muted" style="margin:.2rem 0 .5rem"><b>' + esc(s.이름 || '') + '</b> (' + esc(s.반 || '') + '반) 학생의 바뀐 정보를 적어 주세요. 담임 선생님이나 관리자 선생님이 확인하고 반영해요.</p>' +
+    '<textarea id="im_t" placeholder="예) 연락처가 010-1234-5678 로 바뀌었대요 / 학교를 OO고로 옮겼어요" style="min-height:8rem"></textarea>' +
+    '<button class="btn" style="margin-top:1rem" onclick="saveMemo(\'' + sid + '\')">메모 남기기</button>');
+}
+function saveMemo(sid) {
+  if (!needSynced()) return;
+  var v = $('im_t').value.trim(); if (!v) { toast('내용을 써 주세요'); return; }
+  call('addInfoMemo', { studentId: sid, text: v }).then(function (m) {
+    if (S.params._data && S.params._data.student && S.params._data.student.ID === sid) (S.params._data.memos = S.params._data.memos || []).unshift(m);
+    closeModal(); render(); toast('메모를 남겼어요. 담임 선생님께 전해져요');
+  });
+}
+function doneMemo(id) {
+  if (!needSynced()) return;
+  call('doneInfoMemo', { id: id }).then(function () {
+    var d = S.params._data; if (d && d.memos) d.memos.forEach(function (m) { if (m.ID === id) { m.상태 = '반영'; m.확인자 = S.user; } });
+    S.boot.infoMemos = (S.boot.infoMemos || []).filter(function (m) { return m.ID !== id; });
+    render(); toast('확인했어요. 고마워요');
+  });
+}
+function memoList(memos, can) {
+  var open = (memos || []).filter(function (m) { return m.상태 !== '반영'; }), done = (memos || []).filter(function (m) { return m.상태 === '반영'; });
+  if (!open.length && !done.length) return '';
+  return '<div class="card memo"><h3>정보 메모 ' + (open.length ? '<span class="badge w">확인 전 ' + open.length + '</span>' : '') + '</h3>' +
+    open.map(function (m) {
+      return '<div class="mm"><p>' + esc(m.내용) + '</p><small>' + esc(shortD(m.날짜)) + ' · ' + esc(m.작성자) + '</small>' +
+        (can ? '<div class="row" style="margin-top:.4rem"><button class="btn light small" onclick="studentForm(\'' + m.학생ID + '\')">정보 고치기</button><button class="btn ok small" onclick="doneMemo(\'' + m.ID + '\')">' + ic('tick') + ' 반영했어요</button></div>' : '') + '</div>';
+    }).join('') +
+    (done.length ? '<p class="muted" style="margin:.4rem 0 0">반영한 메모 ' + done.length + '개' + (done[0].확인자 ? ' · 최근 ' + esc(done[0].확인자) : '') + '</p>' : '') + '</div>';
+}
+/** 홈: 우리 반에 확인할 정보 메모 */
+function memoCard() {
+  var L = S.boot.infoMemos || []; if (!L.length || isPastYear()) return '';
+  return '<div class="card memo-home"><b>' + ic('pen') + ' 확인할 학생 정보 메모 ' + L.length + '개</b>' +
+    L.slice(0, 3).map(function (m) { return '<button class="mmrow" onclick="go(\'student\',{id:\'' + m.학생ID + '\'})"><span><b>' + esc(m.학생) + '</b> <span class="muted">' + esc(m.반) + '반 · ' + esc(m.작성자) + '</span></span><em>' + esc(m.내용) + '</em></button>'; }).join('') +
+    (L.length > 3 ? '<p class="muted" style="margin:.3rem 0 0">그 밖에 ' + (L.length - 3) + '개 더 있어요</p>' : '') + '</div>';
+}
+
+/* ---------- 내 정보 고치기 (선생님 본인) ---------- */
+function myInfoForm() {
+  call('getDirectory').then(function (all) {
+    var t = (all || []).filter(function (x) { return x.이름 === S.user; })[0] || {};
+    var f = function (k, label, v, ph, type) { return '<label>' + label + '</label><input id="mi_' + k + '" type="' + (type || 'text') + '" value="' + esc(v || '') + '" placeholder="' + (ph || '') + '">'; };
+    modal('<h2>내 정보 고치기</h2>' +
+      f('직분', '직분', t.직분, '집사, 권사, 청년…') +
+      f('연락처', '연락처', t.연락처, '010-0000-0000', 'tel') +
+      '<div class="hint warn" style="margin-top:.35rem">연락처 <b>뒷자리 4자리</b>가 로그인 번호예요. 바꾸면 다른 기기에서는 새 번호로 다시 들어와야 해요. (이 기기는 그대로)</div>' +
+      f('생일', '생일 (월-일)', t.생일, '03-15') +
+      f('주소', '주소', t.주소, '적지 않아도 돼요') +
+      '<button class="btn" style="margin-top:1rem" onclick="saveMyInfo()">저장</button>');
+  });
+}
+function saveMyInfo() {
+  if (!needSynced()) return;
+  var o = {}; ['직분', '연락처', '생일', '주소'].forEach(function (k) { o[k] = $('mi_' + k).value.trim(); });
+  call('saveMyInfo', o).then(function (d) {
+    if (d && d.token) { S._token = d.token; saveLogin(S.user, !!store('hs_login')); }
+    var me = S.boot.teachers.filter(function (x) { return x.이름 === S.user; })[0]; if (me) me.직분 = o.직분;
+    if (S.view === 'directory') S.params._data = null;
+    closeModal(); render(); toast('내 정보를 고쳤어요');
+  });
 }
 function sigFooter() { return '<div class="sig"><img src="' + SIG + '" alt="대한예수교장로회 목민교회"></div>'; }
 
@@ -1573,7 +1667,7 @@ VIEWS.home = function () {
     '<div class="welcome"><div><b>' + esc(callName(S.user)) + ',</b><span>' + greet() + (isAdmin() ? ' <button class="gedit" onclick="greetForm()" aria-label="인사말 고치기">' + ic('pen') + '</button>' : '') + '</span></div><i class="wb">' + brandName() + '</i></div>' +
     '<button class="main-att" onclick="openAttend()"><span class="tx"><small>' + ic('calendar') + shortD(sun) + ' 주일예배</small>' +
     '<b>' + (hc ? esc(hc) + '반 출석 체크' : '출석 체크') + '</b><p>' + attLine(sun, fut) + '</p></span><span class="go">' + ic('arrow') + '</span></button>' +
-    '<div class="info2">' + myAttCard() + noticeCard(n) + '</div>' + birthdayCard() + installBanner() + '</div>' +
+    '<div class="info2">' + myAttCard() + noticeCard(n) + '</div>' + memoCard() + birthdayCard() + installBanner() + '</div>' +
     G('학생 · 우리 반', M('student', '학생 명단', 'students', 't-blue', '학생 명단 연락처 반') +
       M('grid', '출석부', 'sheet', 't-sky', '학생 출석부 표 전체') +
       M('sprout', '새신자', 'newcomers', 't-lime', '학생 새친구') +
@@ -1722,13 +1816,13 @@ function navTab(v) {
   go(v);
 }
 VIEWS.settings = function () {
-  var b = S.boot, fs = store('hs_fs') || DEF_FS, step = SIZES.indexOf(fs) + 1, hc = homeClass();
+  var b = S.boot, fs = curFs(), step = SIZES.indexOf(fs) + 1, hc = homeClass();
   var row = function (icon, title, sub, onclick, right, cls) {
     return '<button class="set-row ' + (cls || '') + '" onclick="' + onclick + '"><span class="si">' + ic(icon) + '</span><span class="st"><b>' + title + '</b>' + (sub ? '<small>' + sub + '</small>' : '') + '</span><span class="sv">' + (right || '') + ic('next') + '</span></button>';
   };
   return topbar('설정') +
-    '<div class="set-group"><h4>내 정보</h4><div class="set-row"><span class="si">' + ic('user') + '</span><span class="st"><b>' + esc(callName(S.user)) + '</b><small>' + (hc ? esc(hc) + '반 담임 · ' : '') + esc(b.year) + '년</small></span></div></div>' +
-    '<div class="set-group"><h4>화면</h4><div class="set-row"><span class="si">' + ic('type') + '</span><span class="st"><b>글씨 크기</b><small>' + step + ' / ' + SIZES.length + ' 단계</small></span>' +
+    '<div class="set-group"><h4>내 정보</h4><button class="set-row" onclick="myInfoForm()"><span class="si">' + ic('user') + '</span><span class="st"><b>' + esc(callName(S.user)) + '</b><small>' + (hc ? esc(hc) + '반 담임 · ' : '') + esc(b.year) + '년 · 연락처 · 생일 · 주소 고치기</small></span><span class="sv">' + ic('next') + '</span></button></div>' +
+    '<div class="set-group"><h4>화면</h4><div class="set-row"><span class="si">' + ic('type') + '</span><span class="st"><b>글씨 크기</b><small>' + SIZE_NAMES[step - 1] + ' (' + step + ' / ' + SIZES.length + ')</small></span>' +
     '<span class="fs-ctl"><button onclick="fontStep(-1);render()" aria-label="글씨 작게"><span class="a1">가</span></button><button onclick="fontStep(1);render()" aria-label="글씨 크게"><span class="a2">가</span></button></span></div>' +
     (window.innerWidth >= 700 ? row('monitor', isWide() ? '휴대폰 화면으로 보기' : 'PC 넓게 보기', '큰 화면에서 표 · 카드를 넓게', 'togglePC()') : '') + '</div>' +
     '<div class="set-group"><h4>앱</h4>' +
@@ -1801,7 +1895,8 @@ VIEWS.directory = function (p) {
       (sub ? '<div class="muted">' + esc(sub) + '</div>' : '') + '</div></div>' +
       '<div class="muted" style="margin-top:.45rem">' + (t.연락처 ? esc(t.연락처) : '연락처 없음') + (t.생일 ? ' · 생일 ' + esc(t.생일.replace('-', '/')) : '') + '</div>' +
       (t.주소 ? '<div class="muted">' + esc(t.주소) + '</div>' : '') +
-      (t.연락처 ? '<div class="row" style="margin-top:.55rem"><a class="btn ok small" href="tel:' + tel(t.연락처) + '">' + ic('phone') + '전화</a><a class="btn light small" href="sms:' + tel(t.연락처) + '">문자</a></div>' : '') + '</div>';
+      (t.이름 === S.user ? '<button class="btn light small" style="margin-top:.55rem" onclick="myInfoForm()">' + ic('pen') + ' 내 정보 고치기</button>' : '') +
+      (t.연락처 && t.이름 !== S.user ? '<div class="row" style="margin-top:.55rem"><a class="btn ok small" href="tel:' + tel(t.연락처) + '">' + ic('phone') + '전화</a><a class="btn light small" href="sms:' + tel(t.연락처) + '">문자</a></div>' : '') + '</div>';
   };
   return topbar('교사 주소록') +
     '<input style="margin-top:.7rem" placeholder="이름·역할로 찾기" value="' + esc(q) + '" onchange="go(\'directory\',{q:this.value},true)">' +
@@ -2141,7 +2236,7 @@ VIEWS.students = function (p) {
   return topbar('학생 명단') +
     '<input style="margin-top:.8rem" placeholder="이름으로 찾기" value="' + esc(q) + '" onchange="go(\'students\',{cls:\'' + cls + '\',q:this.value},true)">' +
     '<div class="chips">' + chips + '</div>' + (isWide() ? studentTable(list) : rows) +
-    '<button class="btn light" style="margin-top:.6rem" onclick="studentForm(null,\'' + (cls === '전체' ? '' : cls) + '\')">+ 학생 추가</button>' +
+    (isAdmin() || Object.keys(myClassSet()).length ? '<button class="btn light" style="margin-top:.6rem" onclick="studentForm(null,\'' + (cls === '전체' || !canEditStu(cls) ? '' : cls) + '\')">+ 학생 추가</button>' : '') +
     (isAdmin() ? '<button class="btn light" style="margin-top:.5rem" onclick="go(\'admStudents\')">' + ic('check') + ' 학생 반 · 상태 한꺼번에 바꾸기</button>' : '');
 };
 
@@ -2167,6 +2262,7 @@ VIEWS.student = function (p) {
   var dots = att.map(function (r) { return '<i class="' + (r.상태 === '출석' ? 'p' : 'a') + '" title="' + r.날짜 + '"></i>'; }).join('');
   var pc = d.attendance.filter(function (r) { return r.상태 === '출석'; }).length;
   var notes = d.notes.slice(0, 10).map(noteCard).join('') || '<p class="muted">아직 기록이 없어요</p>';
+  var can = canEditStu(s.반);
   return topbar(s.이름) + '<div class="split"><div>' +
     '<div class="row" style="margin-top:.8rem">' +
     (s.연락처 ? '<a class="btn ok" href="tel:' + tel(s.연락처) + '">학생 전화</a>' : '') +
@@ -2175,14 +2271,18 @@ VIEWS.student = function (p) {
     '<div class="card">' + info + (s.특이사항 ? '<div class="hint pre" style="margin-top:.7rem">' + esc(s.특이사항) + '</div>' : '') + '</div>' +
     '<div class="card"><h3>최근 출석 <span class="muted">(초록=출석)</span></h3><div class="dots">' + (dots || '<span class="muted">기록 없음</span>') + '</div>' +
     '<p class="muted" style="margin:.5rem 0 0">전체 ' + d.attendance.length + '번 기록 중 출석 ' + pc + '번' + (d.attendance[0] ? ' · 마지막 기록 ' + fmtD(d.attendance[0].날짜) : '') + '</p></div>' +
-    '<button class="btn light" onclick="studentForm(\'' + s.ID + '\')">학생 정보 고치기</button></div><div>' +
+    memoList(d.memos, can) +
+    (can ? '<button class="btn light" onclick="studentForm(\'' + s.ID + '\')">학생 정보 고치기</button>'
+      : '<button class="btn light" onclick="memoForm(\'' + s.ID + '\')">' + ic('pen') + ' 정보 메모 남기기</button><p class="muted" style="margin:.35rem 0 0;text-align:center">다른 반 학생이라 메모로 남기면 담임 선생님이 반영해요</p>') + '</div><div>' +
     '<button class="btn" style="margin-top:.8rem" onclick="noteForm(\'' + s.ID + '\')">면담 기록하기</button>' +
     '<h3 style="margin:1rem 0 .2rem">면담·심방 기록</h3>' + notes + '</div></div>';
 };
 
 function studentForm(id, cls) {
   var s = id ? (S.params._data && S.params._data.student) || stuById(id) : { 반: cls || myClass(), 상태: '재적' };
-  var clsOpts = classNames().map(function (c) { return '<option ' + (c === s.반 ? 'selected' : '') + '>' + c + '</option>'; }).join('');
+  var mine = myClassSet(), cl = isAdmin() ? classNames() : classNames().filter(function (c) { return mine[c]; });
+  if (!cl.length) { toast('담당반이 있는 선생님만 학생을 추가할 수 있어요'); return; }
+  var clsOpts = cl.map(function (c) { return '<option ' + (c === s.반 ? 'selected' : '') + '>' + c + '</option>'; }).join('');
   var stOpts = ['재적', '장결', '타교회', '졸업'].map(function (c) { return '<option ' + (c === s.상태 ? 'selected' : '') + '>' + c + '</option>'; }).join('');
   var f = function (k, ph, type) { return '<label>' + k + '</label><input id="f_' + k + '" type="' + (type || 'text') + '" value="' + esc(s[k] || '') + '" placeholder="' + (ph || '') + '">'; };
   modal('<h2>' + (id ? '학생 정보 고치기' : '새 학생 추가') + '</h2>' +
@@ -2498,7 +2598,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261120161027';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261120162024';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -3089,14 +3189,16 @@ function meetForm2(id) {
 }
 
 /* ---------- 글씨 크기 ---------- */
-var SIZES = [14, 15, 16, 17, 18, 20, 22, 24, 26], DEF_FS = 17;
+var SIZES = [15, 17, 19, 22], DEF_FS = 17, SIZE_NAMES = ['작게', '보통', '크게', '아주 크게'];
+/** 예전 9단계로 저장된 크기는 가장 가까운 단계로 */
+function curFs() { var v = +(store('hs_fs') || DEF_FS), b = SIZES[0]; SIZES.forEach(function (x) { if (Math.abs(x - v) < Math.abs(b - v)) b = x; }); return b; }
 function fontStep(d) {
-  var cur = store('hs_fs') || DEF_FS, i = SIZES.indexOf(cur); if (i < 0) i = SIZES.indexOf(DEF_FS);
+  var i = SIZES.indexOf(curFs());
   var j = Math.max(0, Math.min(SIZES.length - 1, i + d));
   if (j === i) { toast(d > 0 ? '가장 큰 글씨예요' : '가장 작은 글씨예요'); return; }
   store('hs_fs', SIZES[j]); applyFont();
 }
-function applyFont() { document.documentElement.style.setProperty('--fs', (store('hs_fs') || DEF_FS) + 'px'); }
+function applyFont() { document.documentElement.style.setProperty('--fs', curFs() + 'px'); }
 
 /* ========================= 시작 ========================= */
 function start() {

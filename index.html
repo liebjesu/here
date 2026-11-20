@@ -3,12 +3,12 @@
 <head>
 <base target="_top">
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>HERE · 목민교회 고등부</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<meta name="theme-color" content="#151c33">
+<meta name="theme-color" content="#f7f8fa">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HERE">
@@ -516,8 +516,8 @@ i.in{background:#7ccbf0} i.out{background:#ffb866}
    v2 디자인 시스템 — Modern Minimal Church Management
    (위의 규칙을 덮어씀: 흰 카드 + 얇은 회색 테두리 + 아주 옅은 그림자, 강조색 절제)
    ===================================================================== */
-#app{padding:0 16px calc(max(84px,5.2rem) + env(safe-area-inset-bottom))}
-.wide #app{padding:0 24px calc(max(84px,5.2rem) + env(safe-area-inset-bottom))}
+#app{padding:0 16px calc(max(84px,5.2rem) + 14px + env(safe-area-inset-bottom))}
+.wide #app{padding:0 24px calc(max(84px,5.2rem) + 14px + env(safe-area-inset-bottom))}
 svg.ic{stroke-width:1.85}
 svg.ic [fill-opacity]{fill-opacity:0}           /* Lucide 계열: 면 없이 선만 */
 
@@ -528,6 +528,10 @@ svg.ic [fill-opacity]{fill-opacity:0}           /* Lucide 계열: 면 없이 선
 .back{width:2.6rem;height:2.6rem;border-radius:var(--r-btn);border:1px solid var(--line);box-shadow:none;color:var(--ink)}
 .back:active{background:var(--bg)}
 body.scrolled .top{border-bottom-color:var(--line)}
+/* 아이폰: 맨 위 상태 표시줄 자리는 단색으로 덮고, 화면은 그 아래부터 (흐림 없이 또렷하게) */
+.top{top:env(safe-area-inset-top);background:var(--bg);-webkit-backdrop-filter:none;backdrop-filter:none}
+body{padding-top:env(safe-area-inset-top)}
+body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top);background:var(--bg);z-index:16;pointer-events:none}
 
 /* 카드 · 목록 */
 .card{overflow-x:auto;-webkit-overflow-scrolling:touch}   /* 큰 글씨에서 표가 넓어지면 카드 안에서만 옆으로 밀림 */
@@ -603,7 +607,7 @@ i.in{background:#8cb9e6} i.out{background:#f0c27e}
 .empty.load::before{content:"";width:1.5rem;height:1.5rem;border-radius:50%;border:2.5px solid var(--line);border-top-color:var(--pri);animation:spin .8s linear infinite}
 #loading{background:rgba(247,248,250,.65)}
 #loading::before{border-color:var(--line);border-top-color:var(--pri)}
-#toast{bottom:calc(72px + env(safe-area-inset-bottom));border-radius:14px;font-weight:700;background:var(--navy)}
+#toast{bottom:calc(84px + env(safe-area-inset-bottom));border-radius:14px;font-weight:700;background:var(--navy)}
 #sync{top:calc(8px + env(safe-area-inset-top))}
 
 /* 로그인 */
@@ -692,7 +696,7 @@ button.icard:active{transform:scale(.985);background:#fbfcfd}
 .links .btn.small{font-weight:700}
 
 /* 하단 고정 메뉴 */
-.bnav{position:fixed;left:0;right:0;bottom:0;z-index:15;background:rgba(255,255,255,.94);-webkit-backdrop-filter:saturate(1.6) blur(16px);backdrop-filter:saturate(1.6) blur(16px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+.bnav{position:fixed;left:0;right:0;bottom:0;z-index:15;background:#fff;border-top:1px solid var(--line);padding-bottom:max(10px,calc(env(safe-area-inset-bottom) + 4px))}
 .bnav .in{max-width:640px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
 .wide .bnav .in{max-width:760px}
 .bnav button{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:58px;font-size:12px;font-weight:600;color:#9aa3b2}
@@ -2228,7 +2232,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261120112523';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261120113845';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

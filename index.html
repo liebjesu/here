@@ -792,6 +792,68 @@ button.set-row:active,a.set-row:active{background:var(--bg)}
 .mgroup+.mgroup{margin-top:.9rem}
 .mg-h{margin:.2rem .2rem .45rem;font-size:.78rem;font-weight:800;letter-spacing:.02em;color:var(--sub)}
 .tiles+.mg-h{margin-top:1.1rem}
+
+/* ===== 촘촘하게 (효율 우선: 한 화면에 더 많이) ===== */
+#app{padding-left:12px;padding-right:12px}
+.top{margin:0 -12px;padding:.3rem 12px}
+.hd{padding:.35rem 0 0;gap:.15rem}
+.hd .logo img{height:2rem}
+.icon-btn{width:2.4rem;height:2.4rem}
+.icon-btn svg{width:1.25rem;height:1.25rem}
+.icon-btn .dot{top:.4rem;right:.45rem}
+.yearchip{min-height:2.2rem;padding:.2rem .65rem;font-size:.86rem;margin-right:.15rem}
+.welcome{margin:.3rem 0 0}
+.welcome b{font-size:1.12rem}
+.welcome span{font-size:.8rem;margin-top:0}
+.main-att{margin-top:.5rem;padding:.7rem .8rem .7rem .95rem;border-radius:18px}
+.main-att b{font-size:1.25rem;margin:.12rem 0 .05rem}
+.main-att small{font-size:.76rem}
+.main-att p{font-size:.78rem}
+.main-att .go{width:2.6rem;height:2.6rem}
+.info2{gap:8px;margin-top:8px}
+.icard{padding:.55rem .65rem .55rem;gap:.25rem;border-radius:16px}
+.icard .ih{min-height:1.4rem}
+.icard .ih .more{min-height:1.6rem}
+.icard .ns{padding-top:.3rem}
+.mrow{min-height:2.35rem;padding:.1rem 0}
+.mrow .ring{width:1.95rem;height:1.95rem}
+.bday{margin-top:8px;padding:.6rem .75rem;gap:.6rem;border-radius:16px}
+.bday .bi{width:2.1rem;height:2.1rem;border-radius:11px}
+.sec-h{margin:.75rem 0 .4rem}
+.mgroup{margin-top:.7rem}
+.mgroup+.mgroup{margin-top:.55rem}
+.mg-h{margin:0 .15rem .3rem;font-size:.74rem}
+.mgrid{gap:5px;grid-template-columns:repeat(auto-fill,minmax(3.6rem,1fr))}
+.mt{min-height:4.25rem;padding:.45rem .1rem .4rem;gap:.28rem;border-radius:14px}
+.mt .ib{width:2.15rem;height:2.15rem;border-radius:11px}
+.mt .ib svg{width:1.2rem;height:1.2rem}
+.mt b{font-size:.78rem}
+.wide .mt{min-height:5rem}
+.qa{margin-top:8px;border-radius:14px}
+.qa>*{min-height:2.55rem;font-size:.8rem}
+.links{margin-top:.4rem}
+.card{padding:.65rem .75rem;margin:.4rem 0;border-radius:16px}
+.list-item{padding:.4rem .65rem;margin:.3rem 0;min-height:2.7rem;border-radius:13px}
+.btn{min-height:2.5rem;border-radius:12px}
+.chips{padding:.35rem 0}
+.datebar{margin-top:.35rem;padding:.25rem}
+.datebar button{width:2.25rem;height:2.25rem}
+.hint{padding:.42rem .65rem;margin-top:.35rem}
+.set-group{margin:.4rem 0;border-radius:16px}
+.set-group h4{padding:.5rem .8rem .1rem}
+.set-row{min-height:2.75rem;padding:.38rem .8rem;gap:.6rem}
+.set-row .si{width:1.9rem;height:1.9rem}
+.tiles{gap:6px;margin-top:.5rem}
+.tile{min-height:3.4rem;padding:.5rem .6rem}
+.tiles+.mg-h{margin-top:.8rem}
+.sig{margin:.9rem 0 .2rem}
+.ab-hero{padding:1.2rem 1rem 1rem}
+.ab-sec{margin-top:10px;padding:.85rem .85rem}
+/* 메뉴 검색 (오른쪽 위 돋보기) */
+.msbar{display:flex;align-items:center;gap:.4rem;margin-top:.4rem}
+.msbar .msearch{flex:1;max-width:none;margin:0}
+.msbar .msearch input{min-height:2.5rem;background:#fff;border:1px solid var(--line)}
+.mclose{flex:none;min-height:2.5rem;padding:0 .6rem;font-size:.85rem;font-weight:700;color:var(--sub)}
 </style>
 </head>
 <body>
@@ -1504,12 +1566,14 @@ VIEWS.home = function () {
   var past = isPastYear() ? '<div class="past"><span>' + esc(b.year) + '년 자료 · 참고용</span><button class="btn small" onclick="switchYear(\'' + (b.editYear || b.latestYear) + '\')">' + (b.editYear || b.latestYear) + '년으로</button></div>' : '';
   return '<div class="hd"><span class="logo"><img src="' + SIG + '" alt="대한예수교장로회 목민교회"></span>' +
     '<button class="yearchip" onclick="yearMenu()" aria-label="연도 바꾸기">' + esc(b.year) + ' <i>▼</i></button>' +
+    '<button class="icon-btn" onclick="menuSearch()" aria-label="메뉴 검색">' + ic('search') + '</button>' +
     '<button class="icon-btn" onclick="go(\'notices\')" aria-label="공지">' + ic('bell') + (newNotice() ? '<i class="dot"></i>' : '') + '</button></div>' + past +
+    '<div class="msbar" id="msbar" hidden><label class="msearch">' + ic('search') + '<input id="mq" type="search" placeholder="메뉴 찾기 (예: 주소록, 회계)" aria-label="메뉴 검색" oninput="menuFilter(this.value)"></label><button class="mclose" onclick="menuSearchClose()">닫기</button></div>' +
+    '<div class="hx">' +
     '<div class="welcome"><div><b>' + esc(callName(S.user)) + ',</b><span>' + greet() + (isAdmin() ? ' <button class="gedit" onclick="greetForm()" aria-label="인사말 고치기">' + ic('pen') + '</button>' : '') + '</span></div><i class="wb">' + brandName() + '</i></div>' +
     '<button class="main-att" onclick="openAttend()"><span class="tx"><small>' + ic('calendar') + shortD(sun) + ' 주일예배</small>' +
     '<b>' + (hc ? esc(hc) + '반 출석 체크' : '출석 체크') + '</b><p>' + attLine(sun, fut) + '</p></span><span class="go">' + ic('arrow') + '</span></button>' +
-    '<div class="info2">' + myAttCard() + noticeCard(n) + '</div>' + birthdayCard() + installBanner() +
-    '<div class="sec-h"><h2>주요 메뉴</h2><label class="msearch" style="margin:0">' + ic('search') + '<input type="search" placeholder="메뉴 검색" aria-label="메뉴 검색" oninput="menuFilter(this.value)"></label></div>' +
+    '<div class="info2">' + myAttCard() + noticeCard(n) + '</div>' + birthdayCard() + installBanner() + '</div>' +
     G('학생 · 우리 반', M('student', '학생 명단', 'students', 't-blue', '학생 명단 연락처 반') +
       M('grid', '출석부', 'sheet', 't-sky', '학생 출석부 표 전체') +
       M('sprout', '새신자', 'newcomers', 't-lime', '학생 새친구') +
@@ -1601,6 +1665,12 @@ function newNotice() {
   var n = S.boot && S.boot.latestNotice;   // 목록을 아직 못 받았으면: 최근 공지 1개로 판단
   return !!(n && n.ID && !nRead(null)[n.ID] && (n.날짜 || '') >= addDays(todayStr(), -14));
 }
+function menuSearch() {
+  var bar = $('msbar'); if (!bar) return;
+  if (!bar.hidden) { menuSearchClose(); return; }
+  bar.hidden = false; window.scrollTo(0, 0); var q = $('mq'); q.value = ''; q.focus();
+}
+function menuSearchClose() { var bar = $('msbar'); if (bar) bar.hidden = true; menuFilter(''); }
 function menuFilter(q) {
   q = String(q || '').replace(/\s+/g, ''); var hit = 0;
   document.querySelectorAll('.mgroup').forEach(function (g) {
@@ -1612,6 +1682,7 @@ function menuFilter(q) {
     g.hidden = !gh;
   });
   var no = $('mnone'); if (no) no.hidden = hit > 0;
+  var hx = document.querySelector('.hx'); if (hx) hx.hidden = !!q;
 }
 /** 홈 카드: 내 출석 현황 (지난 7일 모임마다 가장 최근 한 번, 눌러서 바로 체크) */
 function myAttCard() {
@@ -2427,7 +2498,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261120160324';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261120161027';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

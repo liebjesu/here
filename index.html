@@ -2853,12 +2853,17 @@ VIEWS.newcomers = function (p) {
   var all = S.params._data;
   var chips = ['정착중', '등반완료', '전체'].map(function (c) { return '<button class="chip ' + (c === filt ? 'on' : '') + '" onclick="S.params.f=\'' + c + '\';render()">' + c + '</button>'; }).join('');
   var list = all.filter(function (n) { return filt === '전체' || (n.상태 || '정착중') === filt; });
+  // 이미 학생 명단에 같은 이름이 있는데 아직 정착중인 새신자 → 등반 완료로 정리
+  var same = all.filter(function (n) { return n.상태 !== '등반완료' && students().some(function (s) { return s.이름 === n.이름 && s.상태 !== '졸업'; }); });
+  var fix = isAdmin() && same.length ? '<div class="hint warm" style="margin:.6rem 0">' + ic('check') + '<span>학생 명단에 이미 있는 새신자 <b>' + same.length + '명</b>: ' + same.map(function (n) { return esc(n.이름); }).join(', ') +
+    '<br><button class="btn small" style="margin-top:.4rem" onclick="ncLinkAll()">등반 완료로 정리하고 면담에 연결</button></span></div>' : '';
   var cards = list.map(function (n) {
     var wks = ['1주차', '2주차', '3주차', '4주차'].map(function (w) {
       return '<button class="wk ' + (n[w] ? 'on' : '') + '" onclick="toggleWeek(\'' + n.ID + '\',\'' + w + '\')">' + w + '' + '</button>';
     }).join('');
     return '<div class="card"><div style="display:flex;gap:.6rem;align-items:center"><div style="flex:1"><h3>' + esc(n.이름) + ' <span class="badge">' + esc(n.배정반 || '반 미정') + '</span>' +
       (n.상태 === '등반완료' ? ' <span class="badge g">등반완료</span>' : '') + '</h3>' +
+      (function () { var s = n.학생ID ? stuById(n.학생ID) : null; return s ? '<a class="muted" style="font-size:.82rem" href="javascript:void 0" onclick="go(\'student\',{id:\'' + s.ID + '\'})">학생 명단 ' + esc(s.반) + '반 · 학생 정보 보기 ›</a>' : ''; })() +
       '<div class="muted">' + esc(fmtD(n.등록일)) + ' 등록 · ' + esc(n['학교/학년'] || '') + (n.전도자 ? ' · 전도: ' + esc(n.전도자) : '') + '</div></div>' +
       (n.연락처 ? '<a class="call" href="tel:' + tel(n.연락처) + '">' + ic('phone') + '전화</a>' : '') + '</div>' +
       '<div class="muted" style="margin-top:.6rem;font-weight:700">새신자 교육 (눌러서 체크)</div><div class="weeks">' + wks + '</div>' +
@@ -2866,9 +2871,19 @@ VIEWS.newcomers = function (p) {
       '<div class="row" style="margin-top:.7rem"><button class="btn light small" onclick="newcomerForm(\'' + n.ID + '\')">고치기</button>' +
       (n.상태 !== '등반완료' ? '<button class="btn light small" onclick="promote(\'' + n.ID + '\')">학생 명단에 올리기</button>' : '') + '</div></div>';
   }).join('') || '<div class="empty">해당하는 새신자가 없어요</div>';
-  return topbar('새신자') + '<button class="btn" style="margin-top:.8rem" onclick="newcomerForm()">+ 새신자 등록하기</button>' +
+  return topbar('새신자') + '<button class="btn" style="margin-top:.8rem" onclick="newcomerForm()">+ 새신자 등록하기</button>' + fix +
     '<div class="chips">' + chips + '</div><div class="cols">' + cards + '</div>';
 };
+function ncLinkAll() {
+  if (!confirm('학생 명단에 이미 있는 새신자를 등반 완료로 바꾸고, 새신자 정보를 그 학생 면담 기록에 남길까요?')) return;
+  call('fillNewcomerLinks', {}).then(function (r) {
+    S.params._data = null; delete CACHE.newcomers; delete CACHE.notes; NOTE_REQ = false; render();
+    modal('<h2>등반 완료 정리</h2><p><b>' + r.done.length + '명</b>을 정리했어요.</p>' +
+      (r.done.length ? '<div class="chips wrap">' + r.done.map(function (x) { return '<span class="chip">' + esc(x.이름) + ' · ' + esc(x.반) + '반</span>'; }).join('') + '</div>' : '') +
+      (r.left.length ? '<h3 style="margin-top:1rem">그대로 둔 새신자 ' + r.left.length + '명</h3><p class="muted">' + r.left.map(function (x) { return esc(x.이름) + ' (' + esc(x.이유) + ')'; }).join(', ') + '</p>' : '') +
+      '<button class="btn" style="margin-top:.8rem" onclick="closeModal()">확인</button>');
+  });
+}
 function ncById(id) { return S.params._data.filter(function (n) { return n.ID === id; })[0]; }
 function toggleWeek(id, w) {
   var n = ncById(id), o = { ID: id }; o[w] = n[w] ? '' : 'O';
@@ -2905,7 +2920,7 @@ function promote(id) {
 }
 
 /* ---------- 면담 기록 ---------- */
-var NOTE_TYPES = ['심방', '전화', '카톡/문자', '상담', '출석부메모', '기타'];
+var NOTE_TYPES = ['심방', '전화', '카톡/문자', '상담', '출석부메모', '새신자', '기타'];
 function noteCard(n) {
   return '<div class="card"><div class="muted"><b>' + esc(fmtD(n.날짜)) + '</b> · <span class="badge">' + esc(n.유형) + '</span>' + (n.교사 ? ' · ' + esc(n.교사) : '') + (n.장소 ? ' · ' + esc(n.장소) : '') + '</div>' +
     '<h3 style="margin-top:.3rem">' + esc(n.이름) + (n.반 ? ' <span class="muted">' + esc(n.반) + '반</span>' : '') + '</h3><div class="pre">' + esc(n.내용) + '</div></div>';
@@ -2935,12 +2950,13 @@ function notePrev(s, nb) {
 }
 /** 크게 보기: 학생 정보 + 최근 면담 전체 */
 function noteModal(id) {
+  if (!CACHE.notes) { call('getNotes', { limit: 120 }).then(function (d) { CACHE.notes = d; noteModal(id); }); return; }
   var s = stuById(id) || {}, list = notesBy()[id] || [], n = list[0];
   var info = [s.반 ? s.반 + '반' : '', s.상태 && s.상태 !== '재적' ? s.상태 : '', stuBrief(s)].filter(Boolean).join(' · ');
   modal('<h2>' + esc(s.이름 || '') + ' <span class="muted" style="font-size:.85rem">최근 면담</span></h2>' +
     (info ? '<p class="muted" style="margin:.1rem 0 0">' + esc(info) + '</p>' : '') +
     (s.특이사항 ? '<div class="hint pre" style="margin-top:.5rem">' + esc(s.특이사항) + '</div>' : '') +
-    (n ? '<div class="muted" style="margin-top:.8rem"><b>' + esc(fmtD(n.날짜)) + '</b> · <span class="badge">' + esc(n.유형) + '</span>' + (n.교사 ? ' · ' + esc(callName(n.교사)) : '') + (n.장소 ? ' · ' + esc(n.장소) : '') + '</div><div class="nbig">' + esc(n.내용) + '</div>'
+    (n ? '<div class="muted" style="margin-top:.8rem"><b>' + esc(fmtD(n.날짜)) + '</b> · <span class="badge">' + esc(n.유형) + '</span>' + (n.교사 ? ' · ' + esc(personOf(n.교사) ? callName(n.교사) : n.교사) : '') + (n.장소 ? ' · ' + esc(n.장소) : '') + '</div><div class="nbig">' + esc(n.내용) + '</div>'
       : '<p class="muted" style="margin-top:.8rem">아직 면담 기록이 없어요</p>') +
     (list.length > 1 ? '<p class="muted" style="margin:0 0 .4rem">지난 기록 ' + (list.length - 1) + '개는 학생 정보에서 볼 수 있어요</p>' : '') +
     '<div class="row"><button class="btn light" onclick="closeModal();go(\'student\',{id:\'' + id + '\'})">학생 정보 · 전체 기록</button><button class="btn" onclick="closeModal();noteForm(\'' + id + '\')">면담 기록하기</button></div>');
@@ -2986,7 +3002,7 @@ function drawNoteForm() {
       }).join('') + '</div>';
   }
   modal('<h2>면담 기록하기</h2><label>누구를 만났나요?</label>' + who +
-    '<label>어떻게 만났나요?</label><div class="chips wrap">' + NOTE_TYPES.filter(function (t) { return t !== '출석부메모'; }).map(function (t) {
+    '<label>어떻게 만났나요?</label><div class="chips wrap">' + NOTE_TYPES.filter(function (t) { return t !== '출석부메모' && t !== '새신자'; }).map(function (t) {
       return '<button class="chip ' + (t === NF.type ? 'on' : '') + '" onclick="NF.type=\'' + t + '\';drawNoteForm()">' + t + '</button>';
     }).join('') + '</div>' +
     '<div class="row"><div><label>날짜</label><input id="nt_d" type="date" value="' + esc(keep.d) + '"></div><div><label>장소</label><input id="nt_p" value="' + esc(keep.pl) + '" placeholder="예) 카페"></div></div>' +
@@ -3341,7 +3357,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261121164138';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261121165449';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -3485,7 +3501,20 @@ function saveLogin(name, keep) {
   if (tok && S.auth) { S.auth.token = tok; delete S.auth.code; }
   S._token = null;
 }
+/** 컴퓨터 미리보기(예시 데이터)에서만: ?shot=화면이름 → 김선생으로 들어가 그 화면을 엶 (tools/capture_pages.py 가 화면 캡처에 씀) */
+function shotMode() {
+  var q = new URLSearchParams(location.search), v = q.get('shot');
+  if (!window.MOCK || !v) return false;
+  if (v === 'login') { render(); return true; }
+  S.auth = { name: q.get('as') || '김선생', code: q.get('code') || '1001' };
+  call('boot', {}, 'silent').then(function (b) {
+    afterBoot(b);
+    if (v !== 'home') setTimeout(function () { var p = {}; try { p = JSON.parse(q.get('p') || '{}'); } catch (e) {} go(v, p); }, 400);
+  });
+  return true;
+}
 function autoLogin() {
+  if (shotMode()) return;
   var saved = loadLogin();
   if (!(saved && saved.name && (saved.token || saved.code))) { render(); return; }
   LOGIN.keep = !!store('hs_login');

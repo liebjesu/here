@@ -574,8 +574,8 @@ i.in{background:#7ccbf0} i.out{background:#ffb866}
    v2 디자인 시스템 — Modern Minimal Church Management
    (위의 규칙을 덮어씀: 흰 카드 + 얇은 회색 테두리 + 아주 옅은 그림자, 강조색 절제)
    ===================================================================== */
-#app{padding:0 16px calc(max(84px,5.2rem) + 14px + env(safe-area-inset-bottom))}
-.wide #app{padding:0 24px calc(max(84px,5.2rem) + 14px + env(safe-area-inset-bottom))}
+#app{padding:0 16px calc(max(84px,5.2rem) + 54px + env(safe-area-inset-bottom))}
+.wide #app{padding:0 24px calc(max(84px,5.2rem) + 54px + env(safe-area-inset-bottom))}
 svg.ic{stroke-width:1.85}
 svg.ic [fill-opacity]{fill-opacity:0}           /* Lucide 계열: 면 없이 선만 */
 
@@ -769,6 +769,12 @@ button.icard:active{transform:scale(.985);background:#fbfcfd}
 .bnav button.on{color:var(--navy);font-weight:800}
 .bnav button.on::before{content:"";position:absolute;top:0;left:30%;right:30%;height:2.5px;border-radius:0 0 3px 3px;background:var(--navy)}
 .bnav button:active{background:var(--bg)}
+.bnav .bqa{border-bottom:1px solid var(--line)}
+.bnav .bqa .in{display:flex;grid-template-columns:none}
+.bnav .bqa .in>*{flex:1;min-width:0;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:.3rem;min-height:38px;font-size:.8rem;font-weight:700;color:var(--ink);text-decoration:none;white-space:nowrap}
+.bnav .bqa .in>*+*{border-left:1px solid var(--line)}
+.bnav .bqa svg{width:1rem;height:1rem;color:var(--sub)}
+.bnav .bqa .sheet-ic svg{color:var(--ok)}
 .bnav .dot{position:absolute;top:8px;left:calc(50% + 7px);width:8px;height:8px;border-radius:50%;background:var(--no)}
 .nbadge{display:inline-block;background:var(--no);color:#fff;font-size:.7rem;font-weight:800;border-radius:999px;padding:.05rem .45rem;margin-right:.35rem;vertical-align:.08em}
 .ncount{display:inline-block;min-width:1.4rem;text-align:center;background:var(--no);color:#fff;font-size:.74rem;font-weight:800;border-radius:999px;padding:.05rem .4rem}
@@ -2138,10 +2144,6 @@ VIEWS.home = function () {
     G('운영', M('coin', '회계', 'finance', 't-lime', '예산 후원 지출 수입') +
       (isAdmin() ? M('gear', '구성 관리', 'admin', 't-peach', '관리 구성 설정 권한 반편성') : '')) +
     '<div class="empty" id="mnone" hidden>찾는 메뉴가 없어요</div>' +
-    '<div class="qa">' +
-    (isAdmin() && b.sheetUrl ? '<a class="sheet-ic" href="' + esc(b.sheetUrl) + '" target="_blank">' + ic('sheet') + '구글시트 연동</a>' : '') +
-    '<button onclick="safeReload(\'manual\')">' + ic('refresh') + '새로 고침</button>' +
-    '<button onclick="logout()">' + ic('logout') + '로그아웃</button></div>' +
     ((b.chatLink || canShowInstall()) ? '<div class="links">' +
       (b.chatLink ? '<a class="btn light small" href="' + esc(b.chatLink) + '" target="_blank">' + ic('chatbub') + '교사 단톡방</a>' : '') +
       (canShowInstall() ? '<button class="btn light small" onclick="installGuide()">' + ic('plusapp') + '홈 화면에 추가</button>' : '') + '</div>' : '') +
@@ -2311,7 +2313,13 @@ function noticeCard(n) {
 function bnav() {
   var v = S.view, tab = v === 'home' ? 'home' : v === 'ministry' ? 'ministry' : v === 'notices' ? 'notices' : v === 'settings' ? 'settings' : '';
   var B = function (k, icon, label, extra) { return '<button class="' + (tab === k ? 'on' : '') + '" onclick="navTab(\'' + k + '\')"' + (tab === k ? ' aria-current="page"' : '') + '>' + ic(icon) + label + (extra || '') + '</button>'; };
-  return '<nav class="bnav" aria-label="아래 메뉴"><div class="in">' + B('home', 'home', '홈') + B('ministry', 'calendar', '일정') +
+  var b = S.boot || {};
+  // 구글시트 연동 · 새로 고침 · 로그아웃: 아래 메뉴 바로 위에 늘 보이게
+  var qa = '<div class="bqa"><div class="in">' +
+    (isAdmin() && b.sheetUrl ? '<a class="sheet-ic" href="' + esc(b.sheetUrl) + '" target="_blank">' + ic('sheet') + '구글시트 연동</a>' : '') +
+    '<button onclick="safeReload(\'manual\')">' + ic('refresh') + '새로 고침</button>' +
+    '<button onclick="logout()">' + ic('logout') + '로그아웃</button></div></div>';
+  return '<nav class="bnav" aria-label="아래 메뉴">' + qa + '<div class="in">' + B('home', 'home', '홈') + B('ministry', 'calendar', '일정') +
     B('notices', 'bell', '알림', newNotice() && tab !== 'notices' ? '<i class="dot"></i>' : '') + B('settings', 'gear', '설정') + '</div></nav>';
 }
 function navTab(v) {
@@ -3255,7 +3263,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261121155825';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261121160751';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

@@ -1740,8 +1740,9 @@ VIEWS.report = function (p) {
     '<div class="rp-nav noprint"><button class="btn light small" onclick="rpGo(\'' + addDays(date, -7) + '\')">‹ 지난주</button>' +
     '<input type="date" value="' + date + '" onchange="rpGo(this.value)"><button class="btn light small" onclick="rpGo(\'' + addDays(date, 7) + '\')">다음주 ›</button></div>' +
     '<p class="muted" style="margin:.4rem 0 .5rem">' + (edited ? esc(d.by) + ' 쌤이 고침 · ' + esc(d.at) : '자동으로 채운 보고서예요') + ' · 출석 · 교사 출석 · 기도 · 헌금(회계)은 앱 기록에서 자동으로 들어와요</p>' +
-    '<h3 class="rp-eh">결재 ' + (left.length ? '<span class="muted" style="font-size:.8rem">' + (4 - left.length) + ' / 4 승인 · 모두 승인되면 이미지로 받을 수 있어요</span>' : '<span class="rp-tag g">모두 승인</span>') + '</h3>' + rpApBox(d) +
+    '<h3 class="rp-eh">결재 ' + (left.length ? '<span class="muted" style="font-size:.8rem">' + (4 - left.length) + ' / 4 승인 · 모두 승인되면 이미지 · 워드 파일로 받을 수 있어요</span>' : '<span class="rp-tag g">모두 승인</span>') + '</h3>' + rpApBox(d) +
     '<div class="row noprint" style="margin-bottom:.6rem"><button class="btn' + (left.length ? ' light' : '') + '" onclick="rpImage()">' + ic('download') + ' 이미지로 저장</button>' +
+      '<button class="btn' + (left.length ? ' light' : '') + '" onclick="rpImage(\'word\')">' + ic('download') + ' 워드 파일로 저장</button>' +
     (can ? '<button class="btn light" onclick="rpEdit()">' + ic('pen') + ' 수정</button>' : '') + '</div>' +
     '<div class="rp-wrap" id="rpWrap"><div class="rp" id="rpSheet">' + rpHtml(m, date, d.ap, true) + '</div></div>' +
     (can && edited ? '<button class="btn light small" style="margin-top:.7rem" onclick="rpReset()">고친 칸 지우고 자동 값으로</button>' : '') +
@@ -1770,7 +1771,7 @@ function rpSign(slot, undo) {
   });
 }
 /** 바뀐 기록 */
-var RP_LK = { edit: '고침', auto: '출석 기록에서 바뀜', ok: '결재', undo: '결재 취소', img: '이미지 저장' };
+var RP_LK = { edit: '고침', auto: '출석 기록에서 바뀜', ok: '결재', undo: '결재 취소', img: '파일 저장' };
 function rpLogBox(d) {
   var lg = d.log || []; if (!lg.length) return '';
   var all = S.params._logAll, list = all ? lg : lg.slice(0, 6);
@@ -1778,7 +1779,7 @@ function rpLogBox(d) {
     var who = e.k === 'auto' ? '앱 기록' : esc(callName(e.by));
     var tag = e.ap && (e.k === 'edit' || e.k === 'auto') ? '<span class="rp-tag">결재 뒤 바뀜</span>' : '';
     var show = e.k === 'edit' || e.k === 'auto';
-    return '<li><div><b>' + (RP_LK[e.k] || e.k) + '</b>' + tag + (!show && e.k !== 'img' ? ' · ' + esc((e.d || []).join(', ')) : '') + '</div><div class="when">' + esc(e.at) + ' · ' + who + '</div>' +
+    return '<li><div><b>' + (e.k === 'img' ? esc((e.d || [])[0] || '이미지 저장') : (RP_LK[e.k] || e.k)) + '</b>' + tag + (!show && e.k !== 'img' ? ' · ' + esc((e.d || []).join(', ')) : '') + '</div><div class="when">' + esc(e.at) + ' · ' + who + '</div>' +
       (show && (e.d || []).length ? '<ul>' + e.d.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : '') + '</li>';
   }).join('') + '</ul>' +
   (!all && lg.length > 6 ? '<button class="btn light small" onclick="S.params._logAll=1;render()">이력 모두 보기</button>' : '');
@@ -1856,37 +1857,167 @@ function loadH2C() {
   if (window.html2canvas) return Promise.resolve();
   return new Promise(function (ok, no) { var s = document.createElement('script'); s.src = H2C_URL; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
 }
-function rpImage() {
+function rpImage(kind) {
   var d = S.params._data; if (!d) return;
   var left = rpLeft(d);
   if (left.length) { toast('결재가 모두 끝나야 받을 수 있어요 (남은 칸: ' + left.join(', ') + ')'); return; }
   loading(true);
   // 받기 직전에 최신 값으로 다시 읽고 기록을 남김 → 출석이 바뀌었으면 바뀐 값으로 그림
-  call('saveReportImg', { date: d.date }, 'silent').then(function (nd) {
+  call('saveReportImg', { date: d.date, kind: kind === 'word' ? 'word' : 'img' }, 'silent').then(function (nd) {
     S.params._data = d = nd; CACHE['report:' + nd.date] = nd; loading(true);
-    return loadH2C();
+    return kind === 'word' ? null : loadH2C();
   }).then(function () {
     var box = document.createElement('div');
     box.style.cssText = 'position:fixed;left:-10000px;top:0;width:' + RP_W + 'px;background:#fff';
     box.innerHTML = '<div class="rp">' + rpHtml(rpMerge(d), d.date, d.ap, false) + '</div>';
     document.body.appendChild(box);
+    if (kind === 'word') {
+      try { var blob = rpDocx(box.firstChild); } finally { document.body.removeChild(box); }
+      loading(false);
+      rpSaveBlob(blob, '고등부_주간보고_' + d.date + '.docx', blob.type, '워드 파일을 저장했어요');
+      return;
+    }
     return html2canvas(box.firstChild, { scale: 1.5, backgroundColor: '#ffffff', logging: false }).then(function (cv) {
       document.body.removeChild(box);
       var name = '고등부_주간보고_' + d.date + '.png';
       cv.toBlob(function (blob) {
         loading(false);
-        var url = URL.createObjectURL(blob), touch = 'ontouchstart' in window;
-        var file = window.File ? new File([blob], name, { type: 'image/png' }) : null;
-        if (touch && file && navigator.canShare && navigator.canShare({ files: [file] })) {
-          navigator.share({ files: [file], title: '주간 교육활동 보고서' }).catch(function () { rpImgModal(url, name); });
-          return;
-        }
-        var a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
-        if (touch) rpImgModal(url, name); else toast('이미지를 저장했어요');
-        if (S.view === 'report') render();
+        rpSaveBlob(blob, name, 'image/png', '이미지를 저장했어요');
       }, 'image/png');
     }).catch(function (e) { try { document.body.removeChild(box); } catch (x) {} throw e; });
-  }).catch(function (e) { loading(false); toast((e && (e.error || e.message)) || '이미지를 만들지 못했어요. 인터넷 연결을 확인해 주세요'); });
+  }).catch(function (e) { loading(false); toast((e && (e.error || e.message)) || (kind === 'word' ? '워드 파일을 만들지 못했어요' : '이미지를 만들지 못했어요. 인터넷 연결을 확인해 주세요')); });
+}
+/* ---------- 워드 파일(.docx)로 저장: 한글(HWP)에서도 열려요 ----------
+   보고서 표를 화면에 그린 뒤 칸 크기 · 글자 크기 · 배경을 읽어 Word 표로 옮김 (A4 세로) */
+var CRC_T = null;
+function crc32(u) {
+  if (!CRC_T) { CRC_T = []; for (var n = 0; n < 256; n++) { var c = n; for (var k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; CRC_T[n] = c >>> 0; } }
+  var x = 0xFFFFFFFF; for (var i = 0; i < u.length; i++) x = CRC_T[(x ^ u[i]) & 255] ^ (x >>> 8);
+  return (x ^ 0xFFFFFFFF) >>> 0;
+}
+/** 압축 없는 zip (docx 껍데기) */
+function zipStore(files) {
+  var enc = new TextEncoder(), parts = [], cen = [], off = 0;
+  var le = function (n, b) { var a = []; for (var i = 0; i < b; i++) a.push((n >>> (8 * i)) & 255); return a; };
+  files.forEach(function (f) {
+    var nm = enc.encode(f.name), d = enc.encode(f.data), c = crc32(d);
+    var common = [].concat(le(20, 2), le(0, 2), le(0, 2), le(0, 2), le(0x21, 2), le(c, 4), le(d.length, 4), le(d.length, 4), le(nm.length, 2), le(0, 2));
+    var lh = new Uint8Array([].concat(le(0x04034b50, 4), common));
+    parts.push(lh, nm, d);
+    cen.push(new Uint8Array([].concat(le(0x02014b50, 4), le(20, 2), common, le(0, 2), le(0, 2), le(0, 2), le(0, 4), le(off, 4))), nm);
+    off += lh.length + nm.length + d.length;
+  });
+  var cl = cen.reduce(function (s, a) { return s + a.length; }, 0);
+  var end = new Uint8Array([].concat(le(0x06054b50, 4), le(0, 2), le(0, 2), le(files.length, 2), le(files.length, 2), le(cl, 4), le(off, 4), le(0, 2)));
+  return new Blob(parts.concat(cen, [end]), { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+}
+function xq(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function rpDocx(sheet) {
+  var BODY = 1121, PAGE = 10466, K = PAGE / BODY;                 // 화면 1px → twip
+  var tw = function (px) { return Math.round(px * K); };
+  var hp = function (px) { return Math.max(13, Math.round(parseFloat(px) * 0.75 * (K / 15) * 2 * 1.08)); };   // 글자 크기(반 포인트)
+  var rgb = function (c) { var m = /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?/.exec(c || ''); if (!m || m[4] === '0') return ''; var h = [m[1], m[2], m[3]].map(function (v) { return ('0' + (+v).toString(16)).slice(-2); }).join(''); return h === 'ffffff' ? '' : h; };
+  var FONT = '<w:rFonts w:ascii="Malgun Gothic" w:hAnsi="Malgun Gothic" w:eastAsia="맑은 고딕"/>';
+  var rpr = function (el, extra) {
+    var cs = getComputedStyle(el), sz = hp(cs.fontSize);
+    return '<w:rPr>' + FONT + (+cs.fontWeight >= 600 ? '<w:b/>' : '') + (extra || '') + '<w:sz w:val="' + sz + '"/><w:szCs w:val="' + sz + '"/></w:rPr>';
+  };
+  var para = function (runs, jc, ln) { return '<w:p><w:pPr><w:spacing w:before="0" w:after="0" w:line="' + (ln || 240) + '" w:lineRule="auto"/><w:jc w:val="' + jc + '"/></w:pPr>' + runs + '</w:p>'; };
+  // 칸 안 글: <br> 은 줄바꿈
+  var runsOf = function (node) {
+    var out = '';
+    node.childNodes.forEach(function (n) {
+      if (n.nodeType === 3) { if (n.nodeValue) out += '<w:r>' + rpr(n.parentNode) + '<w:t xml:space="preserve">' + xq(n.nodeValue) + '</w:t></w:r>'; }
+      else if (n.nodeName === 'BR') out += '<w:r><w:br/></w:r>';
+      else if (n.nodeType === 1 && n.nodeName !== 'I') out += runsOf(n);
+    });
+    return out;
+  };
+  var B = function (sz) { return 'w:val="single" w:sz="' + sz + '" w:space="0" w:color="000000"'; };
+  var tbl = function (t, opt) {
+    opt = opt || {};
+    var ws = [].map.call(t.querySelectorAll('col'), function (c) { return parseFloat(c.style.width) || 0; });
+    var sum = ws.reduce(function (a, b) { return a + b; }, 0), sc = opt.width ? opt.width / sum : 1;
+    var g = ws.map(function (w) { return tw(w * sc); });
+    var ob = opt.outer || 12;
+    var x = '<w:tbl><w:tblPr><w:tblW w:w="' + g.reduce(function (a, b) { return a + b; }, 0) + '" w:type="dxa"/>' + (opt.jc ? '<w:jc w:val="' + opt.jc + '"/>' : '') +
+      '<w:tblLayout w:type="fixed"/><w:tblBorders><w:top ' + B(ob) + '/><w:left ' + B(ob) + '/><w:bottom ' + B(ob) + '/><w:right ' + B(ob) + '/><w:insideH ' + B(4) + '/><w:insideV ' + B(4) + '/></w:tblBorders>' +
+      '<w:tblCellMar><w:top w:w="0" w:type="dxa"/><w:left w:w="45" w:type="dxa"/><w:bottom w:w="0" w:type="dxa"/><w:right w:w="45" w:type="dxa"/></w:tblCellMar></w:tblPr><w:tblGrid>' +
+      g.map(function (w) { return '<w:gridCol w:w="' + w + '"/>'; }).join('') + '</w:tblGrid>';
+    var hold = [];   // 위 칸에서 이어지는 칸: hold[열] = {left: 남은 줄, span}
+    [].forEach.call(t.rows, function (tr) {
+      var h = parseFloat(tr.style.height) || tr.getBoundingClientRect().height;
+      x += '<w:tr><w:trPr><w:cantSplit/><w:trHeight w:val="' + tw(h) + '" w:hRule="atLeast"/></w:trPr>';
+      var ci = 0, col = 0, cells = tr.cells;
+      while (col < g.length) {
+        var hd = hold[col];
+        if (hd && hd.left > 0) {
+          x += '<w:tc><w:tcPr><w:tcW w:w="' + g.slice(col, col + hd.span).reduce(function (a, b) { return a + b; }, 0) + '" w:type="dxa"/>' + (hd.span > 1 ? '<w:gridSpan w:val="' + hd.span + '"/>' : '') + '<w:vMerge/>' + hd.pr + '</w:tcPr><w:p/></w:tc>';
+          hd.left--; col += hd.span; continue;
+        }
+        var td = cells[ci++]; if (!td) break;
+        var span = td.colSpan || 1, rs = td.rowSpan || 1, cs = getComputedStyle(td);
+        var bg = rgb(cs.backgroundColor), va = cs.verticalAlign === 'top' ? 'top' : 'center';
+        var noB = opt.noBorder && opt.noBorder(td);
+        var pr = (bg ? '<w:shd w:val="clear" w:color="auto" w:fill="' + bg + '"/>' : '') + '<w:vAlign w:val="' + va + '"/>';
+        var brd = noB ? '<w:tcBorders><w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="nil"/><w:right w:val="nil"/></w:tcBorders>' :
+          (td.classList.contains('rp-diag') ? '<w:tcBorders><w:tl2br ' + B(6) + '/></w:tcBorders>' : '');
+        var jc = cs.textAlign === 'left' || cs.textAlign === 'start' ? 'left' : 'center';
+        var body;
+        if (td.classList.contains('rp-diag')) {
+          body = para(runsOf(td.querySelector('.rp-a')), 'right') + para(runsOf(td.querySelector('.rp-b')), 'left');
+        } else if (opt.block && opt.block(td)) {
+          body = opt.block(td);
+        } else {
+          var lh = parseFloat(cs.lineHeight) / parseFloat(cs.fontSize);   // 세로 글씨 칸은 줄 간격을 좁게
+          body = para(runsOf(td), jc, lh && lh < 1.15 ? 190 : 240);
+        }
+        x += '<w:tc><w:tcPr><w:tcW w:w="' + g.slice(col, col + span).reduce(function (a, b) { return a + b; }, 0) + '" w:type="dxa"/>' + (span > 1 ? '<w:gridSpan w:val="' + span + '"/>' : '') +
+          (rs > 1 ? '<w:vMerge w:val="restart"/>' : '') + brd + pr + '</w:tcPr>' + body + '</w:tc>';
+        if (rs > 1) hold[col] = { left: rs - 1, span: span, pr: brd + pr };
+        col += span;
+      }
+      x += '</w:tr>';
+    });
+    return x + '</w:tbl>';
+  };
+  var gap = '<w:p><w:pPr><w:spacing w:before="0" w:after="0" w:line="20" w:lineRule="exact"/></w:pPr><w:r><w:rPr><w:sz w:val="2"/></w:rPr></w:r></w:p>';
+  // 머리: 왼쪽 제목 · 날짜 (테두리 없음) + 오른쪽 결재 칸 → 표 하나로
+  var h1 = sheet.querySelector('.rp-tt h1'), dp = sheet.querySelector('.rp-tt p'), sign = sheet.querySelector('.rp-sign');
+  var head = sign.cloneNode(true);
+  var c0 = document.createElement('col'); c0.style.width = '704px'; head.querySelector('colgroup').insertBefore(c0, head.querySelector('col'));
+  var t0 = document.createElement('td'); t0.rowSpan = 2; t0.className = 'rp-hx'; head.rows[0].insertBefore(t0, head.rows[0].firstChild);
+  sign.parentNode.appendChild(head); head.style.visibility = 'hidden';
+  var title = para('<w:r>' + rpr(h1, '<w:u w:val="single"/>') + '<w:t xml:space="preserve">' + xq(h1.textContent) + '</w:t></w:r>', 'center') +
+    '<w:p><w:pPr><w:spacing w:before="240" w:after="0"/><w:jc w:val="center"/></w:pPr><w:r>' + rpr(dp) + '<w:t xml:space="preserve">' + xq(dp.textContent) + '</w:t></w:r></w:p>';
+  var x = tbl(head, { width: BODY, outer: 0, noBorder: function (td) { return td.className === 'rp-hx'; }, block: function (td) { return td.className === 'rp-hx' ? title : ''; } })
+    .replace(/<w:tblBorders>[\s\S]*?<\/w:tblBorders>/, '<w:tblBorders><w:insideH ' + B(8) + '/><w:insideV ' + B(8) + '/></w:tblBorders>');
+  head.parentNode.removeChild(head);
+  // 결재 칸 바깥 테두리
+  x = x.replace(/<w:tc><w:tcPr>((?:(?!<\/w:tcPr>).)*?)<\/w:tcPr>/g, function (all, pr) {
+    if (/w:val="nil"/.test(pr)) return all;
+    return '<w:tc><w:tcPr>' + pr.replace(/<w:vAlign/, '<w:tcBorders><w:top ' + B(8) + '/><w:left ' + B(8) + '/><w:bottom ' + B(8) + '/><w:right ' + B(8) + '/></w:tcBorders><w:vAlign') + '</w:tcPr>';
+  });
+  x += gap;
+  [].forEach.call(sheet.querySelectorAll('.rp-body > table'), function (t, i) { x += (i ? gap : '') + tbl(t); });
+  var doc = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>' + x +
+    '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="567" w:right="720" w:bottom="454" w:left="720" w:header="0" w:footer="0" w:gutter="0"/></w:sectPr></w:body></w:document>';
+  return zipStore([
+    { name: '[Content_Types].xml', data: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>' },
+    { name: '_rels/.rels', data: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>' },
+    { name: 'word/document.xml', data: doc }
+  ]);
+}
+function rpSaveBlob(blob, name, type, msg) {
+  var url = URL.createObjectURL(blob), touch = 'ontouchstart' in window;
+  var file = window.File ? new File([blob], name, { type: type }) : null;
+  if (touch && file && navigator.canShare && navigator.canShare({ files: [file] })) {
+    navigator.share({ files: [file], title: '주간 교육활동 보고서' }).catch(function () { if (type === 'image/png') rpImgModal(url, name); });
+    return;
+  }
+  var a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  if (touch && type === 'image/png') rpImgModal(url, name); else toast(msg);
+  if (S.view === 'report') render();
 }
 function rpImgModal(url, name) {
   modal('<h2>보고서 이미지</h2><p class="muted">사진을 <b>꾹 눌러</b> 저장하거나 공유하세요.</p><img src="' + url + '" alt="' + esc(name) + '" style="width:100%;border:1px solid var(--line);border-radius:8px">' +
@@ -3356,7 +3487,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261121170926';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261121195009';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

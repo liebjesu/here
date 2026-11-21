@@ -141,6 +141,21 @@ svg.ic{width:1.25em;height:1.25em;flex:none;display:block}
 .stu.p .tg .ck svg{opacity:1}
 .stu.p .tg .st{background:#fff;color:var(--ok)}
 .stu .memo{flex:none;background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:0 .65rem;font-size:.78rem;font-weight:800;color:var(--sub)}
+.stu .memo.nt{color:#c26a12;border-color:#f1d3ad;background:#fff8ef}
+.sinfo{display:block;color:var(--sub);font-size:.8rem;line-height:1.45;margin-top:.1rem;overflow-wrap:anywhere}
+.sinfo.ex{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.nprev{display:flex;gap:.4rem;align-items:flex-start;width:100%;text-align:left;margin-top:.35rem;padding:.35rem .55rem;border-radius:10px;background:#fff8ef;border:1px solid #f6e2c8;font-size:.8rem;color:var(--ink)}
+.nprev svg{flex:none;width:.95rem;height:.95rem;color:#c26a12;margin-top:.1rem}
+.nprev span{flex:1;min-width:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.nprev em{font-style:normal;color:var(--sub);font-weight:700;margin-right:.25rem}
+.tbl .nbtn{border:0;background:none;padding:0 .15rem;color:#c26a12;vertical-align:-2px}.tbl .nbtn svg{width:.95rem;height:.95rem}
+.tbl td.nt{max-width:16rem;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
+.nbig{font-size:1.02rem;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere;background:#fffaf3;border:1px solid #f6e2c8;border-radius:14px;padding:.8rem .9rem;margin:.5rem 0}
+.ncls{display:flex;align-items:baseline;gap:.5rem;margin:1.1rem 0 .2rem}.ncls h3{margin:0}
+.nrow{display:block;width:100%;text-align:left;background:#fff;border:1px solid var(--line);border-radius:14px;padding:.55rem .75rem;margin:.4rem 0}
+.nrow .nr-h{display:flex;gap:.4rem;align-items:baseline;flex-wrap:wrap}.nrow .nr-h b{font-size:1rem}
+.nrow .nr-t{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:.86rem;margin-top:.2rem;color:var(--ink)}
+.nnone{font-size:.8rem;color:var(--sub);margin:.2rem 0 0}
 
 .savebar{position:fixed;left:0;right:0;bottom:0;padding:.55rem 16px calc(.55rem + env(safe-area-inset-bottom));background:rgba(255,255,255,.86);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid var(--line)}
 .savebar .in{max-width:640px;margin:0 auto;display:flex;align-items:center;gap:.8rem}
@@ -2651,10 +2666,12 @@ VIEWS.attend = function () {
   var chips = classNames().map(function (c) {
     return '<button class="chip ' + (c === a.cls ? 'on' : '') + '" onclick="attClass(\'' + c + '\')">' + c + '반' + (a.touched[c] ? ' *' : '') + '</button>';
   }).join('');
+  var nb = notesBy();
   var rows = list.map(function (s) {
     var on = a.marks[s.ID] === '출석', r = a.reasons[s.ID] || '';
     var sub = r || (s.상태 !== '재적' ? s.상태 : '');
     return '<div class="stu ' + (on ? 'p' : '') + '"><button class="tg" onclick="mark(\'' + s.ID + '\')"><span class="ck">' + ic('tick') + '</span><b>' + esc(s.이름) + '</b><small>' + esc(sub) + '</small><span class="st">' + (on ? '출석' : '결석') + '</span></button>' +
+      ((nb[s.ID] || []).length ? '<button class="memo nt" onclick="noteModal(\'' + s.ID + '\')">면담</button>' : '') +
       '<button class="memo" onclick="reasonSheet(\'' + s.ID + '\')">메모</button></div>';
   }).join('') || '<div class="empty">이 반에 학생이 없어요</div>';
   var nP = list.filter(function (s) { return a.marks[s.ID] === '출석'; }).length;
@@ -2750,25 +2767,30 @@ VIEWS.students = function (p) {
   var list = students().filter(function (s) {
     return (q ? s.이름.indexOf(q) >= 0 : (cls === '전체' || s.반 === cls));
   }).sort(function (a, b) { return (a.상태 === '재적' ? 0 : 1) - (b.상태 === '재적' ? 0 : 1); });
+  var nb = notesBy();
   var rows = list.map(function (s) {
     var st = s.상태 === '재적' ? '' : ' <span class="badge ' + (s.상태 === '장결' ? 'w' : 'r') + '">' + esc(s.상태) + '</span>';
-    return '<div class="list-item"><div class="grow" onclick="go(\'student\',{id:\'' + s.ID + '\'})"><b>' + esc(s.이름) + '</b> <span class="muted">' + esc(s.반) + '반</span>' + st + '<br><span class="muted">' + esc(s.학교 || '') + '</span></div>' +
+    var br = stuBrief(s);
+    return '<div class="list-item"><div class="grow" onclick="go(\'student\',{id:\'' + s.ID + '\'})"><b>' + esc(s.이름) + '</b> <span class="muted">' + esc(s.반) + '반</span>' + st +
+      (br ? '<span class="sinfo">' + esc(br) + '</span>' : '') + (s.특이사항 ? '<span class="sinfo ex">' + esc(oneLine(s.특이사항)) + '</span>' : '') + notePrev(s, nb) + '</div>' +
       (s.연락처 ? '<a class="call" href="tel:' + tel(s.연락처) + '">' + ic('phone') + '전화</a>' : '') + '</div>';
   }).join('') || '<div class="empty">학생이 없어요</div>';
   return topbar('학생 명단') +
     '<input style="margin-top:.8rem" placeholder="이름으로 찾기" value="' + esc(q) + '" onchange="go(\'students\',{cls:\'' + cls + '\',q:this.value},true)">' +
-    '<div class="chips">' + chips + '</div>' + (isWide() ? studentTable(list) : rows) +
+    '<div class="chips">' + chips + '</div>' + (isWide() ? studentTable(list, nb) : rows) +
     (isAdmin() || Object.keys(myClassSet()).length ? '<button class="btn light" style="margin-top:.6rem" onclick="studentForm(null,\'' + (cls === '전체' || !canEditStu(cls) ? '' : cls) + '\')">+ 학생 추가</button>' : '') +
     (isAdmin() ? '<button class="btn light" style="margin-top:.5rem" onclick="go(\'admStudents\')">' + ic('check') + ' 학생 반 · 상태 한꺼번에 바꾸기</button>' : '');
 };
 
-function studentTable(list) {
+function studentTable(list, nb) {
   if (!list.length) return '<div class="empty">학생이 없어요</div>';
-  var H = ['반', '이름', '상태', '학교', '연락처', '보호자', '보호자연락처', '생년월일', '특이사항'];
+  nb = nb || {};
+  var H = ['반', '이름', '상태', '학교', '연락처', '보호자', '보호자연락처', '생년월일', '특이사항', '최근 면담'];
   return '<div class="tblwrap"><table class="tbl"><thead><tr>' + H.map(function (h, i) { return '<th class="' + (i === 0 ? 'c1' : i === 1 ? 'c2' : '') + '">' + h + '</th>'; }).join('') + '</tr></thead><tbody>' +
     list.map(function (s) {
       return '<tr class="clk" onclick="go(\'student\',{id:\'' + s.ID + '\'})"><td class="c1">' + esc(s.반) + '</td><td class="c2">' + esc(s.이름) + '</td><td>' + esc(s.상태) + '</td><td class="l">' + esc(s.학교) +
-        '</td><td>' + esc(s.연락처) + '</td><td class="l">' + esc(s.보호자) + '</td><td>' + esc(s.보호자연락처) + '</td><td>' + esc(s.생년월일) + '</td><td class="note">' + esc(s.특이사항) + '</td></tr>';
+        '</td><td>' + esc(s.연락처) + '</td><td class="l">' + esc(s.보호자) + '</td><td>' + esc(s.보호자연락처) + '</td><td>' + esc(s.생년월일) + '</td><td class="note">' + esc(s.특이사항) + '</td>' +
+        (function () { var n = (nb[s.ID] || [])[0]; return n ? '<td class="nt" onclick="event.stopPropagation();noteModal(\'' + s.ID + '\')"><b>' + shortD(n.날짜) + '</b> ' + esc(oneLine(n.내용)) + '</td>' : '<td></td>'; })() + '</tr>';
     }).join('') + '</tbody></table></div>';
 }
 
@@ -2888,13 +2910,63 @@ function noteCard(n) {
   return '<div class="card"><div class="muted"><b>' + esc(fmtD(n.날짜)) + '</b> · <span class="badge">' + esc(n.유형) + '</span>' + (n.교사 ? ' · ' + esc(n.교사) : '') + (n.장소 ? ' · ' + esc(n.장소) : '') + '</div>' +
     '<h3 style="margin-top:.3rem">' + esc(n.이름) + (n.반 ? ' <span class="muted">' + esc(n.반) + '반</span>' : '') + '</h3><div class="pre">' + esc(n.내용) + '</div></div>';
 }
+/* ---------- 면담: 학생마다 최근 기록 (출석 체크 · 출석부 · 학생 명단 · 면담 화면에서 같이 씀) ---------- */
+var NOTE_REQ = false;
+function notesBy() {
+  if (!CACHE.notes) {
+    if (!NOTE_REQ) { NOTE_REQ = true; call('getNotes', { limit: 120 }, 'silent').then(function (d) { CACHE.notes = d; render(); }).catch(function () { NOTE_REQ = false; }); }
+    return {};
+  }
+  var m = {};
+  CACHE.notes.forEach(function (n) { if (n.학생ID) (m[n.학생ID] = m[n.학생ID] || []).push(n); });
+  Object.keys(m).forEach(function (k) { m[k].sort(function (a, b) { return (a.날짜 || '') < (b.날짜 || '') ? 1 : -1; }); });
+  return m;
+}
+function oneLine(t) { return String(t || '').replace(/\s+/g, ' ').trim(); }
+/** 학생 간단 정보 한 줄: 학교 · 생일 · 보호자 */
+function stuBrief(s) {
+  var b = String(s.생년월일 || ''), bd = /^\d{4}-\d{2}-\d{2}/.test(b) ? '생일 ' + (+b.slice(5, 7)) + '/' + (+b.slice(8, 10)) + (isLunar(s) ? '(음)' : '') : b ? '생일 ' + b : '';
+  return [s.학교, bd, s.보호자 ? '보호자 ' + s.보호자 : ''].filter(Boolean).join(' · ');
+}
+/** 최근 면담 미리보기 (누르면 크게) */
+function notePrev(s, nb) {
+  var n = (nb[s.ID] || [])[0]; if (!n) return '';
+  return '<button class="nprev" onclick="event.stopPropagation();noteModal(\'' + s.ID + '\')">' + ic('chat') + '<span><em>' + shortD(n.날짜) + ' ' + esc(n.유형 || '') + '</em>' + esc(oneLine(n.내용)) + '</span></button>';
+}
+/** 크게 보기: 학생 정보 + 최근 면담 전체 */
+function noteModal(id) {
+  var s = stuById(id) || {}, list = notesBy()[id] || [], n = list[0];
+  var info = [s.반 ? s.반 + '반' : '', s.상태 && s.상태 !== '재적' ? s.상태 : '', stuBrief(s)].filter(Boolean).join(' · ');
+  modal('<h2>' + esc(s.이름 || '') + ' <span class="muted" style="font-size:.85rem">최근 면담</span></h2>' +
+    (info ? '<p class="muted" style="margin:.1rem 0 0">' + esc(info) + '</p>' : '') +
+    (s.특이사항 ? '<div class="hint pre" style="margin-top:.5rem">' + esc(s.특이사항) + '</div>' : '') +
+    (n ? '<div class="muted" style="margin-top:.8rem"><b>' + esc(fmtD(n.날짜)) + '</b> · <span class="badge">' + esc(n.유형) + '</span>' + (n.교사 ? ' · ' + esc(callName(n.교사)) : '') + (n.장소 ? ' · ' + esc(n.장소) : '') + '</div><div class="nbig">' + esc(n.내용) + '</div>'
+      : '<p class="muted" style="margin-top:.8rem">아직 면담 기록이 없어요</p>') +
+    (list.length > 1 ? '<p class="muted" style="margin:0 0 .4rem">지난 기록 ' + (list.length - 1) + '개는 학생 정보에서 볼 수 있어요</p>' : '') +
+    '<div class="row"><button class="btn light" onclick="closeModal();go(\'student\',{id:\'' + id + '\'})">학생 정보 · 전체 기록</button><button class="btn" onclick="closeModal();noteForm(\'' + id + '\')">면담 기록하기</button></div>');
+}
 VIEWS.notes = function (p) {
-  if (!S.params._data) { call('getNotes', { limit: 120 }).then(function (d) { S.params._data = d; render(); }); return topbar('면담 기록') + '<div class="empty load">불러오는 중…</div>'; }
-  var t = p.t || '전체';
-  var chips = ['전체'].concat(NOTE_TYPES).map(function (c) { return '<button class="chip ' + (c === t ? 'on' : '') + '" onclick="S.params.t=\'' + c + '\';render()">' + c + '</button>'; }).join('');
-  var list = S.params._data.filter(function (n) { return t === '전체' || n.유형 === t; }).slice(0, 60);
+  if (!S.params._data) { call('getNotes', { limit: 120 }).then(function (d) { S.params._data = d; CACHE.notes = d; render(); }); return topbar('면담 기록') + '<div class="empty load">불러오는 중…</div>'; }
+  if (!CACHE.notes) CACHE.notes = S.params._data;
+  // 반별로 나누고, 학생마다 가장 최근 면담 하나만 (지난 기록은 학생 정보에서)
+  var cls = p.cls || homeClass() || '전체', nb = notesBy(), all = classNames();
+  var chips = ['전체'].concat(all).map(function (c) { return '<button class="chip ' + (c === cls ? 'on' : '') + '" onclick="S.params.cls=\'' + c + '\';render()">' + (c === '전체' ? c : c + '반') + '</button>'; }).join('');
+  var show = cls === '전체' ? all : [cls];
+  var html = show.map(function (c) {
+    var mem = students().filter(function (s) { return s.반 === c && (s.상태 === '재적' || nb[s.ID]); });
+    var has = mem.filter(function (s) { return nb[s.ID]; }).sort(function (a, b) { return nb[a.ID][0].날짜 < nb[b.ID][0].날짜 ? 1 : -1; });
+    var none = mem.filter(function (s) { return !nb[s.ID] && s.상태 === '재적'; });
+    var t = (S.boot.classes.filter(function (x) { return x.반 === c; })[0] || {}).담임교사 || '';
+    return '<div class="ncls"><h3>' + esc(c) + '반</h3><span class="muted">' + esc(t) + (t ? ' · ' : '') + '면담 ' + has.length + ' / ' + mem.length + '명</span></div>' +
+      has.map(function (s) {
+        var n = nb[s.ID][0], more = nb[s.ID].length - 1;
+        return '<button class="nrow" onclick="noteModal(\'' + s.ID + '\')"><div class="nr-h"><b>' + esc(s.이름) + '</b><span class="muted">' + esc(shortD(n.날짜)) + ' · ' + esc(n.유형 || '') + (n.교사 ? ' · ' + esc(n.교사) : '') + (more ? ' · 지난 기록 ' + more + '개' : '') + '</span></div>' +
+          '<div class="nr-t">' + esc(oneLine(n.내용)) + '</div></button>';
+      }).join('') +
+      (none.length ? '<p class="nnone">아직 면담 기록 없음: ' + none.map(function (s) { return '<a href="javascript:void 0" onclick="noteForm(\'' + s.ID + '\')">' + esc(s.이름) + '</a>'; }).join(', ') + '</p>' : '');
+  }).join('');
   return topbar('면담 기록') + '<button class="btn" style="margin-top:.8rem" onclick="noteForm()">+ 새 면담 기록하기</button>' +
-    '<div class="chips">' + chips + '</div>' + '<div class="cols">' + (list.map(noteCard).join('') || '<div class="empty">기록이 없어요</div>') + '</div>';
+    '<div class="chips">' + chips + '</div><p class="muted" style="margin:0">학생마다 가장 최근 면담만 보여요 · 누르면 크게 볼 수 있어요</p>' + (html || '<div class="empty">기록이 없어요</div>');
 };
 var NF = {};
 function noteForm(sid) {
@@ -2992,7 +3064,7 @@ VIEWS.sheet = function (p) {
   var list = students().filter(function (s) { return (cls === '전체' || s.반 === cls) && (s.상태 === '재적' || has[s.ID]); })
     .sort(function (a, b) { return order.indexOf(a.반) - order.indexOf(b.반); });
   var tot = dl.map(function () { return 0; });
-  var curCls = '', body = '';
+  var curCls = '', body = '', nb = notesBy();
   list.forEach(function (s) {
     if (cls === '전체' && s.반 !== curCls) { curCls = s.반; body += '<tr class="grp"><td class="c1">' + esc(s.반) + '</td><td class="c2">' + esc(s.반) + '반</td><td colspan="' + (dl.length + 2) + '"></td></tr>'; }
     var cnt = 0;
@@ -3003,12 +3075,13 @@ VIEWS.sheet = function (p) {
       if (r[2] === '출석') { cnt++; tot[i]++; return '<td class="o"' + t + '>O</td>'; }
       return '<td class="x"' + t + '>' + (r[3] ? '·' : '') + '</td>';
     }).join('');
-    body += '<tr class="clk" onclick="go(\'student\',{id:\'' + s.ID + '\'})"><td class="c1">' + esc(s.반) + '</td><td class="c2">' + esc(s.이름) + (s.상태 !== '재적' ? ' <span class="muted">(' + esc(s.상태) + ')</span>' : '') + '</td>' + cells +
+    body += '<tr class="clk" onclick="go(\'student\',{id:\'' + s.ID + '\'})"><td class="c1">' + esc(s.반) + '</td><td class="c2">' + esc(s.이름) + (s.상태 !== '재적' ? ' <span class="muted">(' + esc(s.상태) + ')</span>' : '') +
+      ((nb[s.ID] || []).length ? '<button class="nbtn" title="최근 면담" onclick="event.stopPropagation();noteModal(\'' + s.ID + '\')">' + ic('chat') + '</button>' : '') + '</td>' + cells +
       '<td><b>' + cnt + '</b></td><td>' + Math.round(cnt / dl.length * 100) + '%</td></tr>';
   });
   var thead = '<tr><th class="c1">반</th><th class="c2">이름</th>' + dl.map(function (d) { return '<th>' + shortD(d) + '</th>'; }).join('') + '<th>출석</th><th>출석률</th></tr>';
   var tfoot = '<tr><td class="c1"></td><td class="c2">출석 합계</td>' + tot.map(function (n) { return '<td>' + n + '</td>'; }).join('') + '<td colspan="2">' + list.length + '명</td></tr>';
-  return head + '<p class="muted" style="margin:0">O = 출석 · 빨간 칸 = 결석 (· 은 결석 이유 있음, 마우스를 올리면 보여요) · 이름을 누르면 학생 정보</p>' +
+  return head + '<p class="muted" style="margin:0">O = 출석 · 빨간 칸 = 결석 (· 은 결석 이유 있음, 마우스를 올리면 보여요) · 이름을 누르면 학생 정보 · 말풍선을 누르면 최근 면담</p>' +
     (isWide() ? '' : '<div class="hint">PC나 태블릿에서 [PC 넓게 보기]로 보면 한눈에 보여요. 휴대폰에서는 옆으로 밀어서 보세요.</div>') +
     '<div class="tblwrap"><table class="tbl"><thead>' + thead + '</thead><tbody>' + body + '</tbody><tfoot>' + tfoot + '</tfoot></table></div>';
 };
@@ -3268,7 +3341,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261121162633';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261121164138';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

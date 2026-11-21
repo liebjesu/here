@@ -1167,7 +1167,10 @@ var S = {           // 앱 상태
 function store(k, v) { try { if (v === undefined) return JSON.parse(localStorage.getItem(k)); localStorage.setItem(k, JSON.stringify(v)); } catch (e) { return null; } }
 function unstore(k) { try { localStorage.removeItem(k); } catch (e) {} }
 
+var WRITE_RE = /^(save|delete|add|create|promote|assign|bulk|fill|reply|comment|done)/;
 function call(action, payload, quiet) {
+  // 전체 보기(보기 전용)로 들어온 분: 고치는 요청은 보내지 않음
+  if (S.viewOnly && (WRITE_RE.test(action) || action === 'batch')) { if (quiet !== 'silent') toast('보기 전용이에요. 고치기는 할 수 없어요'); return Promise.reject({ error: 'view' }); }
   if (!quiet) loading(true);
   return new Promise(function (resolve, reject) {
     var done = function (res) {
@@ -1177,7 +1180,7 @@ function call(action, payload, quiet) {
         if (res && res.auth && S.user) { toast(res.error || '다시 로그인해 주세요'); logout(true, true); reject(res); return; }
         if (quiet !== 'silent') toast((res && res.error) || '오류가 났어요'); reject(res || {}); return;
       }
-      if (res.role) { S.role = res.role; S.isSuper = !!res.isSuper; S.fin = !!res.fin; }
+      if (res.role) { S.role = res.role; S.isSuper = !!res.isSuper; S.fin = !!res.fin; S.viewOnly = !!res.view; }
       if (res.token) S._token = res.token;   // 번호로 들어오면 서버가 주는 로그인 열쇠
       resolve(res.data);
     };
@@ -1570,10 +1573,12 @@ var PERMS = [
   ['구성', '구성 관리', '반 편성 · 학생 · 선생님 · 공지 · 조직표 등'],
   ['회계', '회계', '회계 기록 · 예산 · 보고서'],
   ['서기', '서기', '주간 교육활동 보고서 쓰기 · 고치기'],
-  ['권한지정', '권한 지정', '이 권한 체크 바꾸기 · 새 연도 만들기 (구성 관리 포함)']];
+  ['권한지정', '권한 지정', '이 권한 체크 바꾸기 · 새 연도 만들기 (구성 관리 포함)'],
+  ['전체보기', '전체 보기', '모든 화면 보기만 (구성 · 회계 · 보고서까지, 고치기는 안 돼요)'],
+  ['번호숨김', '연락처 숨김', '주소록 · 선생님 목록에 전화번호를 보이지 않기']];
 function permsOf(v) {
   v = String(v || '').trim();
-  var f = { 일반: true, 구성: false, 회계: false, 서기: false, 권한지정: false };
+  var f = { 일반: true, 구성: false, 회계: false, 서기: false, 권한지정: false, 전체보기: false, 번호숨김: false };
   if (v === '최고관리자') return { 일반: true, 구성: true, 회계: true, 서기: true, 권한지정: true };
   if (v === '관리자') { f.구성 = true; f.회계 = true; return f; }
   if (v === '회계') { f.회계 = true; return f; }
@@ -1587,7 +1592,7 @@ function permStr(f) { if (f.권한지정) { f.구성 = true; f.일반 = true; } 
 function roleBadge(r) {
   var f = permsOf(r), b = function (icon, color, title) { return ' <span title="' + title + '" style="color:' + color + ';display:inline-flex;vertical-align:-2px">' + ic(icon) + '</span>'; };
   if (!f.일반) return ' <span class="badge r">사용 안 함</span>';
-  return (f.권한지정 ? b('shield', 'var(--ci-blue)', '권한 지정') : f.구성 ? b('gear', 'var(--ci-orange)', '구성 관리') : '') + (f.회계 ? b('coin', 'var(--ok)', '회계') : '') + (f.서기 ? b('doc', 'var(--ci-blue)', '서기') : '');
+  return (f.권한지정 ? b('shield', 'var(--ci-blue)', '권한 지정') : f.구성 ? b('gear', 'var(--ci-orange)', '구성 관리') : '') + (f.회계 ? b('coin', 'var(--ok)', '회계') : '') + (f.서기 ? b('doc', 'var(--ci-blue)', '서기') : '') + (f.전체보기 && !f.구성 ? b('search', 'var(--sub)', '전체 보기') : '');
 }
 /** 권한 체크: 권한 지정을 켜면 구성 관리 · 일반도 함께 켜짐 */
 function permTick(k) {
@@ -2431,11 +2436,12 @@ VIEWS.org = function () {
   };
   // 맨 위: 섬김이(교역자·부장·총무…)
   var lead = gmap['섬김이'] || [];
-  var top = lead.filter(function (r) { return /교역자|목사|전도사/.test(r.역할); });
-  var mid = lead.filter(function (r) { return top.indexOf(r) < 0; });
+  var chief = lead.filter(function (r) { return /교장/.test(r.역할); });
+  var top = lead.filter(function (r) { return chief.indexOf(r) < 0 && /교역자|목사|전도사/.test(r.역할); });
+  var mid = lead.filter(function (r) { return chief.indexOf(r) < 0 && top.indexOf(r) < 0; });
   var html = '';
   if (lead.length) {
-    html += '<div class="org-lead">' + (top.length ? '<div class="org-row top">' + top.map(person).join('') + '</div><div class="org-line"></div>' : '') +
+    html += '<div class="org-lead">' + (chief.length ? '<div class="org-row top">' + chief.map(person).join('') + '</div><div class="org-line"></div>' : '') + (top.length ? '<div class="org-row top">' + top.map(person).join('') + '</div><div class="org-line"></div>' : '') +
       '<div class="org-row">' + mid.map(person).join('') + '</div></div>';
   }
   // 담임 (반 편성에서)
@@ -3263,7 +3269,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261121160751';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261121161807';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -3785,7 +3791,7 @@ VIEWS.tatt = function (p) {
   return topbar('교사 출석') + '<div class="chips">' + chips + '</div>' + body;
 };
 function tCheck(d, p) {
-  var date = p.date || tDefaultDate(d), ms = meetsOn(d, date), names = S.boot.teachers.map(function (x) { return x.이름; });
+  var date = p.date || tDefaultDate(d), ms = meetsOn(d, date), names = S.boot.teachers.filter(function (x) { return !x.보기; }).map(function (x) { return x.이름; });
   var bar = '<div class="datebar"><button onclick="S.params.date=tStep(S.params._data,\'' + date + '\',-1);render()" aria-label="이전 일정">' + ic('back') + '</button>' +
     '<div class="d">' + fmtD(date) + '<small>' + (date === todayStr() ? '오늘' : '화살표로 일정 날 바꾸기') + '</small></div>' +
     '<button onclick="S.params.date=tStep(S.params._data,\'' + date + '\',1);render()" aria-label="다음 일정">' + ic('next') + '</button></div>';
@@ -3818,7 +3824,7 @@ function tStats(d, p) {
   var ms = (d['교사모임'] || []).slice().sort(byOrder), mid = p.mid || (ms[0] && ms[0].ID) || '';
   var rows = (d['교사출석'] || []).filter(function (r) { return r.모임ID === mid && r.날짜 <= todayStr(); });
   var held = rows.map(function (r) { return r.날짜; }).filter(function (x, i, a) { return a.indexOf(x) === i; }).sort();
-  var names = S.boot.teachers.map(function (x) { return x.이름; });
+  var names = S.boot.teachers.filter(function (x) { return !x.보기; }).map(function (x) { return x.이름; });
   var per = names.map(function (n) { var c = rows.filter(function (r) { return r.이름 === n; }).length; return [n, c, held.length ? Math.round(c / held.length * 100) : 0]; })
     .sort(function (a, b) { return b[1] - a[1] || (a[0] < b[0] ? -1 : 1); });
   if (!isAdmin()) per = per.filter(function (x) { return x[0] === S.user; });   // 일반 선생님은 내 기록만

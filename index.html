@@ -2133,8 +2133,7 @@ VIEWS.home = function () {
       M('sprout', '새신자', 'newcomers', 't-lime', '학생 새친구') +
       M('chat', '면담', 'notes', 't-peach', '학생 상담 기록') +
       M('chart', '통계', 'stats', 't-sky', '학생 출석률')) +
-    G('선생님', M('usercheck', '교사 출석', 'tatt', 't-blue', '교사 내출석 기도회 특송 교사대학 일정') +
-      M('book', '교사 주소록', 'directory', 't-lilac', '교사 선생님 연락처 생일') +
+    G('선생님', M('book', '교사 주소록', 'directory', 't-lilac', '교사 선생님 연락처 생일') +
       M('org', '조직표', 'org', 't-lime', '교사 조직 섬김이')) +
     G('예배 · 사역', M('megaphone', '공지', 'notices', 't-rose', '광고 알림') +
       M('calendar', '사역 준비', 'ministry', 't-lilac', '사역 일정 행사 준비') +
@@ -3269,7 +3268,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261121161807';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261121162633';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

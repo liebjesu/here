@@ -1589,11 +1589,10 @@ var PERMS = [
   ['회계', '회계', '회계 기록 · 예산 · 보고서'],
   ['서기', '서기', '주간 교육활동 보고서 쓰기 · 고치기'],
   ['권한지정', '권한 지정', '이 권한 체크 바꾸기 · 새 연도 만들기 (구성 관리 포함)'],
-  ['전체보기', '전체 보기', '모든 화면 보기만 (구성 · 회계 · 보고서까지, 고치기는 안 돼요)'],
-  ['번호숨김', '연락처 숨김', '주소록 · 선생님 목록에 전화번호를 보이지 않기']];
+  ['전체보기', '전체 보기', '모든 화면 보기만 (고치기 없음) · 전화번호는 주소록에 안 보임 · 위임목사님 등']];
 function permsOf(v) {
   v = String(v || '').trim();
-  var f = { 일반: true, 구성: false, 회계: false, 서기: false, 권한지정: false, 전체보기: false, 번호숨김: false };
+  var f = { 일반: true, 구성: false, 회계: false, 서기: false, 권한지정: false, 전체보기: false };
   if (v === '최고관리자') return { 일반: true, 구성: true, 회계: true, 서기: true, 권한지정: true };
   if (v === '관리자') { f.구성 = true; f.회계 = true; return f; }
   if (v === '회계') { f.회계 = true; return f; }
@@ -3357,7 +3356,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261121165449';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261121170926';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

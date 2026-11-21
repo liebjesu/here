@@ -747,6 +747,7 @@ button.icard:active{transform:scale(.985);background:#fbfcfd}
 .mrow .mt2 em{display:block;font-style:normal;font-size:.76rem;color:var(--sub);font-weight:600;line-height:1.3}
 .mrow .mt2 b{display:block;font-size:.92rem;font-weight:800;color:var(--pri);white-space:nowrap}
 .mrow.on .mt2 b{color:var(--ok)}
+.mrow.wait .mt2 b{color:var(--sub)}.mrow.wait .ring{border-style:dotted;opacity:.7}
 .icard .skel{height:2.4rem;border-radius:12px;background:linear-gradient(90deg,#f1f3f6,#f8f9fb,#f1f3f6);background-size:200% 100%;animation:shimmer 1.2s infinite}
 @keyframes shimmer{to{background-position:-200% 0}}
 
@@ -2446,10 +2447,17 @@ function myAttCard() {
     var dt = addDays(todayStr(), -i);
     meetsOn(d, dt).forEach(function (m) { if (!seen[m.ID]) { seen[m.ID] = 1; list.push([dt, m]); } });
   }
+  // 금 · 토: 다가오는 주일 일정을 '출석 대기'로 (지난 주일 같은 일정은 이미 체크했으면 빼고)
+  var ns = attSunday();
+  if (ns > todayStr()) meetsOn(d, ns).forEach(function (m) {
+    list = list.filter(function (x) { return !(x[1].ID === m.ID && tIsIn(d, x[0], m.ID, S.user)); });
+    list.push([ns, m, 1]);
+  });
   if (!list.length) return head + '<span class="muted">이번 주 일정이 없어요</span></div>';
   list.sort(function (a, b) { return a[0] < b[0] ? -1 : 1; });
   return head + list.map(function (x) {
     var dt = x[0], m = x[1], on = tIsIn(d, dt, m.ID, S.user);
+    if (x[2]) return '<button class="mrow wait" onclick="toast(\'이번 주일 출석 대기 중이에요. 그날 체크해 주세요\')"><span class="ring"></span><span class="mt2"><em>' + shortD(dt) + ' ' + esc(m.이름) + '</em><b>출석 대기</b></span></button>';
     return '<button class="mrow' + (on ? ' on' : '') + '" onclick="tToggle(\'' + dt + '\',\'' + m.ID + '\',S.user)" aria-label="' + esc(m.이름) + (on ? ' 출석 취소' : ' 출석하기') + '">' +
       '<span class="ring">' + (on ? ic('tick') : '') + '</span><span class="mt2"><em>' + (dt === todayStr() ? '오늘' : shortD(dt)) + ' ' + esc(m.이름) + '</em><b>' + (on ? '출석 완료' : '눌러서 출석') + '</b></span></button>';
   }).join('') + '</div>';
@@ -3490,7 +3498,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261121222212';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261121222534';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -3969,6 +3977,7 @@ function tDefaultDate(d) {
   var t = todayStr(), y = viewYear(), i0;
   if (y > t.slice(0, 4)) { for (i0 = 0; i0 < 31; i0++) { var f = addDays(y + '-01-01', i0); if (meetsOn(d, f).length) return f; } return yearSunday(); }
   if (y < t.slice(0, 4)) t = y + '-12-31';
+  else if (!meetsOn(d, t).length) { var ns = attSunday(); if (ns > t && meetsOn(d, ns).length) return ns; }   // 금 · 토: 다가오는 주일 (출석 대기)
   for (var i = 0; i < 21; i++) { var x = addDays(t, -i); if (meetsOn(d, x).length) return x; }
   return lastSunday();
 }
@@ -4027,7 +4036,7 @@ VIEWS.tatt = function (p) {
 function tCheck(d, p) {
   var date = p.date || tDefaultDate(d), ms = meetsOn(d, date), names = S.boot.teachers.filter(function (x) { return !x.보기; }).map(function (x) { return x.이름; });
   var bar = '<div class="datebar"><button onclick="S.params.date=tStep(S.params._data,\'' + date + '\',-1);render()" aria-label="이전 일정">' + ic('back') + '</button>' +
-    '<div class="d">' + fmtD(date) + '<small>' + (date === todayStr() ? '오늘' : '화살표로 일정 날 바꾸기') + '</small></div>' +
+    '<div class="d">' + fmtD(date) + '<small>' + (date === todayStr() ? '오늘' : date === attSunday() && date > todayStr() ? '이번 주일 · 출석 대기' : '화살표로 일정 날 바꾸기') + '</small></div>' +
     '<button onclick="S.params.date=tStep(S.params._data,\'' + date + '\',1);render()" aria-label="다음 일정">' + ic('next') + '</button></div>';
   var cards = ms.map(function (m) {
     var on = tIsIn(d, date, m.ID, S.user);
@@ -4037,7 +4046,7 @@ function tCheck(d, p) {
     }).join('') + '</div><p class="muted" style="margin:.3rem 0 0">이름을 누르면 그 선생님 출석이 바뀌어요</p>'
       : (here.length ? '<p class="muted" style="margin:.45rem 0 0">함께한 선생님: ' + here.map(esc).join(', ') + '</p>' : '');
     return '<div class="card"><div style="display:flex;align-items:center;gap:.5rem"><h3 style="flex:1;margin:0">' + esc(m.이름) + (m.시간 ? ' <span class="muted" style="font-size:.85rem;font-weight:600">' + esc(m.시간) + '</span>' : '') + '</h3><span class="badge g">' + here.length + ' / ' + names.length + '명</span></div>' +
-      (date > todayStr() ? '<div class="hint warm" style="margin-top:.5rem">아직 다가올 일정이에요. 그날 함께해요!</div>' : '<button class="btn ' + (on ? 'ok' : 'light') + ' tbig" style="margin-top:.5rem" onclick="tToggle(\'' + date + '\',\'' + m.ID + '\',S.user)">' + (on ? ic('tick') + ' 출석했어요 (누르면 취소)' : '나 출석 체크하기') + '</button>') + all + '</div>';
+      (date > todayStr() ? '<div class="hint warm" style="margin-top:.5rem">' + (date === attSunday() ? '이번 주일 출석 대기 중이에요. 그날 체크해 주세요.' : '아직 다가올 일정이에요. 그날 함께해요!') + '</div>' : '<button class="btn ' + (on ? 'ok' : 'light') + ' tbig" style="margin-top:.5rem" onclick="tToggle(\'' + date + '\',\'' + m.ID + '\',S.user)">' + (on ? ic('tick') + ' 출석했어요 (누르면 취소)' : '나 출석 체크하기') + '</button>') + all + '</div>';
   }).join('');
   // 지난 모임 중 체크 안 한 것: 한 번 눌러 체크 (2개월 전까지)
   var miss = isPastYear() && !isAdmin() ? [] : tMissed(d);

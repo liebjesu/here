@@ -1252,7 +1252,10 @@ function viewYear() { return (S.boot && S.boot.year) || todayStr().slice(0, 4); 
 function isFutureYear() { return viewYear() > todayStr().slice(0, 4); }
 function firstSundayOf(y) { var d = parseD(y + '-01-01'); d.setDate(d.getDate() + (7 - d.getDay()) % 7); return ymd(d); }
 function lastSundayOf(y) { var d = parseD(y + '-12-31'); d.setDate(d.getDate() - d.getDay()); return ymd(d); }
-function yearSunday() { var y = viewYear(), ty = todayStr().slice(0, 4); return y === ty ? lastSunday() : y > ty ? firstSundayOf(y) : lastSundayOf(y); }
+/** 출석 기본 날짜: 금 · 토요일부터는 다가오는 주일 (출석 대기), 그 밖에는 지난 주일 */
+function attSunday() { var t = todayStr(), wd = parseD(t).getDay(), n = wd >= 5 ? addDays(t, 7 - wd) : lastSunday(); return n.slice(0, 4) === t.slice(0, 4) ? n : lastSunday(); }
+/** past: 보고서처럼 지난 주일이 기본인 곳 */
+function yearSunday(past) { var y = viewYear(), ty = todayStr().slice(0, 4); return y === ty ? (past ? lastSunday() : attSunday()) : y > ty ? firstSundayOf(y) : lastSundayOf(y); }
 function isFutureDay(d) { return d > todayStr(); }
 function addDays(s, n) { var d = parseD(s); d.setDate(d.getDate() + n); return ymd(d); }
 function tel(n) { return String(n || '').replace(/[^0-9]/g, ''); }
@@ -1643,7 +1646,7 @@ VIEWS.admin = function () {
    출석 · 새신자 · 교사 출석 · 대표기도 · 결재 이름 · 헌금(회계)은 자동으로 채움.
    [수정]으로 고친 칸만 따로 보관 → 안 고친 칸은 늘 최신 자동 값. [이미지로 저장]은 그림 파일로 */
 var RP_W = 1210;
-function rpDate(p) { return (p && p.date) || yearSunday(); }
+function rpDate(p) { return (p && p.date) || yearSunday(1); }
 function rpN(v) { var s = String(v == null ? '' : v).replace(/[^\d-]/g, ''); return s === '' ? '' : (+s).toLocaleString('ko-KR'); }
 function rpVal(v) { return v === undefined || v === null ? '' : v; }
 /** 자동 값 + 고친 값 */
@@ -2776,7 +2779,7 @@ function openAttend() { S.att = null; go('attend'); }
 VIEWS.attend = function () {
   if (!S.att) S.att = { date: yearSunday(), cls: homeClass(), marks: {}, reasons: {}, touched: {}, showAll: false, loaded: false };
   var a = S.att;
-  var datebar = '<div class="datebar"><button onclick="attDate(-7)" aria-label="지난주">' + ic('back') + '</button><div class="d">' + fmtD(a.date) + '<small>' + (a.date === lastSunday() ? '이번 주일' : a.date === firstSundayOf(viewYear()) ? viewYear() + '년 첫 주일' : isFutureDay(a.date) ? '다가올 주일' : '화살표로 날짜 바꾸기') + '</small></div><button onclick="attDate(7)" aria-label="다음주">' + ic('next') + '</button></div>';
+  var datebar = '<div class="datebar"><button onclick="attDate(-7)" aria-label="지난주">' + ic('back') + '</button><div class="d">' + fmtD(a.date) + '<small>' + (a.date === attSunday() ? (isFutureDay(a.date) ? '이번 주일 · 출석 대기' : '이번 주일') : a.date === firstSundayOf(viewYear()) ? viewYear() + '년 첫 주일' : isFutureDay(a.date) ? '다가올 주일' : '화살표로 날짜 바꾸기') + '</small></div><button onclick="attDate(7)" aria-label="다음주">' + ic('next') + '</button></div>';
   if (!a.loaded && ATT[a.date]) { applyAtt(ATT[a.date]); refreshAtt(a.date); }
   if (!a.loaded) { loadAttendance(); return topbar('출석 체크') + datebar + '<div class="empty load">불러오는 중…</div>'; }
 
@@ -3487,7 +3490,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261121195009';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261121222212';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

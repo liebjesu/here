@@ -285,30 +285,47 @@ svg.ic{width:1.25em;height:1.25em;flex:none;display:block}
 .yearsel button.on small{color:#c9d2ea}
 .yearchip{margin-left:auto;align-self:center;display:flex;align-items:center;gap:.25rem;padding:.4rem .8rem;border-radius:999px;background:#fff;border:1.5px solid var(--line);font-weight:900;font-size:.92rem;box-shadow:var(--shadow)}
 .yearchip i{font-style:normal;font-size:.7rem;color:var(--sub)}
-/* 주간 보고서 (종이 양식) */
+/* 주간 보고서 (종이 양식: 원본 한글 서식 크기 그대로, 가로 1210px) */
 .rp-nav{display:flex;gap:.4rem;align-items:center;margin-top:.7rem}.rp-nav input{flex:1;min-width:0;margin:0}
-.rp-wrap{position:relative;overflow:hidden;max-width:760px;margin:0 auto;border-radius:10px;box-shadow:0 1px 6px rgba(0,0,0,.12);background:#fff}
+.rp-wrap{position:relative;overflow:hidden;max-width:1210px;margin:0 auto;border-radius:10px;box-shadow:0 1px 6px rgba(0,0,0,.12);background:#fff}
 #rpSheet{transform-origin:0 0}
-.rp{width:760px;background:#fff;color:#000;padding:18px 16px 20px;box-sizing:border-box;font-family:"Pretendard Variable",Pretendard,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;letter-spacing:0;line-height:1.3}
-.rp-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
-.rp-tt{flex:1;text-align:center}.rp-tt h1{font-size:25px;margin:16px 0 14px;text-decoration:underline;text-underline-offset:5px;font-weight:800;letter-spacing:1px}.rp-tt p{margin:0;font-size:15px;font-weight:700;letter-spacing:2px}
+.rp{width:1210px;background:#fff;color:#000;padding:62px 40px 40px 37px;box-sizing:border-box;font-family:"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",Pretendard,sans-serif;letter-spacing:0;line-height:1.3;font-size:18px}
 .rp table{border-collapse:collapse;table-layout:fixed}
-.rp-sign th,.rp-sign td{border:1.5px solid #000;font-size:13px;text-align:center;width:64px;padding:3px 2px}.rp-sign th{font-weight:700;background:#fff}.rp-sign td{height:40px;font-weight:700}.rp-sign .rp-sl{width:20px}
-.rp-body{border:2px solid #000}
-.rp-t{width:100%;margin-top:-1px}
-.rp-t th,.rp-t td{border:1px solid #000;font-size:12px;text-align:center;padding:3px 2px;vertical-align:middle;word-break:keep-all;overflow-wrap:anywhere}
-.rp-t th{background:#d9d9d9;font-weight:700}
-.rp-t .rp-l{background:#d9d9d9;font-size:13px;line-height:1.15}
-.rp-t td small{font-size:11px}
-.rp-h2 td{height:48px}.rp-h3 td{height:62px}
-.rp-t .rp-txt{text-align:left;vertical-align:top;padding:5px 6px}
-.rp-t .rp-big{text-align:center;vertical-align:middle;font-size:15px;font-weight:700}
-.rp-t .rp-n{font-size:16px;font-weight:700}
-.rp-stu td{height:21px}.rp-stu .rp-k{font-weight:700}.rp-stu .rp-g{font-weight:700}
-.rp-stu .rp-tot{font-weight:700;letter-spacing:3px}
-.rp-t .rp-diag{position:relative;height:26px;box-sizing:border-box;background:#fff;overflow:hidden;padding:0}
-.rp-diag i{position:absolute;left:0;bottom:0;width:104px;height:1px;background:#000;transform-origin:0 50%;transform:rotate(-14.4deg)}
-.rp-diag .a{position:absolute;right:6px;top:2px;font-size:12px}.rp-diag .b{position:absolute;left:3px;bottom:1px;font-size:9px;font-weight:600}
+.rp-head{position:relative;height:163px}
+.rp-tt{position:absolute;left:0;width:716px;top:0;text-align:center}
+.rp-tt h1{font-size:34px;font-weight:700;margin:22px 0 0;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:7px;letter-spacing:2px}
+.rp-tt p{margin:36px 0 0;font-size:20px;font-weight:700;letter-spacing:1px;word-spacing:4px}
+.rp-sign{position:absolute;left:716px;top:0;border:2px solid #000}
+.rp-sign td{border:1.5px solid #000;text-align:center;font-size:19px;padding:0}
+.rp-sign .rp-h td{height:39px;font-weight:700;letter-spacing:1px}.rp-sign .rp-n td{height:95px}
+.rp-sign .rp-sl{font-weight:700;line-height:2.1}
+.rp-body{width:1121px;border:2px solid #000;margin-top:0}
+.rp-t{width:1121px}
+.rp-t+.rp-t{margin-top:-1px}
+.rp-t th,.rp-t td{border:1px solid #000;text-align:center;vertical-align:middle;padding:2px 3px;font-size:18px;font-weight:400;word-break:keep-all;overflow-wrap:anywhere}
+.rp-t th{background:#d9d9d9;font-weight:400;font-size:19px}
+.rp-t .rp-l{background:#d9d9d9;font-size:20px;line-height:1.08;font-weight:400}
+.rp-t .rp-l .rp-u{font-size:18px}
+.rp-t .rp-sm{font-size:17px}
+.rp-t th.rp-ok{font-size:18px}
+.rp-sec{border-top:2px solid #000}
+.rp-t .rp-txt{text-align:left;vertical-align:top;padding:6px 8px;font-size:17px}
+.rp-stu td{font-size:18px}
+.rp-stu .rp-k{font-size:18px;letter-spacing:0}
+.rp-stu .rp-g{font-size:18px}
+.rp-stu th.rp-w{background:#fff;font-size:19px}
+.rp-stu .rp-tot{font-size:19px;letter-spacing:2px}
+.rp-stu .rp-tc{background:#f2f2f2}
+.rp-t .rp-diag{position:relative;background:#fff;overflow:hidden;padding:0}
+.rp-diag i{position:absolute;left:0;top:0;width:150px;height:1.5px;background:#000;transform-origin:0 0;transform:rotate(19.6deg)}
+.rp-diag .rp-a{position:absolute;right:8px;top:2px;font-size:19px}.rp-diag .rp-b{position:absolute;left:2px;bottom:0;font-size:13px}
+.rp-w td{border-color:#000}
+.rp-w .rp-hd{font-size:22px;letter-spacing:1px;padding:0}
+.rp-w .rp-hd2{font-size:19px;letter-spacing:3px;padding:0}
+.rp-w .rp-bn{font-size:23px;font-weight:700}
+.rp-w .rp-vl{font-size:19px;line-height:1.05;padding:0}
+.rp-w .rp-ab{font-size:23px;font-weight:700}
+.rp-w .rp-vb{font-size:27px;font-weight:700;line-height:1.08;padding:0}
 .rp-eh{margin:1rem 0 .2rem;font-size:.98rem}
 .rp-of{display:flex;gap:.3rem;margin-bottom:.35rem}.rp-of input{margin:0;min-width:0}.rp-of input:nth-child(1){flex:1.1}.rp-of input:nth-child(2){flex:1}.rp-of input:nth-child(3){flex:1}
 .rp-eg>div{display:grid;grid-template-columns:3rem repeat(4,1fr);gap:.3rem;margin-bottom:.3rem;align-items:center}.rp-eg input{margin:0;text-align:center;padding-left:.2rem;padding-right:.2rem}
@@ -1590,7 +1607,7 @@ VIEWS.admin = function () {
 /* ========================= 주간 교육활동 보고서 (서기) =========================
    출석 · 새신자 · 교사 출석 · 대표기도 · 결재 이름 · 헌금(회계)은 자동으로 채움.
    [수정]으로 고친 칸만 따로 보관 → 안 고친 칸은 늘 최신 자동 값. [이미지로 저장]은 그림 파일로 */
-var RP_W = 760;
+var RP_W = 1210;
 function rpDate(p) { return (p && p.date) || yearSunday(); }
 function rpN(v) { var s = String(v == null ? '' : v).replace(/[^\d-]/g, ''); return s === '' ? '' : (+s).toLocaleString('ko-KR'); }
 function rpVal(v) { return v === undefined || v === null ? '' : v; }
@@ -1615,53 +1632,58 @@ function rpMerge(d) {
 function rpSum(list) { var any = false, n = 0; list.forEach(function (v) { if (String(v) !== '') { any = true; n += +String(v).replace(/[^\d-]/g, '') || 0; } }); return any ? n : ''; }
 function rpBr(s) { return esc(s).replace(/\n/g, '<br>'); }
 function rpV(t) { return t.split('').map(esc).join('<br>'); }
-/** 보고서 한 장 (종이 양식 그대로) */
+/** 보고서 한 장: 종이 양식(가로 1210px 기준) 그대로 */
 function rpHtml(m, date) {
   var d = parseD(date), sg = m.sign;
-  var head = '<div class="rp-head"><div class="rp-tt"><h1>(고등)부 주간 교육활동 보고서</h1><p>' + d.getFullYear() + ' 년 ' + (d.getMonth() + 1) + ' 월 ' + d.getDate() + ' 일</p></div>' +
-    '<table class="rp-sign"><tr><th rowspan="2" class="rp-sl">결<br><br>재</th><th>서 기</th><th>총 무</th><th>부 장</th><th>교역자</th></tr>' +
-    '<tr>' + ['서기', '총무', '부장', '교역자'].map(function (k) { return '<td>' + esc(sg[k]) + '</td>'; }).join('') + '</tr></table></div>';
+  var cg = function (ws) { return '<colgroup>' + ws.map(function (w) { return '<col style="width:' + w + 'px">'; }).join('') + '</colgroup>'; };
+  var head = '<div class="rp-head"><div class="rp-tt"><h1>(고등)부 주간 교육활동 보고서</h1><p>' + d.getFullYear() + ' 년 &nbsp;' + (d.getMonth() + 1) + ' 월 &nbsp; ' + d.getDate() + ' 일</p></div>' +
+    '<table class="rp-sign">' + cg([33, 87, 99, 100, 98]) + '<tr class="rp-h"><td rowspan="2" class="rp-sl">결<br>재</td><td>서 기</td><td>총 무</td><td>부 장</td><td>교역자</td></tr>' +
+    '<tr class="rp-n">' + ['서기', '총무', '부장', '교역자'].map(function (k) { return '<td>' + esc(sg[k]) + '</td>'; }).join('') + '</tr></table></div>';
   // 예배 · 교사교육
-  var t1 = '<table class="rp-t"><colgroup><col style="width:44px"><col><col><col style="width:118px"><col style="width:118px"><col style="width:220px"></colgroup>' +
-    '<tr><th rowspan="2" class="rp-l">' + rpV('예배') + '</th><th colspan="2">성 경</th><th>설교제목</th><th>기도</th><th>특이사항</th></tr>' +
-    '<tr class="rp-h2"><td colspan="2">' + rpBr(m.성경) + '</td><td>' + rpBr(m.설교) + '</td><td>' + rpBr(m.기도) + '</td><td rowspan="3" class="rp-txt">' + rpBr(m.특이) + '</td></tr>' +
-    '<tr><th rowspan="2" class="rp-l">' + rpV('교사교육') + '</th><th>일 시</th><th>장 소</th><th>인 원</th><th>교육내용</th></tr>' +
-    '<tr class="rp-h2"><td>' + rpBr(m.edu.일시) + '</td><td>' + rpBr(m.edu.장소) + '</td><td>' + rpBr(m.edu.인원) + '</td><td>' + rpBr(m.edu.내용) + '</td></tr></table>';
-  // 헌금
+  var t1 = '<table class="rp-t">' + cg([56, 169, 168, 180, 186, 362]) +
+    '<tr style="height:31px"><th rowspan="2" class="rp-l">' + rpV('예배') + '</th><th colspan="2">성 &nbsp; &nbsp;경</th><th>설교제목</th><th>기도</th><th>특이사항</th></tr>' +
+    '<tr style="height:79px"><td colspan="2">' + rpBr(m.성경) + '</td><td>' + rpBr(m.설교) + '</td><td class="rp-sm">' + rpBr(m.기도) + '</td><td rowspan="3" class="rp-txt">' + rpBr(m.특이) + '</td></tr>' +
+    '<tr style="height:29px"><th rowspan="2" class="rp-l">' + rpV('교사교육') + '</th><th>일 &nbsp; 시</th><th>장 &nbsp; &nbsp;소</th><th>인 &nbsp; &nbsp;원</th><th>교육내용</th></tr>' +
+    '<tr style="height:69px"><td>' + rpBr(m.edu.일시) + '</td><td>' + rpBr(m.edu.장소) + '</td><td>' + rpBr(m.edu.인원) + '</td><td>' + rpBr(m.edu.내용) + '</td></tr></table>';
+  // 헌금: 원본은 8가지 + 계 → 칸 수에 맞춰 나눔
   var of = m.offer, tot = rpSum(of.map(function (o) { return o.v; }));
-  var t2 = '<table class="rp-t"><colgroup><col style="width:44px">' + of.map(function () { return '<col>'; }).join('') + '<col style="width:92px"></colgroup>' +
-    '<tr><th rowspan="2" class="rp-l">' + rpV('헌금') + '</th>' + of.map(function (o) { return '<th class="rp-ok">' + esc(o.k) + '</th>'; }).join('') + '<th>계</th></tr>' +
-    '<tr class="rp-h2">' + of.map(function (o) { return '<td>' + rpN(o.v) + (o.m ? '<br><small>(' + esc(o.m) + ')</small>' : '') + '</td>'; }).join('') + '<td><b>' + rpN(tot) + '</b></td></tr></table>';
+  var ow = Math.floor((1121 - 56 - 119) / Math.max(1, of.length));
+  var spaced = function (k) { return k.length === 2 ? k.charAt(0) + ' &nbsp; ' + k.charAt(1) : esc(k).replace(/ {2,}/g, function (x) { return x.replace(/ /g, '&nbsp;'); }); };
+  var t2 = '<table class="rp-t rp-sec">' + cg([56].concat(of.map(function () { return ow; })).concat([1121 - 56 - ow * of.length])) +
+    '<tr style="height:59px"><th rowspan="2" class="rp-l">' + rpV('헌금') + '</th>' + of.map(function (o) { return '<th class="rp-ok">' + spaced(o.k) + '</th>'; }).join('') + '<th>계</th></tr>' +
+    '<tr style="height:75px">' + of.map(function (o) { return '<td>' + rpN(o.v) + (o.m ? '<br>(' + esc(o.m) + ')' : '') + '</td>'; }).join('') + '<td>' + rpN(tot) + '</td></tr></table>';
   // 다음주 계획
-  var t3 = '<table class="rp-t"><colgroup><col style="width:44px"><col><col><col></colgroup>' +
-    '<tr><th rowspan="2" class="rp-l">' + rpV('다음주계획') + '</th><th>학 생</th><th>교 사</th><th>특이사항</th></tr>' +
-    '<tr class="rp-h3"><td class="rp-txt">' + rpBr(m.plan.학생) + '</td><td class="rp-txt">' + rpBr(m.plan.교사) + '</td><td class="rp-txt">' + rpBr(m.plan.특이) + '</td></tr></table>';
-  // 학생 출석
-  var cls = Object.keys(m.stu), maxN = 2;
-  cls.forEach(function (c) { var n = +c.split('-')[1]; if (n > maxN) maxN = n; });
+  var t3 = '<table class="rp-t rp-sec">' + cg([56, 337, 366, 362]) +
+    '<tr style="height:28px"><th rowspan="2" class="rp-l">' + rpV('다음주계획') + '</th><th>학 &nbsp; 생</th><th>교 &nbsp; 사</th><th>특이사항</th></tr>' +
+    '<tr style="height:85px"><td class="rp-txt">' + rpBr(m.plan.학생) + '</td><td class="rp-txt">' + rpBr(m.plan.교사) + '</td><td class="rp-txt">' + rpBr(m.plan.특이) + '</td></tr></table>';
+  // 학생 출석 (원본처럼 1~15반)
+  var maxN = 15;
+  Object.keys(m.stu).forEach(function (c) { var n = +c.split('-')[1]; if (n > maxN) maxN = n; });
   var nums = []; for (var i = 1; i <= maxN; i++) nums.push(i);
+  var cw = Math.floor(805 / maxN * 10) / 10;
   var allA = [], allR = [];
   var rows = [1, 2, 3].map(function (g) {
     var cell = function (n, k) { var o = m.stu[g + '-' + n]; return o ? o[k] : ''; };
     var gA = rpSum(nums.map(function (n) { return cell(n, '출석'); })), gR = rpSum(nums.map(function (n) { return cell(n, '재적'); }));
     allA.push(gA); allR.push(gR);
-    return ['재 적', '출 석', '결 석', '새신자'].map(function (lb, j) {
-      var k = lb.replace(' ', '');
-      return '<tr>' + (j === 0 ? '<td rowspan="4" class="rp-g">' + g + '</td>' : '') + '<td class="rp-k">' + lb + '</td>' +
+    return ['재 &nbsp; 적', '출 &nbsp; 석', '결 &nbsp; 석', '새신자'].map(function (lb, j) {
+      var k = ['재적', '출석', '결석', '새신자'][j];
+      return '<tr style="height:' + (j === 1 ? 40 : 35) + 'px">' + (j === 0 ? '<td rowspan="4" class="rp-g">' + g + '</td>' : '') + '<td class="rp-k">' + lb + '</td>' +
         nums.map(function (n) { return '<td>' + esc(cell(n, k)) + '</td>'; }).join('') +
         '<td>' + (k === '출석' ? esc(gA) : '') + '</td><td>' + (k === '재적' ? esc(gR) : '') + '</td></tr>';
     }).join('');
   }).join('');
-  var t4 = '<table class="rp-t rp-stu"><colgroup><col style="width:44px"><col style="width:34px"><col style="width:66px">' + nums.map(function () { return '<col>'; }).join('') + '<col style="width:50px"><col style="width:50px"></colgroup>' +
-    '<tr><th rowspan="14" class="rp-l">' + rpV('학생출석현황') + '<br>(명)</th><th colspan="2" class="rp-diag"><i></i><span class="a">반</span><span class="b">학년 구분</span></th>' + nums.map(function (n) { return '<th>' + n + '</th>'; }).join('') + '<th>출석</th><th>재적</th></tr>' +
-    rows + '<tr><td colspan="' + (2 + nums.length) + '" class="rp-tot">총 &nbsp; 계</td><td><b>' + esc(rpSum(allA)) + '</b></td><td><b>' + esc(rpSum(allR)) + '</b></td></tr></table>';
-  // 교사 · 결석명단 · 건의 · 기도제목
-  var t5 = '<table class="rp-t"><colgroup><col style="width:110px"><col style="width:110px"><col style="width:110px"><col style="width:34px"><col></colgroup>' +
-    '<tr><th colspan="3">교사 현황(명)</th><th rowspan="3" class="rp-l">' + rpV('결석명단및사유') + '</th><td rowspan="3" class="rp-txt rp-big">' + rpBr(m.absent) + '</td></tr>' +
-    '<tr><th>재 적</th><th>출 석</th><th>결 석</th></tr>' +
-    '<tr class="rp-h3"><td class="rp-n">' + esc(m.t.재적) + '</td><td class="rp-n">' + esc(m.t.출석) + '</td><td class="rp-n">' + esc(m.t.결석) + '</td></tr></table>' +
-    '<table class="rp-t"><colgroup><col style="width:34px"><col><col style="width:34px"><col></colgroup>' +
-    '<tr class="rp-h3"><th class="rp-l">' + rpV('건의사항') + '</th><td class="rp-txt">' + rpBr(m.건의) + '</td><th class="rp-l">' + rpV('기도제목') + '</th><td class="rp-txt">' + rpBr(m.기도제목) + '</td></tr></table>';
+  var t4 = '<table class="rp-t rp-sec rp-stu">' + cg([56, 42, 100].concat(nums.map(function () { return cw; })).concat([58, 60])) +
+    '<tr style="height:50px"><th rowspan="14" class="rp-l">' + rpV('학생출석현황') + '<br><span class="rp-u">(명)</span></th><th colspan="2" class="rp-diag"><i></i><span class="rp-a">반</span><span class="rp-b">학년 &nbsp;구분</span></th>' +
+    nums.map(function (n) { return '<th class="rp-w">' + n + '</th>'; }).join('') + '<th class="rp-w">출석</th><th class="rp-w">재적</th></tr>' +
+    rows + '<tr style="height:55px"><td colspan="' + (2 + nums.length) + '" class="rp-tot">총 &nbsp; &nbsp; 계</td><td class="rp-tc">' + esc(rpSum(allA)) + '</td><td class="rp-tc">' + esc(rpSum(allR)) + '</td></tr></table>';
+  // 교사 현황 · 결석명단 · 건의사항 · 기도제목
+  var t5 = '<table class="rp-t rp-sec rp-w">' + cg([168, 173, 172, 48, 560]) +
+    '<tr style="height:30px"><td colspan="3" class="rp-hd">교사 현황(명)</td><td rowspan="3" class="rp-vl">' + rpV('결석명단및사유') + '</td><td rowspan="3" class="rp-ab">' + rpBr(m.absent) + '</td></tr>' +
+    '<tr style="height:27px"><td class="rp-hd2">재 적</td><td class="rp-hd2">출 &nbsp; 석</td><td class="rp-hd2">결 &nbsp; 석</td></tr>' +
+    '<tr style="height:96px"><td class="rp-bn">' + esc(m.t.재적) + '</td><td class="rp-bn">' + esc(m.t.출석) + '</td><td class="rp-bn">' + esc(m.t.결석) + '</td></tr></table>' +
+    '<table class="rp-t rp-sec rp-w">' + cg([48, 465, 48, 560]) +
+    '<tr style="height:127px"><td class="rp-vb">' + rpV('건의사항') + '</td><td class="rp-txt">' + rpBr(m.건의) + '</td><td class="rp-vb">' + rpV('기도제목') + '</td><td class="rp-txt">' + rpBr(m.기도제목) + '</td></tr></table>';
   return head + '<div class="rp-body">' + t1 + t2 + t3 + t4 + t5 + '</div>';
 }
 function fitRp() {
@@ -1768,7 +1790,7 @@ function rpImage() {
     box.style.cssText = 'position:fixed;left:-10000px;top:0;width:' + RP_W + 'px;background:#fff';
     box.innerHTML = '<div class="rp">' + rpHtml(rpMerge(d), d.date) + '</div>';
     document.body.appendChild(box);
-    return html2canvas(box.firstChild, { scale: 2, backgroundColor: '#ffffff', logging: false }).then(function (cv) {
+    return html2canvas(box.firstChild, { scale: 1.5, backgroundColor: '#ffffff', logging: false }).then(function (cv) {
       document.body.removeChild(box);
       var name = '고등부_주간보고_' + d.date + '.png';
       cv.toBlob(function (blob) {
@@ -3177,7 +3199,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261121140234';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261121140935';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

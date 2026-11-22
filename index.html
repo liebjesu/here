@@ -1744,9 +1744,9 @@ VIEWS.report = function (p) {
     '<div class="rp-nav noprint"><button class="btn light small" onclick="rpGo(\'' + addDays(date, -7) + '\')">‹ 지난주</button>' +
     '<input type="date" value="' + date + '" onchange="rpGo(this.value)"><button class="btn light small" onclick="rpGo(\'' + addDays(date, 7) + '\')">다음주 ›</button></div>' +
     '<p class="muted" style="margin:.4rem 0 .5rem">' + (edited ? esc(d.by) + ' 쌤이 고침 · ' + esc(d.at) : '자동으로 채운 보고서예요') + ' · 출석 · 교사 출석 · 기도 · 헌금(회계)은 앱 기록에서 자동으로 들어와요</p>' +
-    '<h3 class="rp-eh">결재 ' + (left.length ? '<span class="muted" style="font-size:.8rem">' + (4 - left.length) + ' / 4 승인 · 모두 승인되면 이미지 · 워드 파일로 받을 수 있어요</span>' : '<span class="rp-tag g">모두 승인</span>') + '</h3>' + rpApBox(d) +
-    '<div class="row noprint" style="margin-bottom:.6rem"><button class="btn' + (left.length ? ' light' : '') + '" onclick="rpImage()">' + ic('download') + ' 이미지로 저장</button>' +
-      '<button class="btn' + (left.length ? ' light' : '') + '" onclick="rpImage(\'word\')">' + ic('download') + ' 워드 파일로 저장</button>' +
+    '<h3 class="rp-eh">결재 ' + (left.length ? '<span class="muted" style="font-size:.8rem">' + (4 - left.length) + ' / 4 승인 · 승인 전에도 이미지 · 워드 파일로 받을 수 있어요</span>' : '<span class="rp-tag g">모두 승인</span>') + '</h3>' + rpApBox(d) +
+    '<div class="row noprint" style="margin-bottom:.6rem"><button class="btn" onclick="rpImage()">' + ic('download') + ' 이미지로 저장</button>' +
+      '<button class="btn" onclick="rpImage(\'word\')">' + ic('download') + ' 워드 파일로 저장</button>' +
     (can ? '<button class="btn light" onclick="rpEdit()">' + ic('pen') + ' 수정</button>' : '') + '</div>' +
     '<div class="rp-wrap" id="rpWrap"><div class="rp" id="rpSheet">' + rpHtml(m, date, d.ap, true) + '</div></div>' +
     (can && edited ? '<button class="btn light small" style="margin-top:.7rem" onclick="rpReset()">고친 칸 지우고 자동 값으로</button>' : '') +
@@ -1863,8 +1863,6 @@ function loadH2C() {
 }
 function rpImage(kind) {
   var d = S.params._data; if (!d) return;
-  var left = rpLeft(d);
-  if (left.length) { toast('결재가 모두 끝나야 받을 수 있어요 (남은 칸: ' + left.join(', ') + ')'); return; }
   loading(true);
   // 받기 직전에 최신 값으로 다시 읽고 기록을 남김 → 출석이 바뀌었으면 바뀐 값으로 그림
   call('saveReportImg', { date: d.date, kind: kind === 'word' ? 'word' : 'img' }, 'silent').then(function (nd) {
@@ -3498,7 +3496,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261122092117';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261122111524';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

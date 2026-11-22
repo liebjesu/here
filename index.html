@@ -2499,7 +2499,7 @@ VIEWS.settings = function () {
     (window.innerWidth >= 700 ? row('monitor', isWide() ? '휴대폰 화면으로 보기' : 'PC 넓게 보기', '큰 화면에서 표 · 카드를 넓게', 'togglePC()') : '') + '</div>' +
     '<div class="set-group"><h4>앱</h4>' +
     row('calendar', '연도 바꾸기', '지난 해 자료 보기', 'yearMenu()', esc(b.year) + ' ') +
-    (canShowInstall() ? row('plusapp', '홈 화면에 추가', (PLAT.ios ? '아이폰' : '안드로이드') + ' 앱처럼 쓰기', 'installGuide()') : '') +
+    row('plusapp', canShowInstall() ? '홈 화면에 추가' : '홈 화면 추가 방법', canShowInstall() ? (PLAT.ios ? '아이폰' : '안드로이드') + ' 앱처럼 쓰기' : '아이폰 · 안드로이드 순서 보기 (다른 선생님 안내용)', 'installGuide()') +
     row('refresh', '새로 고침', '최신 버전 · 최신 자료로', 'safeReload(\'manual\')') +
     (b.chatLink ? '<a class="set-row" href="' + esc(b.chatLink) + '" target="_blank"><span class="si">' + ic('chatbub') + '</span><span class="st"><b>교사 단톡방</b><small>문의 · 연락</small></span><span class="sv">' + ic('next') + '</span></a>' : '') +
     (isAdmin() && b.sheetUrl ? '<a class="set-row" href="' + esc(b.sheetUrl) + '" target="_blank"><span class="si">' + ic('sheet') + '</span><span class="st"><b>구글시트 연동</b><small>원본 시트 열기</small></span><span class="sv">' + ic('next') + '</span></a>' : '') +
@@ -3498,7 +3498,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261121222534';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261122092117';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -3557,8 +3557,9 @@ function appIntro() {
   return '<div class="intro"><p><b>HERE.</b> 는 목민교회 고등부 선생님들의 출석 · 새신자 · 면담 · 공지 앱입니다.' +
     (canShowInstall() ? ' 홈 화면에 추가하면 아이콘을 눌러 앱처럼 바로 열려요.' : '') + '</p>' + btn + '</div>' + inapp;
 }
-function installGuide(os) {
+function installGuide(os, br) {
   os = os || (PLAT.android ? 'android' : 'ios');
+  br = br || (PLAT.samsung ? 'samsung' : 'chrome');
   var tab = function (k, l) { return '<button class="chip ' + (k === os ? 'on' : '') + '" onclick="installGuide(\'' + k + '\')">' + l + '</button>'; };
   var step = function (n, html) { return '<li><i>' + n + '</i><div>' + html + '</div></li>'; };
   var K = function (t) { return '<span class="key">' + t + '</span>'; };
@@ -3573,11 +3574,34 @@ function installGuide(os) {
       step(3, '오른쪽 위 ' + K('추가') + ' 를 누르면 끝!') + '</ol>' +
       '<div class="hint">홈 화면의 <b>HERE.</b> 아이콘으로 <b>처음 열 때 한 번만</b> 이름과 번호를 다시 눌러 주세요. (아이폰은 Safari와 홈 화면 앱이 따로 기억해요)</div>';
   } else {
-    if (here && INSTALL.evt) body += '<button class="btn ok" style="margin-top:.4rem" onclick="installNow()">' + ic('plusapp') + ' 지금 홈 화면에 추가</button><p class="muted" style="text-align:center;margin:.3rem 0">누른 뒤 ' + K('설치') + ' 또는 ' + K('추가') + ' 만 누르면 끝!</p>';
-    body += '<ol class="steps">' + (here && PLAT.samsung
-      ? step(1, '화면 아래쪽 ' + K('≡') + ' 를 누르세요') + step(2, K('현재 페이지 추가') + ' → ' + K('홈 화면') + ' 을 누르세요') + step(3, K('추가') + ' 를 누르면 끝!')
-      : step(1, '오른쪽 위 ' + K('⋮') + ' 를 누르세요') + step(2, K('홈 화면에 추가') + ' 또는 ' + K('앱 설치') + ' 를 누르세요') + step(3, K('설치') + ' 또는 ' + K('추가') + ' 를 누르면 끝!')) + '</ol>' +
-      '<div class="hint">홈 화면의 <b>HERE.</b> 아이콘을 누르면 로그인된 채로 바로 열려요.</div>';
+    // 안드로이드: 크롬 / 삼성 인터넷 따로 자세히
+    var bt = function (k, l) { return '<button class="chip ' + (k === br ? 'on' : '') + '" onclick="installGuide(\'android\',\'' + k + '\')">' + l + '</button>'; };
+    var H3 = function (t) { return '<h3 style="margin:.9rem 0 .2rem;font-size:.95rem">' + t + '</h3>'; };
+    if (here && INSTALL.evt) body += '<button class="btn ok" style="margin-top:.4rem" onclick="installNow()">' + ic('plusapp') + ' 지금 홈 화면에 추가 (한 번 누르기)</button><p class="muted" style="text-align:center;margin:.3rem 0">누른 뒤 ' + K('설치') + ' 또는 ' + K('추가') + ' 만 누르면 끝! 아래 순서는 안 될 때 보세요.</p>';
+    body += H3('0. 먼저: 인터넷 앱에서 열기') +
+      '<p class="muted" style="margin:0">카카오톡에서 주소를 누르면 카톡 안에서 열려서 추가가 안 돼요. 오른쪽 위 ' + K('⋮') + ' → ' + K('다른 브라우저로 열기') + ' 를 누르고 ' + K('Chrome') + ' 이나 ' + K('삼성 인터넷') + ' 을 고르세요.</p>' +
+      H3('쓰는 인터넷 앱을 고르세요') + '<div class="chips">' + bt('chrome', 'Chrome (크롬)') + bt('samsung', '삼성 인터넷') + '</div>';
+    if (br === 'samsung') {
+      body += '<ol class="steps">' +
+        step(1, '삼성 인터넷에서 HERE. 를 열고 로그인하세요') +
+        step(2, '화면 <b>아래쪽 오른쪽</b> ' + K('≡') + ' (줄 세 개) 를 누르세요<br><span class="muted">아래 막대가 안 보이면 화면을 살짝 아래로 내리면 나와요</span>') +
+        step(3, K('+ 현재 페이지 추가') + ' (또는 ' + K('페이지 추가') + ') 를 누르세요') +
+        step(4, K('홈 화면') + ' 을 고르세요') +
+        step(5, K('추가') + ' 를 누르면 끝!<br><span class="muted">주소창 오른쪽에 ' + K('⬇ 설치') + ' 표시가 보이면 그걸 눌러도 돼요</span>') + '</ol>';
+    } else {
+      body += '<ol class="steps">' +
+        step(1, '크롬에서 HERE. 를 열고 로그인하세요') +
+        step(2, '화면 <b>오른쪽 위</b> ' + K('⋮') + ' (점 세 개) 를 누르세요') +
+        step(3, K(ic('plusapp') + '홈 화면에 추가') + ' 를 누르세요<br><span class="muted">크롬 버전에 따라 ' + K('앱 설치') + ' 로 보이기도 해요. 목록을 조금 내려야 보일 수 있어요</span>') +
+        step(4, '창이 뜨면 ' + K('설치') + ' 를 누르세요<br><span class="muted">' + K('바로가기 만들기') + ' 와 ' + K('설치') + ' 가 함께 나오면 ' + K('설치') + ' 를 고르세요</span>') +
+        step(5, K('추가') + ' 또는 ' + K('자동으로 추가') + ' 를 누르면 끝!<br><span class="muted">아이콘을 길게 눌러 원하는 자리로 옮길 수 있어요</span>') + '</ol>';
+    }
+    body += '<div class="hint">홈 화면의 <b>HERE.</b> 아이콘을 누르면 주소창 없이 앱처럼 열리고, 로그인도 그대로 이어져요.</div>' +
+      H3('안 될 때') + '<ul class="muted" style="margin:.2rem 0 0;padding-left:1.1rem;line-height:1.6">' +
+      '<li>메뉴에 <b>홈 화면에 추가</b>가 없어요 → <b>시크릿 모드</b>가 아닌지 보고, Play 스토어에서 크롬(삼성 인터넷)을 <b>업데이트</b>해 주세요</li>' +
+      '<li>추가했는데 아이콘이 안 보여요 → 홈 화면을 <b>옆으로 넘겨</b> 보거나, 앱 목록(위로 밀기)에서 <b>HERE</b> 를 찾아 길게 눌러 <b>홈에 추가</b></li>' +
+      '<li>갤럭시: <b>설정 → 홈 화면 → 새 앱을 홈 화면에 추가</b> 를 켜 두면 바로 홈에 생겨요</li>' +
+      '<li>아이콘으로 열었는데 로그인 화면이 나와요 → 이름과 번호 뒷자리 4자리를 한 번만 다시 넣어 주세요</li></ul>';
   }
   modal('<h2>홈 화면에 앱 추가</h2><div class="chips">' + tab('ios', '아이폰') + tab('android', '안드로이드') + '</div>' + body +
     (S.user && isAdmin() ? '<button class="btn light small" style="margin-top:.6rem;width:100%" onclick="copyInviteText()">선생님들께 보낼 안내 문자 복사</button>' : '') +
@@ -3589,7 +3613,7 @@ function copyInviteText() {
   copyText('[HERE. 목민교회 고등부 선생님 앱]\n' + u + '\n\n' +
     '주소를 누르고 → 내 이름 → 전화번호 뒷자리 4자리\n\n' +
     '[아이폰] Safari에서 열고 아래쪽 [공유] → [홈 화면에 추가] → [추가]\n(카카오톡 안에서 열리면 오른쪽 아래 ··· → [다른 브라우저로 열기])\n\n' +
-    '[안드로이드] 크롬에서 열고 [홈 화면에 앱 추가] 버튼, 또는 오른쪽 위 ⋮ → [홈 화면에 추가]\n\n' +
+    '[안드로이드 · 크롬] 오른쪽 위 ⋮ → [홈 화면에 추가](또는 [앱 설치]) → [설치]\n[안드로이드 · 삼성 인터넷] 아래쪽 ≡ → [현재 페이지 추가] → [홈 화면] → [추가]\n(카카오톡 안에서 열리면 오른쪽 위 ⋮ → [다른 브라우저로 열기])\n\n' +
     '다음부터는 홈 화면의 HERE. 아이콘을 누르면 바로 열립니다.', '안내 문자를 복사했어요. 단톡방에 붙여넣으세요');
 }
 

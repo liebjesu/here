@@ -1678,8 +1678,7 @@ function rpHtml(m, date, ap, preview) {
   var head = '<div class="rp-head"><div class="rp-tt"><h1>(고등)부 주간 교육활동 보고서</h1><p>' + d.getFullYear() + ' 년 &nbsp;' + (d.getMonth() + 1) + ' 월 &nbsp; ' + d.getDate() + ' 일</p></div>' +
     '<table class="rp-sign">' + cg([33, 87, 99, 100, 98]) + '<tr class="rp-h"><td rowspan="2" class="rp-sl">결<br>재</td><td>서 기</td><td>총 무</td><td>부 장</td><td>교역자</td></tr>' +
     '<tr class="rp-n">' + ['서기', '총무', '부장', '교역자'].map(function (k) {
-      if (ap[k]) return '<td>' + esc(ap[k].n) + '</td>';
-      return '<td>' + (preview ? '<span class="rp-wait">' + (sg[k] ? esc(sg[k]) + '<br>' : '') + '승인 전</span>' : '') + '</td>';
+      return '<td>' + esc(sg[k] || (ap[k] && ap[k].n) || '') + '</td>';
     }).join('') + '</tr></table></div>';
   // 예배 · 교사교육
   var t1 = '<table class="rp-t">' + cg([56, 169, 168, 180, 186, 362]) +
@@ -1738,13 +1737,12 @@ VIEWS.report = function (p) {
   var date = rpDate(p);
   if (!S.params._data) { call('getReport', { date: date }).then(function (d) { S.params._data = d; render(); }); return loadingView('주간 보고서'); }
   var d = S.params._data, m = rpMerge(d), can = d.can && !(S.boot && S.boot.guest);
-  var edited = Object.keys(d.saved || {}).length > 0, left = rpLeft(d);
+  var edited = Object.keys(d.saved || {}).length > 0;
   setTimeout(fitRp, 0);
   return topbar('주간 보고서', can ? '<button class="btn small" onclick="rpEdit()">' + ic('pen') + ' 수정</button>' : '') +
     '<div class="rp-nav noprint"><button class="btn light small" onclick="rpGo(\'' + addDays(date, -7) + '\')">‹ 지난주</button>' +
     '<input type="date" value="' + date + '" onchange="rpGo(this.value)"><button class="btn light small" onclick="rpGo(\'' + addDays(date, 7) + '\')">다음주 ›</button></div>' +
     '<p class="muted" style="margin:.4rem 0 .5rem">' + (edited ? esc(d.by) + ' 쌤이 고침 · ' + esc(d.at) : '자동으로 채운 보고서예요') + ' · 출석 · 교사 출석 · 기도 · 헌금(회계)은 앱 기록에서 자동으로 들어와요</p>' +
-    '<h3 class="rp-eh">결재 ' + (left.length ? '<span class="muted" style="font-size:.8rem">' + (4 - left.length) + ' / 4 승인 · 승인 전에도 이미지 · 워드 파일로 받을 수 있어요</span>' : '<span class="rp-tag g">모두 승인</span>') + '</h3>' + rpApBox(d) +
     '<div class="row noprint" style="margin-bottom:.6rem"><button class="btn" onclick="rpImage()">' + ic('download') + ' 이미지로 저장</button>' +
       '<button class="btn" onclick="rpImage(\'word\')">' + ic('download') + ' 워드 파일로 저장</button>' +
     (can ? '<button class="btn light" onclick="rpEdit()">' + ic('pen') + ' 수정</button>' : '') + '</div>' +
@@ -1754,26 +1752,6 @@ VIEWS.report = function (p) {
     rpLogBox(d) +
     ((d.dates || []).length ? '<h3 class="org-h">저장된 보고서</h3><div class="chips">' + d.dates.slice(0, 12).map(function (x) { return '<button class="chip ' + (x === date ? 'on' : '') + '" onclick="rpGo(\'' + x + '\')">' + shortD(x) + '</button>'; }).join('') + '</div>' : '');
 };
-var RP_SG = ['서기', '총무', '부장', '교역자'];
-function rpLeft(d) { var ap = d.ap || {}; return RP_SG.filter(function (k) { return !ap[k]; }); }
-/** 결재 네 칸: 이름 · 승인 여부 · (본인이면) 승인 / 취소 버튼 */
-function rpApBox(d) {
-  var ap = d.ap || {}, names = d.names || {}, mine = d.mine || [];
-  return '<div class="rp-ap">' + RP_SG.map(function (k) {
-    var a = ap[k], nm = a ? a.n : (names[k] || ''), me = mine.indexOf(k) >= 0;
-    var st = a ? '승인 ' + esc(String(a.at).slice(5)) : (nm ? '기다리는 중' : '이름 없음');
-    var btn = me ? (a ? '<button class="btn light small" onclick="rpSign(\'' + k + '\',1)">취소</button>' : '<button class="btn small" onclick="rpSign(\'' + k + '\')">승인하기</button>') : '';
-    return '<div class="' + (a ? 'ok' : '') + '"><b>' + k + '</b><div class="nm">' + (nm ? esc(nm) : '-') + '</div><div class="st">' + st + '</div>' + btn + '</div>';
-  }).join('') + '</div>' +
-  (RP_SG.some(function (k) { return !names[k]; }) ? '<p class="muted" style="margin:-.3rem 0 .6rem;font-size:.82rem">이름이 없는 칸은 서기 쌤이 [수정] → 결재에서 넣어 주세요. 조직표에 맡은 분이 있으면 자동으로 들어와요.</p>' : '');
-}
-function rpSign(slot, undo) {
-  var d = S.params._data; if (!d) return;
-  if (undo && !confirm(slot + ' 승인을 취소할까요?')) return;
-  call('saveReportSign', { date: d.date, slot: slot, undo: undo ? 1 : 0 }).then(function (nd) {
-    S.params._data = nd; CACHE['report:' + nd.date] = nd; render(); toast(undo ? '승인을 취소했어요' : slot + ' 칸에 승인했어요');
-  });
-}
 /** 바뀐 기록 */
 var RP_LK = { edit: '고침', auto: '출석 기록에서 바뀜', ok: '결재', undo: '결재 취소', img: '파일 저장' };
 function rpLogBox(d) {
@@ -1781,7 +1759,7 @@ function rpLogBox(d) {
   var all = S.params._logAll, list = all ? lg : lg.slice(0, 6);
   return '<h3 class="org-h">업데이트 이력 <span class="muted" style="font-size:.8rem">' + lg.length + '건</span></h3><ul class="rp-lg">' + list.map(function (e) {
     var who = e.k === 'auto' ? '앱 기록' : esc(callName(e.by));
-    var tag = e.ap && (e.k === 'edit' || e.k === 'auto') ? '<span class="rp-tag">결재 뒤 바뀜</span>' : '';
+    var tag = '';
     var show = e.k === 'edit' || e.k === 'auto';
     return '<li><div><b>' + (e.k === 'img' ? esc((e.d || [])[0] || '이미지 저장') : (RP_LK[e.k] || e.k)) + '</b>' + tag + (!show && e.k !== 'img' ? ' · ' + esc((e.d || []).join(', ')) : '') + '</div><div class="when">' + esc(e.at) + ' · ' + who + '</div>' +
       (show && (e.d || []).length ? '<ul>' + e.d.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : '') + '</li>';
@@ -1803,7 +1781,7 @@ function rpEdit() {
   }).join('') + '</div>';
   modal('<h2>보고서 수정 <span class="muted" style="font-size:.85rem">' + fmtD(d.date) + '</span></h2>' +
     '<p class="muted" style="margin:.2rem 0 0">비워 둔 칸은 비어 있는 채로 나와요. 자동으로 들어온 값도 고칠 수 있어요.</p>' +
-    '<h3 class="rp-eh">결재 <span class="muted" style="font-size:.8rem">이름이 적힌 분이 직접 승인해요 · 승인된 칸 이름을 바꾸면 다시 승인받아야 해요</span></h3><div class="row">' + ['서기', '총무', '부장', '교역자'].map(function (k) { return '<div>' + L(k) + inp('s_' + k, m.sign[k]) + '</div>'; }).join('') + '</div>' +
+    '<h3 class="rp-eh">결재 칸 이름 <span class="muted" style="font-size:.8rem">보고서 결재 칸에 그대로 들어가요</span></h3><div class="row">' + ['서기', '총무', '부장', '교역자'].map(function (k) { return '<div>' + L(k) + inp('s_' + k, m.sign[k]) + '</div>'; }).join('') + '</div>' +
     '<h3 class="rp-eh">예배</h3>' + L('성경') + inp('성경', m.성경, '예) 요 2:13-22') + '<div class="row"><div>' + L('설교제목') + inp('설교', m.설교) + '</div><div>' + L('기도') + inp('기도', m.기도, '예) 홍길동 학생') + '</div></div>' + L('특이사항') + ta('특이', m.특이) +
     '<h3 class="rp-eh">교사교육</h3><div class="row"><div>' + L('일시') + inp('e_일시', m.edu.일시) + '</div><div>' + L('장소') + inp('e_장소', m.edu.장소) + '</div></div><div class="row"><div>' + L('인원') + inp('e_인원', m.edu.인원) + '</div><div>' + L('교육내용') + inp('e_내용', m.edu.내용) + '</div></div>' +
     '<h3 class="rp-eh">헌금 <span class="muted" style="font-size:.8rem">종류 이름도 바꿀 수 있어요 · 다음 주에도 이어져요</span></h3><div id="rpOffer"></div>' +
@@ -1899,11 +1877,12 @@ function crc32(u) {
 }
 /** 압축 없는 zip (docx 껍데기) */
 function zipStore(files) {
-  var enc = new TextEncoder(), parts = [], cen = [], off = 0;
+  var enc = new TextEncoder(), parts = [], cen = [], off = 0, nd = new Date();
+  var dt = ((nd.getHours() << 11) | (nd.getMinutes() << 5) | (nd.getSeconds() >> 1)), dd = (((nd.getFullYear() - 1980) << 9) | ((nd.getMonth() + 1) << 5) | nd.getDate());
   var le = function (n, b) { var a = []; for (var i = 0; i < b; i++) a.push((n >>> (8 * i)) & 255); return a; };
   files.forEach(function (f) {
     var nm = enc.encode(f.name), d = enc.encode(f.data), c = crc32(d);
-    var common = [].concat(le(20, 2), le(0, 2), le(0, 2), le(0, 2), le(0x21, 2), le(c, 4), le(d.length, 4), le(d.length, 4), le(nm.length, 2), le(0, 2));
+    var common = [].concat(le(20, 2), le(0, 2), le(0, 2), le(dt, 2), le(dd, 2), le(c, 4), le(d.length, 4), le(d.length, 4), le(nm.length, 2), le(0, 2));
     var lh = new Uint8Array([].concat(le(0x04034b50, 4), common));
     parts.push(lh, nm, d);
     cen.push(new Uint8Array([].concat(le(0x02014b50, 4), le(20, 2), common, le(0, 2), le(0, 2), le(0, 2), le(0, 4), le(off, 4))), nm);
@@ -1919,10 +1898,10 @@ function rpDocx(sheet) {
   var tw = function (px) { return Math.round(px * K); };
   var hp = function (px) { return Math.max(13, Math.round(parseFloat(px) * 0.75 * (K / 15) * 2 * 1.08)); };   // 글자 크기(반 포인트)
   var rgb = function (c) { var m = /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?/.exec(c || ''); if (!m || m[4] === '0') return ''; var h = [m[1], m[2], m[3]].map(function (v) { return ('0' + (+v).toString(16)).slice(-2); }).join(''); return h === 'ffffff' ? '' : h; };
-  var FONT = '<w:rFonts w:ascii="Malgun Gothic" w:hAnsi="Malgun Gothic" w:eastAsia="맑은 고딕"/>';
+  var FONT = '<w:rFonts w:ascii="Malgun Gothic" w:hAnsi="Malgun Gothic" w:eastAsia="Malgun Gothic" w:cs="Malgun Gothic"/>';
   var rpr = function (el, extra) {
     var cs = getComputedStyle(el), sz = hp(cs.fontSize);
-    return '<w:rPr>' + FONT + (+cs.fontWeight >= 600 ? '<w:b/>' : '') + (extra || '') + '<w:sz w:val="' + sz + '"/><w:szCs w:val="' + sz + '"/></w:rPr>';
+    return '<w:rPr>' + FONT + (+cs.fontWeight >= 600 ? '<w:b/><w:bCs/>' : '') + '<w:sz w:val="' + sz + '"/><w:szCs w:val="' + sz + '"/>' + (extra || '') + '</w:rPr>';
   };
   var para = function (runs, jc, ln) { return '<w:p><w:pPr><w:spacing w:before="0" w:after="0" w:line="' + (ln || 240) + '" w:lineRule="auto"/><w:jc w:val="' + jc + '"/></w:pPr>' + runs + '</w:p>'; };
   // 칸 안 글: <br> 은 줄바꿈
@@ -1943,8 +1922,8 @@ function rpDocx(sheet) {
     var g = ws.map(function (w) { return tw(w * sc); });
     var ob = opt.outer || 12;
     var x = '<w:tbl><w:tblPr><w:tblW w:w="' + g.reduce(function (a, b) { return a + b; }, 0) + '" w:type="dxa"/>' + (opt.jc ? '<w:jc w:val="' + opt.jc + '"/>' : '') +
-      '<w:tblLayout w:type="fixed"/><w:tblBorders><w:top ' + B(ob) + '/><w:left ' + B(ob) + '/><w:bottom ' + B(ob) + '/><w:right ' + B(ob) + '/><w:insideH ' + B(4) + '/><w:insideV ' + B(4) + '/></w:tblBorders>' +
-      '<w:tblCellMar><w:top w:w="0" w:type="dxa"/><w:left w:w="45" w:type="dxa"/><w:bottom w:w="0" w:type="dxa"/><w:right w:w="45" w:type="dxa"/></w:tblCellMar></w:tblPr><w:tblGrid>' +
+      '<w:tblBorders><w:top ' + B(ob) + '/><w:left ' + B(ob) + '/><w:bottom ' + B(ob) + '/><w:right ' + B(ob) + '/><w:insideH ' + B(4) + '/><w:insideV ' + B(4) + '/></w:tblBorders><w:tblLayout w:type="fixed"/>' +
+      '<w:tblCellMar><w:top w:w="0" w:type="dxa"/><w:left w:w="45" w:type="dxa"/><w:bottom w:w="0" w:type="dxa"/><w:right w:w="45" w:type="dxa"/></w:tblCellMar><w:tblLook w:val="0000" w:firstRow="0" w:lastRow="0" w:firstColumn="0" w:lastColumn="0" w:noHBand="1" w:noVBand="1"/></w:tblPr><w:tblGrid>' +
       g.map(function (w) { return '<w:gridCol w:w="' + w + '"/>'; }).join('') + '</w:tblGrid>';
     var hold = [];   // 위 칸에서 이어지는 칸: hold[열] = {left: 남은 줄, span}
     [].forEach.call(t.rows, function (tr) {
@@ -1998,16 +1977,41 @@ function rpDocx(sheet) {
   // 결재 칸 바깥 테두리
   x = x.replace(/<w:tc><w:tcPr>((?:(?!<\/w:tcPr>).)*?)<\/w:tcPr>/g, function (all, pr) {
     if (/w:val="nil"/.test(pr)) return all;
-    return '<w:tc><w:tcPr>' + pr.replace(/<w:vAlign/, '<w:tcBorders><w:top ' + B(8) + '/><w:left ' + B(8) + '/><w:bottom ' + B(8) + '/><w:right ' + B(8) + '/></w:tcBorders><w:vAlign') + '</w:tcPr>';
+    var tb = '<w:tcBorders><w:top ' + B(8) + '/><w:left ' + B(8) + '/><w:bottom ' + B(8) + '/><w:right ' + B(8) + '/></w:tcBorders>';
+    pr = pr.replace(/<w:tcBorders>[\s\S]*?<\/w:tcBorders>/, '');
+    return '<w:tc><w:tcPr>' + pr.replace(/(<w:shd|<w:vAlign)/, tb + '$1') + '</w:tcPr>';
   });
   x += gap;
   [].forEach.call(sheet.querySelectorAll('.rp-body > table'), function (t, i) { x += (i ? gap : '') + tbl(t); });
-  var doc = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>' + x +
+  var W = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"', XH = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+  var REL = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+  var doc = XH + '<w:document ' + W + ' xmlns:r="' + REL + '"><w:body>' + x + gap +
     '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="567" w:right="720" w:bottom="454" w:left="720" w:header="0" w:footer="0" w:gutter="0"/></w:sectPr></w:body></w:document>';
+  var CT = 'application/vnd.openxmlformats-officedocument.', PR = 'http://schemas.openxmlformats.org/package/2006/relationships';
+  var styles = XH + '<w:styles ' + W + '><w:docDefaults><w:rPrDefault><w:rPr>' + FONT + '<w:sz w:val="20"/><w:szCs w:val="20"/><w:lang w:val="en-US" w:eastAsia="ko-KR"/></w:rPr></w:rPrDefault>' +
+    '<w:pPrDefault><w:pPr><w:spacing w:before="0" w:after="0" w:line="240" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>' +
+    '<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/></w:style>' +
+    '<w:style w:type="table" w:default="1" w:styleId="TableNormal"><w:name w:val="Normal Table"/><w:uiPriority w:val="99"/><w:semiHidden/><w:tblPr><w:tblInd w:w="0" w:type="dxa"/><w:tblCellMar><w:top w:w="0" w:type="dxa"/><w:left w:w="108" w:type="dxa"/><w:bottom w:w="0" w:type="dxa"/><w:right w:w="108" w:type="dxa"/></w:tblCellMar></w:tblPr></w:style></w:styles>';
+  var settings = XH + '<w:settings ' + W + '><w:defaultTabStop w:val="800"/><w:characterSpacingControl w:val="doNotCompress"/><w:compat><w:spaceForUL/><w:balanceSingleByteDoubleByteWidth/><w:doNotLeaveBackslashAlone/><w:ulTrailSpace/><w:doNotExpandShiftReturn/><w:adjustLineHeightInTable/><w:useFELayout/></w:compat></w:settings>';
+  var fonts = XH + '<w:fonts ' + W + '><w:font w:name="Malgun Gothic"><w:altName w:val="맑은 고딕"/><w:charset w:val="81"/><w:family w:val="swiss"/><w:pitch w:val="variable"/></w:font></w:fonts>';
+  var now = new Date().toISOString().replace(/\.\d+Z$/, 'Z');
+  var core = XH + '<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
+    '<dc:title>주간 교육활동 보고서</dc:title><dc:creator>HERE.</dc:creator><dcterms:created xsi:type="dcterms:W3CDTF">' + now + '</dcterms:created><dcterms:modified xsi:type="dcterms:W3CDTF">' + now + '</dcterms:modified></cp:coreProperties>';
+  var app = XH + '<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties"><Application>Microsoft Office Word</Application></Properties>';
   return zipStore([
-    { name: '[Content_Types].xml', data: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>' },
-    { name: '_rels/.rels', data: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>' },
-    { name: 'word/document.xml', data: doc }
+    { name: '[Content_Types].xml', data: XH + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/>' +
+      '<Override PartName="/word/document.xml" ContentType="' + CT + 'wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="' + CT + 'wordprocessingml.styles+xml"/>' +
+      '<Override PartName="/word/settings.xml" ContentType="' + CT + 'wordprocessingml.settings+xml"/><Override PartName="/word/fontTable.xml" ContentType="' + CT + 'wordprocessingml.fontTable+xml"/>' +
+      '<Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/><Override PartName="/docProps/app.xml" ContentType="' + CT + 'extended-properties+xml"/></Types>' },
+    { name: '_rels/.rels', data: XH + '<Relationships xmlns="' + PR + '"><Relationship Id="rId1" Type="' + REL + '/officeDocument" Target="word/document.xml"/>' +
+      '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/><Relationship Id="rId3" Type="' + REL + '/extended-properties" Target="docProps/app.xml"/></Relationships>' },
+    { name: 'word/_rels/document.xml.rels', data: XH + '<Relationships xmlns="' + PR + '"><Relationship Id="rId1" Type="' + REL + '/styles" Target="styles.xml"/><Relationship Id="rId2" Type="' + REL + '/settings" Target="settings.xml"/><Relationship Id="rId3" Type="' + REL + '/fontTable" Target="fontTable.xml"/></Relationships>' },
+    { name: 'word/document.xml', data: doc },
+    { name: 'word/styles.xml', data: styles },
+    { name: 'word/settings.xml', data: settings },
+    { name: 'word/fontTable.xml', data: fonts },
+    { name: 'docProps/core.xml', data: core },
+    { name: 'docProps/app.xml', data: app }
   ]);
 }
 function rpSaveBlob(blob, name, type, msg) {
@@ -3496,7 +3500,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261122111524';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261122113325';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

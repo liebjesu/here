@@ -2047,7 +2047,7 @@ function rpDocx(sheet) {
   });
   x += gap;
   [].forEach.call(sheet.querySelectorAll('.rp-body > table'), function (t, i) { x += (i ? gap : '') + tbl(t); });
-  var W = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"', XH = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+  var W = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"', XH = '<' + '?xml version="1.0" encoding="UTF-8" standalone="yes"?' + '>';
   var REL = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
   var doc = XH + '<w:document ' + W + ' xmlns:r="' + REL + '"><w:body>' + x + gap +
     '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="567" w:right="720" w:bottom="454" w:left="720" w:header="0" w:footer="0" w:gutter="0"/></w:sectPr></w:body></w:document>';
@@ -3867,7 +3867,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261125003823';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261125081050';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

@@ -997,6 +997,52 @@ button.set-row:active,a.set-row:active{background:var(--bg)}
 .mjump b{flex:none;align-self:center;font-size:.8rem;color:var(--sub);margin-right:.1rem}
 .mjump button{flex:none;padding:.35rem .75rem;border:1px solid var(--line);border-radius:999px;background:#fff;font-weight:700;font-size:.84rem;white-space:nowrap}
 @media print{.ptabs,.mjump,.jumps{display:none!important}}
+/* 주보 (이미지 540px → 2배 1080px) */
+.bl-wrap{overflow:hidden;border-radius:18px;box-shadow:0 6px 24px rgba(20,43,80,.14)}
+.bl{width:540px;background:#eef2f8;color:#14213d;font-family:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;letter-spacing:-.02em;line-height:1.6;word-break:keep-all;padding-bottom:4px}
+.bl-hd{position:relative;overflow:hidden;background:linear-gradient(155deg,#0f2244 0%,#1b4683 55%,#2675c9 100%);color:#fff;padding:30px 30px 30px}
+.bl-hd:before{content:'';position:absolute;right:-70px;top:-80px;width:250px;height:250px;border-radius:50%;background:rgba(143,214,247,.16)}
+.bl-hd:after{content:'';position:absolute;left:-40px;bottom:-90px;width:180px;height:180px;border-radius:50%;background:rgba(159,209,74,.13)}
+.bl-hd>*{position:relative;z-index:1}
+.bl-top{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:800;letter-spacing:.14em;color:rgba(255,255,255,.75)}
+.bl-smp{background:#ffd24d;color:#5a4200;padding:2px 9px;border-radius:99px;letter-spacing:.02em}
+.bl-logo{margin-top:14px;font-size:40px;font-weight:900;letter-spacing:-.03em;line-height:1}
+.bl-logo i{color:#9fd14a;font-style:normal}.bl-logo span{font-size:15px;font-weight:800;letter-spacing:.32em;color:#bfe6fa;vertical-align:middle;margin-left:4px}
+.bl-date{margin-top:8px;font-size:14px;font-weight:700;color:rgba(255,255,255,.85)}
+.bl-ttl{margin-top:26px}
+.bl-ttl small{display:inline-block;background:#9fd14a;color:#0f2244;font-weight:900;font-size:12px;padding:3px 11px;border-radius:99px}
+.bl-ttl h1{margin:10px 0 6px;font-size:33px;line-height:1.28;font-weight:900;letter-spacing:-.035em;color:#fff}
+.bl-ttl p{margin:0;font-size:15px;font-weight:600;color:#d7e9fb}
+.bl-q{margin-top:20px;padding:13px 16px;border-left:4px solid #9fd14a;background:rgba(255,255,255,.11);border-radius:0 14px 14px 0;font-size:16px;font-weight:700;line-height:1.5}
+.bl-sec{margin:12px 14px 0;background:#fff;border-radius:22px;padding:18px 20px 18px}
+.bl-h{display:flex;flex-direction:column;margin:0 0 12px}
+.bl-h em{font-style:normal;font-size:11px;font-weight:900;letter-spacing:.16em;color:#2675c9}
+.bl-h b{font-size:20px;font-weight:900;letter-spacing:-.03em}
+.bl-roles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.bl-roles div{background:#f1f5fb;border-radius:14px;padding:10px 12px;min-width:0}
+.bl-roles small{display:block;font-size:11.5px;font-weight:800;color:#6b7a90}.bl-roles b{display:block;font-size:15.5px;font-weight:800;line-height:1.35}
+.bl-vs{background:#0f2244;color:#fff;border-radius:16px;padding:16px 18px;font-size:16px;font-weight:700;line-height:1.6;margin-bottom:10px}
+.bl-md{border-radius:16px;padding:13px 15px;margin-top:8px;background:#f4f7fb}
+.bl-md span{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:900;padding:2px 10px;border-radius:99px;color:#fff}
+.bl-md span i{font-style:normal;font-weight:700;opacity:.9}
+.bl-md p{margin:7px 0 0;font-size:14.5px;line-height:1.65;color:#25324a}
+.bl-md.m성경 span{background:#1d7fc0}.bl-md.m신학 span{background:#6b4fd1}.bl-md.m역사 span{background:#c0621d}
+.bl-md.m적용{background:#eef8df;border:2px solid #9fd14a}.bl-md.m적용 span{background:#4d8a12}.bl-md.m적용 p{font-weight:700;color:#24400a}
+.bl-song{display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px dashed #dde4ee}
+.bl-song i{flex:none;width:28px;height:28px;border-radius:50%;background:#e6f2fd;color:#1d6fb8;font-style:normal;font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center}
+.bl-song b{flex:1;font-size:16px;font-weight:800}.bl-song small{font-size:11.5px;font-weight:800;color:#a55a00;background:#fff1e0;padding:2px 8px;border-radius:99px}
+.bl-pm{margin:11px 0 0;font-size:14.5px;line-height:1.65;color:#25324a}
+.bl-prev{border-left:4px solid #c9d6e8;padding-left:13px}.bl-prev b{display:block;font-size:17px;font-weight:900}.bl-prev small{display:block;color:#6b7a90;font-weight:700;font-size:12.5px}
+.bl-prev p{margin:8px 0 0;font-size:14.5px;line-height:1.65;color:#25324a}
+.bl-ul{margin:0;padding:0;list-style:none}.bl-ul li{position:relative;padding:6px 0 6px 18px;font-size:14.5px;font-weight:600;line-height:1.5;border-bottom:1px solid #eef1f5}
+.bl-ul li:last-child{border-bottom:0}.bl-ul li:before{content:'';position:absolute;left:2px;top:14px;width:7px;height:7px;border-radius:50%;background:#2675c9}
+.bl-two{display:flex;gap:10px;margin:12px 14px 0}.bl-two>.bl-sec{flex:1;min-width:0;margin:0}
+.bl-bd>div:last-child{display:flex;flex-wrap:wrap;gap:6px}.bl-bd span{background:#ffeef3;color:#c2255c;font-weight:800;font-size:14px;padding:4px 11px;border-radius:99px}
+.bl-ft{text-align:center;padding:20px 20px 22px;font-size:11.5px;font-weight:600;color:#7a889c}.bl-ft b{display:block;font-size:20px;font-weight:900;color:#142b50;letter-spacing:-.03em}.bl-ft i{color:#9fd14a;font-style:normal}
+.bl-autos{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.bl-auto{border:1px dashed var(--line);border-radius:12px;padding:.45rem .6rem;min-width:0}.bl-auto small{display:block;font-size:.75rem;color:var(--sub);font-weight:700}
+.bl-auto b{display:block;font-size:.92rem;overflow-wrap:anywhere}.bl-auto em{display:block;font-style:normal;font-size:.72rem;color:var(--pri)}
+.bl-aibox{display:flex;flex-wrap:wrap;gap:.4rem;align-items:center;padding:.6rem;border-radius:14px;background:var(--pri-soft);margin-bottom:.3rem}.bl-aibox .btn{flex:1 1 auto}
 </style>
 </head>
 <body>
@@ -2312,6 +2358,7 @@ VIEWS.home = function () {
       M('pray', '기도·봉헌', 'prayer', 't-rose', '기도 봉헌 순서') +
       M('music', '찬양팀', 'worship', 't-sky', '찬양 콘티') +
       M('star', '임역원', 'officers', 't-peach', '임역원 회의') +
+      M('layers', '주보', 'bulletin', 't-lime', '주보 설교 묵상 찬양 광고 이미지') +
       M('doc', '주간 보고서', 'report', 't-sky', '서기 주간 교육활동 보고서 헌금 출석 결재')) +
     G('요청 · 건의', M('wrench', '앱 수정 요청', 'reqApp', 't-sky', '앱 수정 요청 불편 오류 버그 접수') +
       M('bulb', '고등부 건의', 'reqIdea', 't-peach', '건의 제안 의견 접수') +
@@ -3300,6 +3347,271 @@ VIEWS.sheet = function (p) {
     '<div class="tblwrap"><table class="tbl"><thead>' + thead + '</thead><tbody>' + body + '</tbody><tfoot>' + tfoot + '</tfoot></table></div>';
 };
 
+/* ========================= 주보 (고등부 주간 소식) =========================
+   자동: 찬양 콘티 · 찬양 인도 · 기도봉헌(대표기도 · 봉헌) · 공지 · 생일
+   입력(주보 탭): 설교 · 본문 · 묵상 도움글(AI 초안) · 지난주 요약 · 광고 · 기도제목 */
+var BL_W = 540, BL_TABS = ['주보', '찬양콘티', '찬양인도', '기도봉헌'];
+var BL_MD = [['성경', '성경', '본문 이야기'], ['신학', '신학', '이 말씀이 알려 주는 것'], ['역사', '역사', '그때 그곳'], ['적용', '적용', '이번 주 해 볼 것']];
+// 샘플 (아직 이번 주 주보를 쓰지 않았을 때 디자인 · 내용 확인용)
+var BL_SAMPLE = {
+  설교제목: '내 안의 성전을 깨끗하게', 본문: '요한복음 2:13-22', 설교자: '고등부 교역자',
+  본문말씀: '예수께서 대답하여 이르시되 너희가 이 성전을 헐라 내가 사흘 동안에 일으키리라 (요 2:19)',
+  한마디: '예수님이 오늘 내 마음에서 엎으실 "상"은 무엇일까?', 사회: '고등부 회장',
+  묵상_성경: '유월절이 가까워 예루살렘에 올라가신 예수님은 성전 뜰에서 소와 양과 비둘기를 파는 사람들, 돈 바꾸는 사람들을 보시고 노끈으로 채찍을 만들어 내쫓으셨어요. 그리고 "이 성전을 헐라 내가 사흘 동안에 일으키리라"고 하셨는데, 요한은 이것이 예수님 자신의 몸을 두고 하신 말씀이라고 알려 줘요(21절).',
+  묵상_신학: '성전은 하나님이 백성과 함께 계시는 곳이었어요. 예수님은 이제 당신 자신이 참 성전, 곧 하나님을 만나는 유일한 길이라고 말씀하세요. 이 말씀은 십자가와 부활로 이루어졌고, 예수님을 믿는 우리도 성령님이 계시는 성전이 되었어요(고전 3:16).',
+  묵상_역사: '당시 성전은 헤롯 대왕이 크게 고쳐 짓기 시작한 건물로, 사람들이 "46년 동안 지었다"고 말할 만큼 오래 공사 중이었어요(20절). 멀리서 온 순례자들은 제물로 쓸 짐승을 사야 했고, 성전세는 정해진 은화로 내야 해서 환전상이 있었어요. 이런 장사는 이방인도 기도하러 들어올 수 있던 바깥뜰에서 이루어졌다고 알려져 있어요.',
+  묵상_적용: '이번 주, 하나님과의 시간을 밀어내는 내 안의 "장사꾼의 상" 하나를 적어 보세요. 끝없는 쇼츠, 친구와 비교하는 마음, 미뤄 둔 사과… 하나를 골라 치우고, 그 자리에 하루 5분 기도를 넣어 봐요.',
+  묵상_찬양: '오늘 찬양은 왕이신 예수님을 높이고(예수 우리 왕이여), 오시는 주님을 "호산나"로 맞이하는 고백이에요. 성전에 들어오신 예수님께 내 마음의 가장 좋은 자리를 내어 드리는 마음으로 불러 봐요.',
+  광고: '겨울 수련회: 2월 셋째 주 금~토 · 참석 여부를 반 선생님께 알려 주세요\n예배 후 임원 모임이 있어요 (교육관)\n다음 주는 성탄 찬양 연습을 시작해요',
+  기도제목: '수능을 마친 고3 친구들의 새 출발을 위해\n기말고사를 준비하는 친구들의 건강과 지혜를 위해',
+  _songs: [['예수 우리 왕이여', ''], ['호산나', ''], ['나 같은 죄인 살리신', '헌금']], _인도: '찬양팀', _기도: '2학년 대표', _봉헌: '1-1반',
+  _prev: { 날짜: '', 설교제목: '물이 포도주가 되었어요', 본문: '요한복음 2:1-11', 설교요약: '가나의 혼인 잔치에서 포도주가 떨어졌을 때, 마리아는 하인들에게 "무엇을 말씀하시든지 그대로 하라"고 했어요. 하인들이 말씀대로 항아리에 물을 채우자 예수님은 그것을 좋은 포도주로 바꾸셨어요. 내가 가진 평범한 "물"도 말씀에 순종할 때 예수님이 기쁨으로 바꾸세요.' }
+};
+function blRows(d) { return (d['주보'] || []).slice().sort(function (a, b) { return a.날짜 < b.날짜 ? 1 : -1; }); }
+function blRow(d, date) { return (d['주보'] || []).filter(function (r) { return r.날짜 === date; })[0]; }
+/** 콘티 내용 → [곡 제목, '헌금' 이면 헌금 찬양] */
+function blSongs(txt) {
+  var out = [], offer = false;
+  String(txt || '').split('\n').forEach(function (l) {
+    l = l.trim(); if (!l) return;
+    if (/^<\s*헌금\s*>|^\[?헌금\]?$|^헌금\s*찬양/.test(l)) { offer = true; return; }
+    if (/^https?:\/\//.test(l)) return;
+    var m = /^\d+\s*[.)]\s*(.+)$/.exec(l), t = m ? m[1] : (offer ? l : '');
+    if (!t) return;
+    t = t.replace(/https?:\/\/\S+/g, '').replace(/\(\s*[A-G][#b♭]?m?\s*(?:key|키)?\s*\)\s*$/i, '').replace(/[-–·]\s*$/, '').trim();
+    if (t) { out.push([t, offer ? '헌금' : '']); if (offer) offer = false; }
+  });
+  return out;
+}
+function blName(n) { n = String(n || '').trim(); if (!n) return ''; return personOf(n) ? callName(n) : n; }
+function blWeekNo(date) { var d = parseD(date), j = new Date(d.getFullYear(), 0, 1); return Math.ceil(((d - j) / 864e5 + j.getDay() + 1) / 7); }
+/** 한 주 주보에 들어갈 내용 모으기. 이번 주 주보를 아직 안 썼으면 샘플 */
+function blData(d, date) {
+  var r = blRow(d, date), sample = !r, S0 = BL_SAMPLE;
+  var c = (d['찬양콘티'] || []).filter(function (x) { return x.날짜 === date; })[0];
+  var mon = (+date.slice(5, 7)) + '월', lead = ((d['찬양인도'] || []).filter(function (x) { return x.월 === mon; })[0] || {})[weekOf(date) + '주'];
+  var pr = (d['기도봉헌'] || []).filter(function (x) { return x.날짜 === date; })[0] || {};
+  var src = r || S0, B = { date: date, sample: sample, no: blWeekNo(date) };
+  ['설교제목', '본문', '설교자', '본문말씀', '한마디', '사회', '광고', '기도제목', '묵상_성경', '묵상_신학', '묵상_역사', '묵상_적용', '묵상_찬양'].forEach(function (k) { B[k] = String(src[k] || '').trim(); });
+  B.songs = c ? blSongs(c.내용) : sample ? S0._songs : [];
+  B.인도 = blName((c && c.인도) || lead) || (sample ? S0._인도 : '');
+  B.기도 = blName(pr.기도자) || (sample ? S0._기도 : '');
+  B.봉헌 = String(pr.봉헌 || pr.학년반 || '').trim() || (sample ? S0._봉헌 : '');
+  B.설교자 = blName(B.설교자);
+  var pv = (d['주보'] || []).filter(function (x) { return x.날짜 < date && (x.설교제목 || x.설교요약); }).sort(function (a, b) { return a.날짜 < b.날짜 ? 1 : -1; })[0];
+  B.prev = pv || (sample ? S0._prev : null);
+  if (!B.광고) {   // 비워 두면 최근 2주 공지 제목
+    var from = addDays(date, -14);
+    B.광고 = (CACHE.notices || []).filter(function (n) { return (n.날짜 || '') >= from && (n.날짜 || '') <= date; }).slice(0, 4).map(function (n) { return n.제목; }).join('\n');
+  }
+  var bd = [];
+  if (!isPastYear()) students().forEach(function (s) {
+    if (s.상태 !== '재적' || !/^\d{4}-\d{2}-\d{2}/.test(s.생년월일 || '')) return;
+    var n = nextBday(s.생년월일.slice(5, 10), isLunar(s), date);
+    if (n && n <= addDays(date, 6)) bd.push(s.이름);
+  });
+  B.bdays = bd;
+  return B;
+}
+function blLines(t) { return String(t || '').split('\n').map(function (x) { return x.replace(/^[\s·•\-*]+/, '').trim(); }).filter(Boolean); }
+function blPara(t) { return esc(t).replace(/\n/g, '<br>'); }
+/** 주보 한 장 (이미지로도 그대로 나감) */
+function blHtml(B) {
+  var d = parseD(B.date), sec = function (no, en, ko, body) { return body ? '<div class="bl-sec"><div class="bl-h"><em>' + no + ' ' + en + '</em><b>' + ko + '</b></div>' + body + '</div>' : ''; };
+  var role = function (k, v) { return v ? '<div><small>' + k + '</small><b>' + esc(v) + '</b></div>' : ''; };
+  var roles = role('찬양 인도', B.인도) + role('대표 기도', B.기도) + role('말씀', B.설교자) + role('봉헌', B.봉헌) + role('사회', B.사회);
+  var md = BL_MD.map(function (m) { var t = B['묵상_' + m[0]]; return t ? '<div class="bl-md ' + 'm' + m[0] + '"><span>' + m[1] + '<i>' + m[2] + '</i></span><p>' + blPara(t) + '</p></div>' : ''; }).join('');
+  var songs = B.songs.map(function (s, i) { return '<div class="bl-song"><i>' + (s[1] ? '♪' : i + 1) + '</i><b>' + esc(s[0]) + '</b>' + (s[1] ? '<small>' + s[1] + ' 찬양</small>' : '') + '</div>'; }).join('');
+  var ad = blLines(B.광고).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('');
+  var pray = blLines(B.기도제목).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('');
+  var pv = B.prev;
+  return '<div class="bl">' +
+    '<div class="bl-hd"><div class="bl-top"><span>MOKMIN HIGH SCHOOL · No.' + B.no + '</span>' + (B.sample ? '<span class="bl-smp">샘플</span>' : '<span>' + d.getFullYear() + '</span>') + '</div>' +
+      '<div class="bl-logo">HERE<i>.</i> <span>WEEKLY</span></div><div class="bl-date">' + (d.getMonth() + 1) + '월 ' + d.getDate() + '일 주일 · 목민교회 고등부</div>' +
+      (B.설교제목 ? '<div class="bl-ttl"><small>오늘의 말씀</small><h1>' + esc(B.설교제목) + '</h1><p>' + esc(B.본문) + (B.설교자 ? ' &nbsp;·&nbsp; ' + esc(B.설교자) : '') + '</p></div>' : '') +
+      (B.한마디 ? '<div class="bl-q">' + blPara(B.한마디) + '</div>' : '') + '</div>' +
+    sec('01', 'WORSHIP', '오늘의 예배', roles ? '<div class="bl-roles">' + roles + '</div>' : '') +
+    sec('02', 'WORD', '말씀 미리 보기', (B.본문말씀 ? '<div class="bl-vs">' + blPara(B.본문말씀) + '</div>' : '') + md) +
+    sec('03', 'PRAISE', '찬양으로 묵상', songs || B.묵상_찬양 ? songs + (B.묵상_찬양 ? '<p class="bl-pm">' + blPara(B.묵상_찬양) + '</p>' : '') : '') +
+    (pv ? sec('04', 'LAST WEEK', '지난주 말씀 다시 보기', '<div class="bl-prev"><b>' + esc(pv.설교제목 || '') + '</b><small>' + esc(pv.본문 || '') + (pv.날짜 ? ' · ' + shortD(pv.날짜) : '') + '</small>' + (pv.설교요약 ? '<p>' + blPara(pv.설교요약) + '</p>' : '') + '</div>') : '') +
+    sec(pv ? '05' : '04', 'NEWS', '광고', ad ? '<ul class="bl-ul">' + ad + '</ul>' : '') +
+    (pray || B.bdays.length ? '<div class="bl-two">' +
+      (pray ? '<div class="bl-sec"><div class="bl-h"><b>함께 기도해요</b></div><ul class="bl-ul">' + pray + '</ul></div>' : '') +
+      (B.bdays.length ? '<div class="bl-sec bl-bd"><div class="bl-h"><b>이번 주 생일 축하해요</b></div><div>' + B.bdays.map(function (n) { return '<span>' + esc(n) + '</span>'; }).join('') + '</div></div>' : '') + '</div>' : '') +
+    '<div class="bl-ft"><b>HERE<i>.</i></b> 여기, 우리가 함께 예배해요 · 대한예수교장로회 목민교회 고등부</div></div>';
+}
+function fitBl() {
+  var w = $('blWrap'), s = $('blSheet'); if (!w || !s) return;
+  var k = Math.min(1, w.clientWidth / BL_W);
+  s.style.transform = 'scale(' + k + ')'; w.style.height = Math.ceil(s.offsetHeight * k) + 'px';
+}
+window.addEventListener('resize', function () { if (S.view === 'bulletin') fitBl(); });
+VIEWS.bulletin = function (p) {
+  if (!S.params._data) {
+    Promise.all([call('getTab', { tabs: BL_TABS }), CACHE.notices ? Promise.resolve(CACHE.notices) : call('getNotices', {}, 'silent').catch(function () { return []; })])
+      .then(function (a) { CACHE.notices = CACHE.notices || a[1]; S.params._data = a[0]; render(); });
+    return loadingView('주보');
+  }
+  var d = S.params._data, date = p.date || nextSunday(), t = p.t || '보기', ed = isAdmin() && !isPastYear() && !(S.boot && S.boot.guest);
+  var tabs = [['보기', '주보 보기'], ['입력', '내용 입력'], ['설교', '설교 기록', blRows(d).length]];
+  if (!ed) tabs = [tabs[0], tabs[2]];
+  var nav = '<div class="rp-nav noprint"><button class="btn light small" onclick="blGo(\'' + addDays(date, -7) + '\')">‹ 지난주</button>' +
+    '<input type="date" value="' + date + '" onchange="blGo(this.value)"><button class="btn light small" onclick="blGo(\'' + addDays(date, 7) + '\')">다음주 ›</button></div>';
+  var body;
+  if (t === '입력' && ed) body = nav + blForm(d, date);
+  else if (t === '설교') body = blList(d);
+  else {
+    var B = blData(d, date);
+    setTimeout(fitBl, 0); setTimeout(fitBl, 400);
+    body = nav + (B.sample ? '<div class="hint warm">' + fmtD(date) + ' 주보는 아직 쓰지 않아서 <b>샘플</b>로 보여요. ' + (ed ? '[내용 입력]에서 설교 · 묵상을 넣으면 바뀌어요.' : '') + ' 찬양 · 기도 · 봉헌이 등록돼 있으면 그대로 들어가요.</div>' : '') +
+      '<div class="row noprint" style="margin:.5rem 0 .6rem"><button class="btn" onclick="blImage()">' + ic('download') + ' 이미지로 저장 · 공유</button>' + (ed ? '<button class="btn light" onclick="S.params.t=\'입력\';render()">' + ic('pen') + ' 내용 입력</button>' : '') + '</div>' +
+      '<div class="bl-wrap" id="blWrap"><div id="blSheet" style="width:' + BL_W + 'px;transform-origin:0 0">' + blHtml(B) + '</div></div>' +
+      '<p class="muted" style="margin-top:.6rem">찬양은 [찬양팀] 콘티 · 인도 순서, 대표기도 · 봉헌은 [기도 · 봉헌], 광고는 비워 두면 최근 공지에서 자동으로 들어와요.</p>';
+  }
+  return topbar('주보') + ptabs('t', tabs, t) + body;
+};
+function blGo(date) { if (!/^\d{4}-\d{2}-\d{2}$/.test(date || '')) return; blKeep(); var d = parseD(date); if (d.getDay()) date = addDays(date, 7 - d.getDay()); S.params.date = date; render(); }
+function blList(d) {
+  var rows = blRows(d).filter(function (r) { return r.설교제목 || r.본문; });
+  if (!rows.length) return '<div class="empty">아직 쓴 설교가 없어요' + (isAdmin() ? ' · [내용 입력]에서 넣어 주세요' : '') + '</div>';
+  return '<p class="muted" style="margin:.2rem 0 .3rem">누르면 그 주 주보로 가요</p>' + rows.map(function (r) {
+    return '<button class="list-item" onclick="S.params.date=\'' + r.날짜 + '\';S.params.t=\'보기\';render()"><span class="grow"><b>' + esc(r.설교제목 || '(제목 없음)') + '</b><br><span class="muted">' + shortD(r.날짜) + ' · ' + esc(r.본문 || '') + (r.설교자 ? ' · ' + esc(r.설교자) : '') + '</span></span>' +
+      '<span class="badge' + (r.묵상_적용 ? ' g' : '') + '">' + (r.묵상_적용 ? '묵상 있음' : '묵상 없음') + '</span>' + (r.설교요약 ? '<span class="badge">요약</span>' : '') + '</button>';
+  }).join('');
+}
+/* ---------- 주보 내용 입력 ---------- */
+function blForm(d, date) {
+  var r = Object.assign({}, blRow(d, date) || {}, ((S.params._draft || {})[date]) || {}), A = blAuto(d, date);
+  var pv = (d['주보'] || []).filter(function (x) { return x.날짜 < date; }).sort(function (a, b) { return a.날짜 < b.날짜 ? 1 : -1; })[0];
+  var I = function (k, label, ph) { return '<label>' + label + '</label><input id="bl_' + k + '" value="' + esc(r[k] || '') + '" placeholder="' + (ph || '') + '">'; };
+  var T = function (k, label, ph, rows) { return '<label>' + label + '</label><textarea id="bl_' + k + '" rows="' + (rows || 3) + '" placeholder="' + (ph || '') + '">' + esc(r[k] || '') + '</textarea>'; };
+  var auto = function (k, v, where) { return '<div class="bl-auto"><small>' + k + '</small><b>' + (v ? esc(v) : '<span class="muted">비어 있음</span>') + '</b><em>' + where + '</em></div>'; };
+  if (S.params._ai === undefined) { S.params._ai = null; call('aiStatus', {}, 'silent').then(function (x) { S.params._ai = x; if (S.view === 'bulletin' && S.params.t === '입력') { blKeep(); render(); } }).catch(function () {}); }
+  var ai = S.params._ai || {};
+  return '<p class="muted" style="margin:.2rem 0 0">' + fmtD(date) + ' 주보 · 비워 둔 칸은 주보에 안 나와요</p>' +
+    '<h3 class="rp-eh">1. 이번 주 설교</h3>' + I('설교제목', '설교 제목', '예) 내 안의 성전을 깨끗하게') +
+    '<div class="row"><div>' + I('본문', '성경 본문', '예) 요한복음 2:13-22') + '</div><div>' + I('설교자', '설교자', '예) 이한빈 목사님') + '</div></div>' +
+    T('본문말씀', '핵심 구절 (선택)', '주보에 크게 들어갈 한 구절', 2) + I('한마디', '이번 주 질문 · 한마디 (선택)', '예) 예수님이 내 마음에서 엎으실 상은?') +
+    '<h3 class="rp-eh">2. 예배 담당 <span class="muted" style="font-size:.8rem">다른 메뉴에서 자동으로 들어와요</span></h3>' +
+    '<div class="bl-autos">' + auto('찬양 인도', A.인도, '찬양팀') + auto('대표 기도', A.기도, '기도 · 봉헌') + auto('봉헌', A.봉헌, '기도 · 봉헌') + auto('찬양 곡', A.곡, '찬양팀 콘티') + '</div>' +
+    '<div class="row" style="margin-top:.3rem"><button class="btn light small" onclick="go(\'worship\')">찬양팀 열기</button><button class="btn light small" onclick="go(\'prayer\')">기도 · 봉헌 열기</button></div>' +
+    I('사회', '사회 (선택)', '예) 고등부 회장 김수아') +
+    '<h3 class="rp-eh">3. 말씀 묵상 도움글 <span class="muted" style="font-size:.8rem">AI 초안을 받아서 고쳐 쓰세요</span></h3>' +
+    '<div class="bl-aibox">' + (ai.has ? '<button class="btn" onclick="blAi()">' + ic('bulb') + ' AI로 초안 만들기</button>' : '') +
+      '<button class="btn light" onclick="blAiCopy()">' + ic('share') + ' AI에게 부탁할 글 복사</button>' +
+      '<button class="btn light" onclick="blAiPaste()">' + ic('doc') + ' AI 답 붙여넣기</button>' +
+      '<p class="muted" style="margin:.2rem 0 0;font-size:.82rem">' + (ai.has ? '[AI로 초안 만들기]를 누르면 설교 제목 · 본문 · 찬양으로 다섯 칸을 채워요 (구글 Gemini).' : '복사한 글을 ChatGPT · Gemini · Claude 앱에 붙여넣고, 받은 답을 [AI 답 붙여넣기]에 넣으면 칸이 채워져요.') +
+      (ai.admin ? ' <a href="#" onclick="blAiSetup();return false">' + (ai.has ? 'AI 연결 설정' : 'AI 자동 연결하기') + '</a>' : '') + '</p></div>' +
+    T('묵상_성경', '성경 · 본문 이야기', '무슨 일이 있었는지 쉽게') + T('묵상_신학', '신학 · 이 말씀이 알려 주는 것', '하나님 · 예수님 · 복음') +
+    T('묵상_역사', '역사 · 그때 그곳', '시대 · 장소 · 문화 배경') + T('묵상_적용', '적용 · 이번 주 해 볼 것', '고등학생 일상에서 한 가지') +
+    T('묵상_찬양', '찬양으로 묵상', '이번 주 찬양 곡과 말씀을 이어서') +
+    '<h3 class="rp-eh">4. 지난주 말씀 요약 ' + (pv ? '<span class="muted" style="font-size:.8rem">' + shortD(pv.날짜) + ' · ' + esc(pv.설교제목 || '제목 없음') + '</span>' : '') + '</h3>' +
+    (pv ? '<textarea id="bl_prevsum" rows="3" placeholder="지난주 설교 핵심 2~3줄">' + esc(r._prevsum !== undefined ? r._prevsum : pv.설교요약 || '') + '</textarea>' : '<p class="muted" style="margin:0">지난주 주보가 없어요. 지난 설교도 [다른 날짜]로 가서 넣으면 여기에 이어져요.</p>') +
+    '<label>이번 주 설교 요약 (예배 뒤에 쓰면 다음 주 주보에 나와요)</label><textarea id="bl_설교요약" rows="3">' + esc(r.설교요약 || '') + '</textarea>' +
+    '<h3 class="rp-eh">5. 광고 · 기도제목</h3>' + T('광고', '광고 (줄마다 하나)', '비워 두면 최근 2주 공지 제목이 들어가요', 4) + T('기도제목', '함께 기도해요 (줄마다 하나, 선택)', '', 3) +
+    '<button class="btn" style="margin-top:1rem" onclick="blSave()">저장하고 주보 보기</button>';
+}
+/** 다른 메뉴에서 자동으로 오는 것 (샘플 없이 실제 값만) */
+function blAuto(d, date) {
+  var c = (d['찬양콘티'] || []).filter(function (x) { return x.날짜 === date; })[0];
+  var mon = (+date.slice(5, 7)) + '월', lead = ((d['찬양인도'] || []).filter(function (x) { return x.월 === mon; })[0] || {})[weekOf(date) + '주'];
+  var pr = (d['기도봉헌'] || []).filter(function (x) { return x.날짜 === date; })[0] || {};
+  return { 인도: blName((c && c.인도) || lead), 기도: blName(pr.기도자), 봉헌: String(pr.봉헌 || pr.학년반 || '').trim(), 곡: c ? blSongs(c.내용).map(function (x) { return x[0]; }).join(', ') : '' };
+}
+/** 화면을 다시 그리기 전에 쓰던 칸을 기억 (날짜별) */
+function blKeep() {
+  var date = S.params.date || nextSunday(), o = {};
+  BL_F.concat(['prevsum']).forEach(function (k) { var el = $('bl_' + k); if (el) o[k === 'prevsum' ? '_prevsum' : k] = el.value; });
+  if (Object.keys(o).length) { S.params._draft = S.params._draft || {}; S.params._draft[date] = o; }
+}
+var BL_F = ['설교제목', '본문', '설교자', '본문말씀', '한마디', '사회', '묵상_성경', '묵상_신학', '묵상_역사', '묵상_적용', '묵상_찬양', '설교요약', '광고', '기도제목'];
+function blSave() {
+  var d = S.params._data, date = S.params.date || nextSunday(), o = { 날짜: date };
+  BL_F.forEach(function (k) { var el = $('bl_' + k); if (el) o[k] = el.value.trim(); });
+  var pv = (d['주보'] || []).filter(function (x) { return x.날짜 < date; }).sort(function (a, b) { return a.날짜 < b.날짜 ? 1 : -1; })[0];
+  var ps = $('bl_prevsum'), jobs = [call('saveTabRow', { tab: '주보', row: o })];
+  if (pv && ps && ps.value.trim() !== String(pv.설교요약 || '')) jobs.push(call('saveTabRow', { tab: '주보', row: { 날짜: pv.날짜, 설교요약: ps.value.trim() } }));
+  Promise.all(jobs).then(function (res) {
+    var L = d['주보'] = d['주보'] || [];
+    res.forEach(function (x) { var f = L.filter(function (r) { return r.날짜 === x.날짜; })[0]; if (f) { for (var k in x) f[k] = x[k]; } else L.push(x); });
+    if (S.params._draft) delete S.params._draft[date];
+    S.params.t = '보기'; render(); window.scrollTo(0, 0); toast('주보를 저장했어요');
+  });
+}
+function blAiIn() {
+  var v = function (k) { var el = $('bl_' + k); return el ? el.value.trim() : ''; };
+  var d = S.params._data, date = S.params.date || nextSunday(), c = (d['찬양콘티'] || []).filter(function (x) { return x.날짜 === date; })[0];
+  return { title: v('설교제목'), verse: v('본문'), memo: v('본문말씀'), songs: c ? blSongs(c.내용).map(function (s) { return s[0] + (s[1] ? '(헌금 찬양)' : ''); }).join(', ') : '' };
+}
+function blAiFill(o) {
+  var n = 0; [['성경', '묵상_성경'], ['신학', '묵상_신학'], ['역사', '묵상_역사'], ['적용', '묵상_적용'], ['찬양', '묵상_찬양']].forEach(function (x) { var el = $('bl_' + x[1]); if (el && o[x[0]]) { el.value = o[x[0]]; n++; } });
+  return n;
+}
+function blAi() {
+  var p = blAiIn(); if (!p.title && !p.verse) { toast('설교 제목이나 본문을 먼저 써 주세요'); return; }
+  call('aiMeditate', p).then(function (o) { var n = blAiFill(o); toast(n ? 'AI 초안을 넣었어요 · 꼭 읽고 고쳐 주세요' : 'AI 답을 칸에 맞추지 못했어요'); });
+}
+/** 키 없이도: ChatGPT · Gemini · Claude 에 붙여넣을 부탁 글 */
+function blAiPrompt(p) {
+  return ['너는 한국 장로교회 고등부 주보에 들어갈 "묵상 도움글"을 쓰는 사역자야. 독자는 고등학생이야.',
+    '이번 주 설교 제목: ' + (p.title || '(없음)'), '성경 본문: ' + (p.verse || '(없음)'), p.memo ? '핵심 구절: ' + p.memo : '', p.songs ? '이번 주 찬양 곡 제목: ' + p.songs : '', '',
+    '아래 다섯 칸을 써 줘. 칸마다 2~4문장, 쉬운 말, 존댓말(~해요체).',
+    '[성경] 본문 내용을 쉽게 풀어 줘.', '[신학] 이 말씀이 하나님 · 예수님 · 복음에 대해 알려 주는 핵심 (개혁주의 장로교 관점).',
+    '[역사] 그 시대 · 장소 · 문화 배경 (확실한 사실만).', '[적용] 고등학생이 이번 주에 해 볼 구체적인 한 가지.',
+    '[찬양] ' + (p.songs ? '찬양 곡들이 어떤 고백인지 오늘 말씀과 이어서 (가사 인용 없이).' : '말씀을 기억하며 찬양하는 마음.'), '',
+    '형식: 각 칸을 [성경] [신학] [역사] [적용] [찬양] 으로 시작하고 다른 말은 붙이지 마.'].filter(function (x, i, a) { return x !== '' || (a[i - 1] !== ''); }).join('\n');
+}
+function blAiCopy() {
+  var p = blAiIn(); if (!p.title && !p.verse) { toast('설교 제목이나 본문을 먼저 써 주세요'); return; }
+  copyText(blAiPrompt(p), '복사했어요 · ChatGPT · Gemini · Claude 에 붙여넣으세요');
+}
+function blAiPaste() {
+  modal('<h2>AI 답 붙여넣기</h2><p class="muted">AI가 준 답을 통째로 붙여넣으세요. [성경] [신학] [역사] [적용] [찬양] 칸으로 나눠서 넣어요.</p>' +
+    '<textarea id="bl_paste" rows="10" placeholder="[성경] ...\n[신학] ...\n[역사] ...\n[적용] ...\n[찬양] ..."></textarea>' +
+    '<button class="btn" style="margin-top:.7rem" onclick="blAiPasteGo()">칸에 넣기</button>');
+}
+function blAiPasteGo() {
+  var t = ($('bl_paste') || {}).value || '', keys = ['성경', '신학', '역사', '적용', '찬양'], o = {};
+  keys.forEach(function (k) {
+    var re = new RegExp('\\[\\s*' + k + '\\s*\\]([\\s\\S]*?)(?=\\[\\s*(?:' + keys.join('|') + ')\\s*\\]|$)');
+    var m = re.exec(t); o[k] = m ? m[1].replace(/^[\s:：\-]+/, '').replace(/\*\*/g, '').trim() : '';
+  });
+  closeModal(); var n = blAiFill(o);
+  toast(n ? n + '칸을 채웠어요 · 읽고 고쳐 주세요' : '[성경] 같은 칸 이름을 찾지 못했어요');
+}
+function blAiSetup() {
+  var ai = S.params._ai || {};
+  modal('<h2>AI 자동 연결 (구글 Gemini)</h2>' +
+    '<div class="hint">구글 계정만 있으면 무료로 쓸 수 있어서 Gemini 로 연결해요. 연결하면 [AI로 초안 만들기] 한 번에 묵상 다섯 칸이 채워져요.</div>' +
+    '<ol class="steps" style="margin:.6rem 0">' +
+    '<li><b>aistudio.google.com</b> 에 구글 계정으로 들어가요</li>' +
+    '<li>왼쪽 <b>Get API key</b> → <b>API 키 만들기</b> 를 누르고, 만들어진 키를 복사해요</li>' +
+    '<li>아래 칸에 직접 붙여넣고 [저장] 을 눌러요 (키는 서버에만 저장되고 화면에 다시 보이지 않아요)</li>' +
+    '<li><b>처음 한 번만:</b> Apps Script 편집기에서 함수 <b>aiAuthorize</b> 를 골라 [실행] → 권한 허용</li></ol>' +
+    '<label>API 키 ' + (ai.has ? '<span class="badge g">연결돼 있어요</span>' : '') + '</label><input id="bl_key" type="password" autocomplete="off" placeholder="' + (ai.has ? '바꿀 때만 새 키를 넣으세요' : 'AIza 로 시작하는 키') + '">' +
+    '<div class="row" style="margin-top:.7rem"><button class="btn" onclick="blAiKeySave()">저장</button>' + (ai.has ? '<button class="btn light" onclick="blAiKeySave(1)">연결 끊기</button>' : '') + '</div>' +
+    '<p class="muted" style="font-size:.8rem;margin-top:.6rem">무료 사용은 하루 사용량 제한이 있고, 보낸 글(설교 제목 · 본문 · 찬양 제목)이 구글 서비스 개선에 쓰일 수 있어요. 학생 이름 같은 개인 정보는 보내지 않아요.</p>');
+}
+function blAiKeySave(off) {
+  var k = off ? '' : (($('bl_key') || {}).value || '').trim();
+  if (!off && !k) { toast('키를 붙여넣어 주세요'); return; }
+  call('saveAiKey', { key: k }).then(function (x) { S.params._ai = { has: x.has, admin: true }; closeModal(); blKeep(); render(); toast(x.has ? 'AI를 연결했어요' : '연결을 끊었어요'); });
+}
+function blImage() {
+  var d = S.params._data; if (!d) return;
+  var date = S.params.date || nextSunday(), B = blData(d, date);
+  loading(true);
+  loadH2C().then(function () {
+    var box = document.createElement('div');
+    box.style.cssText = 'position:fixed;left:-10000px;top:0;width:' + BL_W + 'px';
+    box.innerHTML = blHtml(B); document.body.appendChild(box);
+    return html2canvas(box.firstChild, { scale: 2, backgroundColor: '#eef2f8', logging: false, useCORS: true }).then(function (cv) {
+      document.body.removeChild(box);
+      cv.toBlob(function (blob) { loading(false); rpSaveBlob(blob, '고등부_주보_' + date + '.png', 'image/png', '주보 이미지를 저장했어요'); }, 'image/png');
+    }).catch(function (e) { try { document.body.removeChild(box); } catch (x) {} throw e; });
+  }).catch(function () { loading(false); toast('이미지를 만들지 못했어요. 인터넷 연결을 확인해 주세요'); });
+}
+
 VIEWS.about = function () { return topbar('앱 소개') + aboutPage(false); };
 
 /* ---------- 공지 ---------- */
@@ -3555,7 +3867,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261122114113';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261125003823';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

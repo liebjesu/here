@@ -1061,6 +1061,25 @@ button.set-row:active,a.set-row:active{background:var(--bg)}
 .lc-chip{display:inline-flex;align-items:center;gap:.35rem;font-size:.78rem;font-weight:800;padding:.1rem .55rem;border-radius:99px;border:1px solid var(--line);white-space:nowrap}.lc-chip i{box-shadow:none;width:10px;height:10px}
 .lc-short{font-weight:700;margin:.2rem 0 .5rem}.lc-b{margin-top:.6rem}.lc-b b{display:block;font-size:.84rem;color:var(--pri)}.lc-b p{margin:.15rem 0 0;line-height:1.7}
 .lc-sp{border-left:5px solid #f7941d}.lc-sp h3{margin:0}
+.cal{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden;margin-top:.5rem}
+.cal-nav{display:flex;align-items:center;gap:.4rem;margin-top:.6rem}.cal-nav b{flex:1;text-align:center;font-size:1.1rem}
+.cal-w{display:grid;grid-template-columns:repeat(7,1fr);background:#f6f8fb;border-bottom:1px solid var(--line);font-size:.78rem;font-weight:800;text-align:center;padding:.3rem 0}
+.cal-w .sun,.cal-c.sun>b{color:#d63a3a}.cal-w .sat,.cal-c.sat>b{color:#2563c9}
+.cal-g{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+.cal-c{position:relative;min-height:4.4rem;padding:.2rem .1rem .25rem;border:0;border-right:1px solid #eef1f5;border-bottom:1px solid #eef1f5;background:#fff;text-align:left;font:inherit;color:inherit;display:flex;flex-direction:column;gap:2px;overflow:hidden;cursor:pointer}
+.cal-c:nth-child(7n){border-right:0}.cal-c.out{background:#fafbfd;cursor:default}
+.cal-c>b{font-size:.8rem;padding-left:.25rem;line-height:1.3}
+.cal-c.today>b{display:inline-flex;align-self:flex-start;align-items:center;justify-content:center;min-width:1.45rem;height:1.45rem;padding:0;border-radius:50%;background:var(--pri);color:#fff!important}
+.cal-c.sel{background:var(--pri-soft);box-shadow:inset 0 0 0 2px var(--pri)}
+.cal-lc{position:absolute;top:.5rem;left:1.75rem;width:8px;height:8px;border-radius:50%;background:var(--lc)}
+.cal-e{display:block;font-size:.66rem;font-weight:700;line-height:1.35;padding:0 .25rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff;background:#7c8aa0;margin:0 -1px}
+.cal-e.f{border-top-left-radius:5px;border-bottom-left-radius:5px;margin-left:2px}.cal-e.l{border-top-right-radius:5px;border-bottom-right-radius:5px;margin-right:2px}
+.cal-e.pre{background:#7c8aa0}.cal-e.ing{background:#e08a1e}.cal-e.done{background:#2f8f4e}
+.cal-more{font-size:.64rem;color:var(--sub);font-weight:700;padding-left:.25rem}
+.cal-key{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin:.45rem 0 0;font-size:.76rem;color:var(--sub)}.cal-key .cal-e{display:inline-block;margin:0}
+.cal-day{margin-top:.7rem}.cal-day h3{margin:0 0 .2rem}
+.min-row{border-left:5px solid #7c8aa0}.min-row.ing{border-left-color:#e08a1e}.min-row.done{border-left-color:#2f8f4e}
+@media (min-width:900px){.cal-c{min-height:6.2rem}.cal-e{font-size:.76rem}.cal-c>b{font-size:.9rem}}
 .conti-md{margin-top:.6rem;padding:.55rem .7rem;border-radius:12px;background:var(--pri-soft)}.conti-md b{font-size:.78rem;color:var(--pri)}.conti-md p{margin:.2rem 0 0;font-size:.88rem;line-height:1.6;white-space:pre-wrap}
 .lc-pck{border-left:5px solid #3B5BDB}.lc-pck b{font-size:.84rem;color:var(--pri)}.lc-pck p{margin:.2rem 0 0;font-weight:700;line-height:1.6}
 .lc-nx{border-left:5px solid var(--lc);margin-top:.6rem}.lc-src{display:flex;flex-wrap:wrap;gap:.4rem;margin:.3rem 0 .4rem}
@@ -4267,37 +4286,105 @@ function rqCopy(id) { copyText(rqText(rqById(id)), '기안문을 복사했어요
 function rqToMinistry(id) {
   var r = rqById(id), mo = (String(r.행사일 || '').match(/\d{4}-\d{2}/) || [todayStr().slice(0, 7)])[0];
   if (!confirm('"' + r.제목 + '" 을(를) 사역 준비에 올릴까요?\n(' + mo.replace('-', '년 ') + '월 · 담당 ' + r.작성자 + ')')) return;
-  var o = { ID: newId('M'), 사역명: r.제목, 시기: mo, 담당: r.작성자, 진행상태: '준비전', 메모: '기안에서 옮김' + (r.장소 ? ' · ' + r.장소 : '') + (r.예산 ? ' · 예산 ' + Number(r.예산).toLocaleString() + '원' : '') };
+  var dd = (String(r.행사일 || '').match(/\d{4}-\d{2}-\d{2}/) || [''])[0];
+  var o = { ID: newId('M'), 사역명: r.제목, 시기: mo, 날짜: dd, 담당: r.작성자, 진행상태: '준비전', 메모: '기안에서 옮김' + (r.장소 ? ' · ' + r.장소 : '') + (r.예산 ? ' · 예산 ' + Number(r.예산).toLocaleString() + '원' : '') };
   if (CACHE.ministry) CACHE.ministry.push(o);
   enqueue('saveMinistry', o); toast('사역 준비에 올렸어요');
 }
 
 /* ---------- 사역 준비 ---------- */
 var MIN_ST = ['준비전', '준비중', '완료'];
-VIEWS.ministry = function () {
-  if (!S.params._data) { call('getMinistry').then(function (d) { S.params._data = d; render(); }); return topbar('사역 준비') + '<div class="empty load">불러오는 중…</div>'; }
-  var groups = {};
-  S.params._data.forEach(function (m) { (groups[m.시기] = groups[m.시기] || []).push(m); });
-  var html = Object.keys(groups).sort().map(function (k) {
-    var lbl = /^\d{4}-\d{2}$/.test(k) ? k.slice(0, 4) + '년 ' + (+k.slice(5)) + '월' : k;
-    return '<h3 style="margin:1.2rem 0 0">' + esc(lbl) + '</h3><div class="cols">' + groups[k].map(function (m) {
-      var bc = m.진행상태 === '완료' ? 'g' : m.진행상태 === '준비중' ? 'w' : '';
-      return '<div class="card"><h3>' + esc(m.사역명) + ' <span class="badge ' + bc + '">' + esc(m.진행상태 || '준비전') + '</span></h3>' +
-        '<div class="muted">' + (m.담당 ? '담당: ' + esc(m.담당) : '담당 미정') + '</div>' + (m.메모 ? '<div class="muted pre" style="margin-top:.3rem">' + esc(m.메모) + '</div>' : '') +
-        (m.구글시트링크 ? '<a class="btn ok" style="margin-top:.7rem" href="' + esc(m.구글시트링크) + '" target="_blank">이 사역 준비 탭 열기</a>'
-          : '<button class="btn light" style="margin-top:.7rem" onclick="makeSheet(\'' + m.ID + '\')">사역준비 시트에 탭 만들기</button>') +
-        '<div class="row" style="margin-top:.5rem"><button class="btn light small" onclick="cycleMin(\'' + m.ID + '\')">상태 바꾸기</button><button class="btn light small" onclick="ministryForm(\'' + m.ID + '\')">고치기</button></div></div>';
-    }).join('') + '</div>';
-  }).join('');
-  var book = S.boot.ministryBookUrl;
-  return topbar('사역 준비') + lcStrip(nextSunday()) + '<div class="hint" style="margin-top:.8rem">모든 사역은 <b>사역준비 구글시트 1개</b>에 사역마다 탭으로 정리됩니다. 링크만 있으면 로그인 없이 함께 편집할 수 있어요.</div>' +
-    (book ? '<a class="btn ok" style="margin-top:.6rem" href="' + esc(book) + '" target="_blank">사역준비 시트 전체 열기</a>' : '') +
-    '<button class="btn" style="margin-top:.8rem" onclick="ministryForm()">+ 사역 추가</button>' + (html || '<div class="empty">등록된 사역이 없어요</div>');
+VIEWS.ministry = function (p) {
+  if (!S.params._data) { call('getMinistry').then(function (d) { S.params._data = d; render(); }); return topbar('일정 · 사역 준비') + '<div class="empty load">불러오는 중…</div>'; }
+  var t = p.t || '달력', book = S.boot.ministryBookUrl;
+  var tools = '<div class="row noprint" style="margin-top:.6rem"><button class="btn" onclick="ministryForm()">+ 일정 · 사역 추가</button>' +
+    (book ? '<a class="btn light" href="' + esc(book) + '" target="_blank">사역준비 시트 열기</a>' : '') + '</div>';
+  return topbar('일정 · 사역 준비') + ptabs('t', [['달력', '달력'], ['목록', '목록', S.params._data.length]], t) +
+    (t === '목록' ? minList() : minCal(p)) + tools +
+    '<p class="muted" style="font-size:.8rem;margin-top:.6rem">사역마다 <b>사역준비 구글시트</b>에 탭을 만들어 준비할 일 · 예산 · 명단을 함께 정리해요. 링크만 있으면 로그인 없이 같이 편집할 수 있어요.</p>';
 };
+/** 사역 하나가 걸친 날들 (날짜 ~ 끝날, 최대 31일) */
+function minDays(m) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(m.날짜 || '')) return [];
+  var out = [], d = m.날짜, end = /^\d{4}-\d{2}-\d{2}$/.test(m.끝날 || '') && m.끝날 >= d ? m.끝날 : d;
+  for (var i = 0; i < 31 && d <= end; i++, d = addDays(d, 1)) out.push(d);
+  return out;
+}
+function minWhen(m) {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(m.날짜 || '')) return shortD(m.날짜) + '(' + WD[parseD(m.날짜).getDay()] + ')' + (m.끝날 && m.끝날 > m.날짜 ? ' ~ ' + shortD(m.끝날) + '(' + WD[parseD(m.끝날).getDay()] + ')' : '');
+  return /^\d{4}-\d{2}$/.test(m.시기 || '') ? (+m.시기.slice(5)) + '월 중 (날짜 미정)' : '날짜 미정';
+}
+function minCls(m) { return m.진행상태 === '완료' ? 'done' : m.진행상태 === '준비중' ? 'ing' : 'pre'; }
+/** 달력: 한 달 · 날짜를 누르면 아래에 그날 일정 · 주일은 교회력 색 점 */
+function minCal(p) {
+  var today = todayStr(), mon = /^\d{4}-\d{2}$/.test(p.m || '') ? p.m : today.slice(0, 7);
+  var first = parseD(mon + '-01'), y = first.getFullYear(), mo = first.getMonth();
+  var nDays = new Date(y, mo + 1, 0).getDate(), lead = first.getDay();
+  var byDay = {}, undated = [];
+  S.params._data.forEach(function (m) {
+    var ds = minDays(m);
+    if (!ds.length) { if ((m.시기 || '') === mon) undated.push(m); return; }
+    ds.forEach(function (d, i) { (byDay[d] = byDay[d] || []).push({ m: m, first: i === 0, last: i === ds.length - 1 }); });
+  });
+  var sel = p.d && p.d.slice(0, 7) === mon ? p.d : (today.slice(0, 7) === mon ? today : '');
+  var prevM = ymd(new Date(y, mo - 1, 1)).slice(0, 7), nextM = ymd(new Date(y, mo + 1, 1)).slice(0, 7);
+  var cells = '';
+  for (var i = 0; i < lead; i++) cells += '<div class="cal-c out"></div>';
+  for (var dn = 1; dn <= nDays; dn++) {
+    var ds = mon + '-' + ('0' + dn).slice(-2), wd = (lead + dn - 1) % 7, ev = byDay[ds] || [];
+    var L = wd === 0 ? lcInfo(ds) : null;
+    var chips = ev.slice(0, 3).map(function (e) { return '<span class="cal-e ' + minCls(e.m) + (e.first ? ' f' : '') + (e.last ? ' l' : '') + '">' + (e.first || wd === 0 ? esc(e.m.사역명) : '&nbsp;') + '</span>'; }).join('') + (ev.length > 3 ? '<span class="cal-more">+' + (ev.length - 3) + '</span>' : '');
+    cells += '<button class="cal-c' + (wd === 0 ? ' sun' : wd === 6 ? ' sat' : '') + (ds === today ? ' today' : '') + (ds === sel ? ' sel' : '') + '" onclick="calPick(\'' + ds + '\')">' +
+      '<b>' + dn + '</b>' + (L ? '<i class="cal-lc" style="--lc:' + L.hex + '" title="' + esc(L.label) + '"></i>' : '') + chips + '</button>';
+  }
+  var tail = (7 - (lead + nDays) % 7) % 7; for (var j = 0; j < tail; j++) cells += '<div class="cal-c out"></div>';
+  var head = '<div class="cal-nav"><button class="btn light small" onclick="calGo(\'' + prevM + '\')" aria-label="지난달">‹</button><b>' + y + '년 ' + (mo + 1) + '월</b>' +
+    '<button class="btn light small" onclick="calGo(\'' + nextM + '\')" aria-label="다음달">›</button>' + (mon !== today.slice(0, 7) ? '<button class="btn light small" onclick="calGo(\'' + today.slice(0, 7) + '\')">오늘</button>' : '') + '</div>';
+  var grid = '<div class="cal"><div class="cal-w">' + ['일', '월', '화', '수', '목', '금', '토'].map(function (w, i) { return '<span class="' + (i === 0 ? 'sun' : i === 6 ? 'sat' : '') + '">' + w + '</span>'; }).join('') + '</div><div class="cal-g">' + cells + '</div></div>';
+  var day = '';
+  if (sel) {
+    var L2 = parseD(sel).getDay() === 0 ? lcInfo(sel) : null, evs = byDay[sel] || [];
+    day = '<div class="card cal-day"><h3>' + esc(fmtD(sel)) + '</h3>' +
+      (L2 ? '<button class="lc-strip" style="--lc:' + L2.hex + ';margin:.3rem 0" onclick="go(\'churchyear\',{date:\'' + sel + '\'})"><i></i><span class="grow"><small>교회력</small><b>' + esc(L2.label) + '</b>' + (L2.pck.length ? '<em>' + esc(L2.pck.join(' · ')) + '</em>' : '') + '</span>' + ic('arrow') + '</button>' : '') +
+      (evs.length ? evs.map(function (e) { return minRow(e.m); }).join('') : '<p class="muted" style="margin:.3rem 0">이날 일정이 없어요 · <a href="#" onclick="ministryForm(\'\',\'' + sel + '\');return false">이날 일정 추가</a></p>') + '</div>';
+  }
+  var monthList = S.params._data.filter(function (m) { var ds = minDays(m); return ds.length ? ds.some(function (d) { return d.slice(0, 7) === mon; }) : (m.시기 || '') === mon; })
+    .sort(function (a, b) { return (a.날짜 || '9') < (b.날짜 || '9') ? -1 : 1; });
+  return head + grid + '<div class="cal-key"><span class="cal-e pre f l">준비 전</span><span class="cal-e ing f l">준비 중</span><span class="cal-e done f l">완료</span><span><i class="cal-lc" style="--lc:#6b3fa0;position:static;display:inline-block"></i> 주일 교회력</span></div>' + day +
+    '<h3 class="rp-eh">' + (mo + 1) + '월 일정 ' + (monthList.length ? '<span class="muted" style="font-size:.85rem">' + monthList.length + '개</span>' : '') + '</h3>' +
+    (monthList.length ? monthList.map(minRow).join('') : '<div class="empty">이번 달 일정이 없어요</div>') +
+    (undated.length ? '<p class="muted" style="font-size:.8rem">날짜 미정인 일정은 달력에 안 보여요. 눌러서 날짜를 넣으면 달력에 나와요.</p>' : '');
+}
+function minRow(m) {
+  return '<button class="list-item min-row ' + minCls(m) + '" onclick="minDetail(\'' + m.ID + '\')"><span class="grow"><b>' + esc(m.사역명) + '</b><br><span class="muted">' + esc(minWhen(m)) + (m.담당 ? ' · ' + esc(m.담당) : '') + '</span></span>' +
+    '<span class="badge ' + (m.진행상태 === '완료' ? 'g' : m.진행상태 === '준비중' ? 'w' : '') + '">' + esc(m.진행상태 || '준비전') + '</span></button>';
+}
+function calGo(m) { S.params.m = m; S.params.d = ''; render(); }
+function calPick(d) { S.params.d = d; S.params.m = d.slice(0, 7); render(); var el = document.querySelector('.cal-day'); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+/** 목록 (예전 화면): 월별 카드 */
+function minList() {
+  var groups = {};
+  S.params._data.forEach(function (m) { var k = (m.날짜 || '').slice(0, 7) || m.시기 || '날짜 미정'; (groups[k] = groups[k] || []).push(m); });
+  return Object.keys(groups).sort().map(function (k) {
+    var lbl = /^\d{4}-\d{2}$/.test(k) ? k.slice(0, 4) + '년 ' + (+k.slice(5)) + '월' : k;
+    return '<h3 style="margin:1.2rem 0 0">' + esc(lbl) + '</h3><div class="cols">' + groups[k].sort(function (a, b) { return (a.날짜 || '9') < (b.날짜 || '9') ? -1 : 1; }).map(function (m) { return '<div class="card">' + minCard(m) + '</div>'; }).join('') + '</div>';
+  }).join('') || '<div class="empty">등록된 사역이 없어요</div>';
+}
+/** 사역 한 개 자세히 (목록 카드 · 달력에서 누른 창 공통) */
+function minCard(m) {
+  var bc = m.진행상태 === '완료' ? 'g' : m.진행상태 === '준비중' ? 'w' : '';
+  return '<h3>' + esc(m.사역명) + ' <span class="badge ' + bc + '">' + esc(m.진행상태 || '준비전') + '</span></h3>' +
+    '<div class="muted">' + esc(minWhen(m)) + ' · ' + (m.담당 ? '담당: ' + esc(m.담당) : '담당 미정') + '</div>' + (m.메모 ? '<div class="muted pre" style="margin-top:.3rem">' + esc(m.메모) + '</div>' : '') +
+    (m.구글시트링크 ? '<a class="btn ok" style="margin-top:.7rem" href="' + esc(m.구글시트링크) + '" target="_blank">이 사역 준비 탭 열기</a>'
+      : '<button class="btn light" style="margin-top:.7rem" onclick="makeSheet(\'' + m.ID + '\')">사역준비 시트에 탭 만들기</button>') +
+    '<div class="row" style="margin-top:.5rem"><button class="btn light small" onclick="cycleMin(\'' + m.ID + '\')">상태 바꾸기</button><button class="btn light small" onclick="ministryForm(\'' + m.ID + '\')">고치기</button></div>';
+}
+function minDetail(id) { var m = minById(id); if (m) modal('<div class="min-dt">' + minCard(m) + '</div>'); }
 function minById(id) { return S.params._data.filter(function (m) { return m.ID === id; })[0]; }
 function cycleMin(id) {
   var m = minById(id), nx = MIN_ST[(MIN_ST.indexOf(m.진행상태 || '준비전') + 1) % MIN_ST.length];
-  m.진행상태 = nx; render(); enqueue('saveMinistry', { ID: id, 진행상태: nx });
+  m.진행상태 = nx; enqueue('saveMinistry', { ID: id, 진행상태: nx });
+  if (document.querySelector('#modal .min-dt')) minDetail(id); render();
 }
 function makeSheet(id) {
   if (!needSynced()) return;
@@ -4308,29 +4395,36 @@ function makeSheet(id) {
     render(); toast('탭을 만들었어요');
   });
 }
-function ministryForm(id) {
-  var m = id ? minById(id) : { 시기: todayStr().slice(0, 7), 진행상태: '준비전' };
-  modal('<h2>' + (id ? '사역 고치기' : '사역 추가') + '</h2><label>사역 이름</label><input id="m_n" value="' + esc(m.사역명 || '') + '" placeholder="예) 여름수련회">' +
-    '<label>시기 (월)</label><input id="m_s" type="month" value="' + esc(m.시기 || '') + '">' +
+function ministryForm(id, day) {
+  var m = id ? minById(id) : { 날짜: day || '', 시기: (day || todayStr()).slice(0, 7), 진행상태: '준비전' };
+  modal('<h2>' + (id ? '일정 · 사역 고치기' : '일정 · 사역 추가') + '</h2><label>이름</label><input id="m_n" value="' + esc(m.사역명 || '') + '" placeholder="예) 여름수련회, 교사 기도회">' +
+    '<div class="row"><div><label>날짜 (달력에 나와요)</label><input id="m_d" type="date" value="' + esc(m.날짜 || '') + '" onchange="if(this.value)$(\'m_s\').value=this.value.slice(0,7)"></div>' +
+    '<div><label>끝나는 날 (여러 날일 때)</label><input id="m_e" type="date" value="' + esc(m.끝날 || '') + '"></div></div>' +
+    '<label>날짜가 아직 안 정해졌으면: 몇 월쯤</label><input id="m_s" type="month" value="' + esc(m.시기 || '') + '">' +
     '<label>담당</label><input id="m_w" value="' + esc(m.담당 || '') + '">' +
     '<label>준비 시트 링크 <span class="muted">(비워두면 [탭 만들기]로 자동 생성)</span></label><input id="m_l" value="' + esc(m.구글시트링크 || '') + '" placeholder="https://docs.google.com/...">' +
-    '<label>메모</label><textarea id="m_m">' + esc(m.메모 || '') + '</textarea>' +
+    '<label>메모 (장소 · 시간 · 준비물 등)</label><textarea id="m_m">' + esc(m.메모 || '') + '</textarea>' +
     '<button class="btn" style="margin-top:1rem" onclick="saveMin(\'' + (id || '') + '\')">저장</button>' +
     (id && isAdmin() ? '<button class="btn danger" style="margin-top:.6rem" onclick="delMin(\'' + id + '\')">삭제</button>' : ''));
 }
 function saveMin(id) {
-  var o = { ID: id || undefined, 사역명: $('m_n').value.trim(), 시기: $('m_s').value, 담당: $('m_w').value.trim(), 구글시트링크: $('m_l').value.trim(), 메모: $('m_m').value.trim() };
+  var o = { ID: id || undefined, 사역명: $('m_n').value.trim(), 날짜: $('m_d').value, 끝날: $('m_e').value, 시기: $('m_s').value, 담당: $('m_w').value.trim(), 구글시트링크: $('m_l').value.trim(), 메모: $('m_m').value.trim() };
   if (!id) o.진행상태 = '준비전';
-  if (!o.사역명) { toast('사역 이름을 써 주세요'); return; }
+  if (!o.사역명) { toast('이름을 써 주세요'); return; }
+  if (o.끝날 && !o.날짜) { toast('시작하는 날짜를 먼저 넣어 주세요'); return; }
+  if (o.끝날 && o.끝날 < o.날짜) { toast('끝나는 날이 시작보다 빨라요'); return; }
+  if (o.끝날 === o.날짜) o.끝날 = '';
+  if (o.날짜) o.시기 = o.날짜.slice(0, 7);
   if (!o.ID) o.ID = newId('M');
   if (S.params._data) upsertLocal(S.params._data, o);
   enqueue('saveMinistry', o);
+  if (o.날짜) { S.params.m = o.날짜.slice(0, 7); S.params.d = o.날짜; }
   closeModal(); render(); toast('저장했어요');
 }
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261125150529';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261125180457';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

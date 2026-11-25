@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HERE. 앱 설치 안내 · 목민교회 고등부</title>
+<meta name="description" content="카카오톡 링크로 HERE. 앱을 열고 휴대폰 홈 화면에 추가하는 방법을 그림으로 안내합니다.">
+<link rel="icon" href="icon-192.png">
+<style>
+:root{--ink:#14213d;--sub:#5b6b82;--line:#dde4ee;--bg:#f4f7fb;--pri:#2563c9;--pri-soft:#e8f0fd;--ok:#2f8f4e;--ok-soft:#e7f6ec;--warn:#b25d00;--warn-soft:#fff3e0;--red:#e5383b;--kakao:#fee500}
+*{box-sizing:border-box}
+html{font-size:18px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;line-height:1.65;word-break:keep-all;letter-spacing:-.01em}
+a{color:var(--pri)}
+.wrap{max-width:760px;margin:0 auto;padding:0 14px 60px}
+header{background:linear-gradient(155deg,#0f2244,#1b4683 55%,#2675c9);color:#fff;padding:28px 18px 26px;text-align:center}
+header h1{margin:6px 0 4px;font-size:1.7rem;line-height:1.3}
+header p{margin:0;opacity:.9;font-size:1rem}
+header .logo{font-weight:900;font-size:2.2rem;letter-spacing:-.03em}.logo i{color:#9fd14a;font-style:normal}
+.fs{position:sticky;top:0;z-index:5;display:flex;justify-content:center;gap:8px;padding:8px;background:rgba(244,247,251,.95);border-bottom:1px solid var(--line)}
+.fs button{font:inherit;font-size:.95rem;font-weight:800;padding:6px 14px;border-radius:99px;border:1px solid var(--line);background:#fff;color:var(--ink)}
+.toc{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}
+.toc a{display:block;text-decoration:none;color:var(--ink);background:#fff;border:2px solid var(--line);border-radius:18px;padding:14px;text-align:center;font-weight:800;font-size:1.05rem}
+.toc a small{display:block;font-weight:600;color:var(--sub);font-size:.82rem}
+.toc a.wide{grid-column:1/-1}
+.toc .big{font-size:2rem;line-height:1}
+h2{margin:34px 0 8px;font-size:1.45rem;line-height:1.35;padding-top:6px}
+h2 .tag{display:inline-block;font-size:.8rem;vertical-align:middle;background:var(--pri);color:#fff;border-radius:99px;padding:2px 10px;margin-right:6px}
+h3{margin:22px 0 6px;font-size:1.15rem}
+.card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:16px;margin:12px 0}
+.ready{display:grid;gap:8px}
+.ready div{display:flex;gap:10px;align-items:flex-start}
+.ready div.tip{display:block}
+.ready b.n{flex:none;width:30px;height:30px;border-radius:50%;background:var(--pri);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.95rem}
+.step{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:20px;padding:14px;margin:12px 0}
+.step .txt{flex:1 1 260px;min-width:0}
+.step .no{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:34px;padding:0 8px;border-radius:99px;background:var(--ink);color:#fff;font-weight:900;margin-right:6px}
+.step .txt h4{margin:0 0 6px;font-size:1.12rem;line-height:1.4}
+.step .txt p{margin:6px 0}
+.k{display:inline-block;padding:0 8px;border-radius:8px;border:1.5px solid #b9c6d8;background:#f6f8fb;font-weight:800;white-space:nowrap}
+.k.y{background:var(--kakao);border-color:#e6cf00}
+.case{border-left:6px solid var(--warn);background:var(--warn-soft)}
+.case>.txt h4:before{content:"이런 화면이 나오면 · ";color:var(--warn);font-size:.9rem}
+.ok{border-left:6px solid var(--ok);background:var(--ok-soft)}
+.tip{background:var(--pri-soft);border-radius:14px;padding:10px 12px;margin:8px 0;font-size:.95rem}
+.warnbox{background:#fdecec;border-radius:14px;padding:10px 12px;margin:8px 0;font-size:.95rem;color:#8a1c1f}
+.muted{color:var(--sub);font-size:.9rem}
+/* ---------- 휴대폰 그림 ---------- */
+.ph{flex:none;width:210px;margin:0 auto;border:9px solid #1c2333;border-radius:30px;background:#1c2333;box-shadow:0 8px 22px rgba(20,33,61,.18);position:relative;font-size:11px;line-height:1.4}
+.ph .scr{position:relative;background:#fff;border-radius:21px;overflow:hidden;height:360px;display:flex;flex-direction:column}
+.ph .st{display:flex;justify-content:space-between;padding:4px 12px 2px;font-size:9px;font-weight:700;color:#333}
+.ph .bar{display:flex;align-items:center;gap:6px;padding:6px 8px;border-bottom:1px solid #e5e7eb;background:#fff}
+.ph .bar .u{flex:1;min-width:0;background:#f1f3f5;border-radius:99px;padding:3px 8px;color:#555;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:10px}
+.ph .bar .t{flex:1;min-width:0;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ph .bar .t small{display:block;font-weight:500;color:#888;font-size:9px}
+.ph .ico{flex:none;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:#333;border-radius:6px}
+.ph .body{flex:1;position:relative;overflow:hidden;background:#f6f8fb}
+.ph .bot{display:flex;justify-content:space-around;align-items:center;padding:7px 6px;border-top:1px solid #e5e7eb;background:#fff;font-size:14px;color:#444}
+.ph .bot span{width:26px;text-align:center;border-radius:6px}
+.ph .kk{background:#fff}
+.ph .chat{padding:10px 8px;background:#b2c7da;height:100%}
+.ph .bub{background:#fff;border-radius:10px;padding:7px 8px;max-width:88%;box-shadow:0 1px 1px rgba(0,0,0,.05)}
+.ph .bub .lnk{color:#1a63d8;text-decoration:underline;word-break:break-all}
+.ph .prev{margin-top:6px;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;background:#fff}
+.ph .prev b{display:block;padding:5px 7px 0}.ph .prev small{display:block;padding:0 7px 6px;color:#777}
+.ph .prev .img{height:46px;background:linear-gradient(155deg,#0f2244,#2675c9);color:#fff;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:16px}
+.ph .appmock{padding:10px}
+.ph .appmock .lg{text-align:center;font-weight:900;font-size:18px;color:#142b50}.ph .appmock .lg i{color:#9fd14a;font-style:normal}
+.ph .appmock .nm{background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:6px 8px;margin-top:5px;font-weight:700;display:flex;gap:6px;align-items:center}
+.ph .appmock .nm i{width:18px;height:18px;border-radius:50%;background:#e8f0fd;color:#2563c9;font-style:normal;font-size:10px;display:flex;align-items:center;justify-content:center}
+.ph .yel{background:#fff3e0;border:1px solid #f7c08a;color:#8a4a06;border-radius:8px;padding:6px 8px;margin:6px 0;font-weight:700}
+.ph .yel .b{display:block;margin-top:5px;background:#1b4683;color:#fff;border-radius:6px;text-align:center;padding:4px}
+.ph .green{background:#e7f6ec;border:1px solid #b9dd7d;color:#24400a;border-radius:8px;padding:7px 8px;margin:6px 0;font-weight:800;display:flex;gap:6px;align-items:center}
+.ph .pad{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:6px}.ph .pad span{background:#fff;border:1px solid #e5e7eb;border-radius:6px;text-align:center;padding:5px 0;font-weight:800;font-size:13px}
+.ph .dots{display:flex;justify-content:center;gap:5px;margin:6px 0}.ph .dots i{width:9px;height:9px;border-radius:50%;background:#d5dbe4}.ph .dots i.f{background:#2563c9}
+.ph .menu{position:absolute;right:6px;top:4px;width:150px;background:#fff;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.25);padding:4px 0;z-index:3}
+.ph .menu.bt{top:auto;bottom:4px}
+.ph .menu.lf{right:auto;left:6px}
+.ph .menu div{padding:6px 10px;white-space:nowrap}
+.ph .menu div.sep{border-top:1px solid #eee}
+.ph .sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:14px 14px 0 0;box-shadow:0 -6px 20px rgba(0,0,0,.2);padding:8px 10px 10px;z-index:3}
+.ph .sheet .h{width:30px;height:4px;border-radius:9px;background:#ccc;margin:0 auto 6px}
+.ph .sheet .row{display:flex;align-items:center;gap:8px;padding:6px 2px;border-bottom:1px solid #f0f0f0}
+.ph .sheet .row i{width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:12px;color:#fff;font-weight:900}
+.ph .dim{position:absolute;inset:0;background:rgba(0,0,0,.35);z-index:2}
+.ph .dlg{position:absolute;left:12px;right:12px;top:50%;transform:translateY(-50%);background:#fff;border-radius:14px;padding:12px;z-index:3;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.ph .dlg b{display:block;font-size:12px;margin-bottom:4px}
+.ph .dlg .bt{display:flex;justify-content:flex-end;gap:12px;margin-top:10px;font-weight:800;color:#1a63d8}
+.ph .dlg .ic{display:flex;gap:8px;align-items:center;margin:6px 0}
+.ph .dlg .ic i{width:30px;height:30px;border-radius:8px;background:linear-gradient(155deg,#0f2244,#2675c9);color:#fff;font-style:normal;font-weight:900;display:flex;align-items:center;justify-content:center}
+.ph .home{height:100%;background:linear-gradient(180deg,#6b8fd6,#9bb7ee);padding:14px 10px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;align-content:start}
+.ph .home div{text-align:center;color:#fff;font-size:9px;font-weight:700}
+.ph .home div i{display:block;width:34px;height:34px;margin:0 auto 3px;border-radius:10px;background:rgba(255,255,255,.75)}
+.ph .home div.here i{background:linear-gradient(155deg,#0f2244,#2675c9);color:#fff;font-style:normal;font-weight:900;font-size:10px;display:flex;align-items:center;justify-content:center}
+/* 누르는 곳 표시 */
+.tap{position:relative;z-index:4;box-shadow:0 0 0 3px var(--red)!important;border-radius:8px;animation:pulse 1.4s ease-in-out infinite}
+.tap:after{content:"👆";position:absolute;right:-8px;bottom:-18px;font-size:20px;line-height:1;filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}
+.tap.l:after{right:auto;left:-6px}
+.tap.u:after{content:"👇";bottom:auto;top:-22px}
+@keyframes pulse{50%{box-shadow:0 0 0 6px rgba(229,56,59,.35)}}
+@media (prefers-reduced-motion:reduce){.tap{animation:none}}
+.cap{text-align:center;font-size:.8rem;color:var(--sub);margin-top:6px}
+.fig{flex:0 0 auto;margin:0 auto}
+footer{text-align:center;color:var(--sub);font-size:.85rem;margin-top:30px}
+.back{display:inline-block;margin-top:6px;font-size:.9rem}
+@media print{.fs,.toc{display:none}.tap{animation:none}.step,.card{break-inside:avoid}body{background:#fff}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">HERE<i>.</i></div>
+  <h1>앱 설치 안내</h1>
+  <p>목민교회 고등부 선생님 앱 · 천천히 그림을 보며 따라 하세요</p>
+</header>
+<div class="fs"><button onclick="fz(-1)">가 글씨 작게</button><button onclick="fz(1)">가 글씨 크게</button></div>
+<div class="wrap">
+
+<div class="card ready">
+  <h3 style="margin:0 0 4px">시작하기 전에 준비할 것</h3>
+  <div><b class="n">1</b><span>휴대폰 (인터넷 · 와이파이가 되는 곳)</span></div>
+  <div><b class="n">2</b><span>카카오톡 교사 단톡방에 올라온 <b>앱 주소(링크)</b><br><span class="muted">https://liebjesu.github.io/here/</span></span></div>
+  <div><b class="n">3</b><span>내 <b>휴대폰 번호 뒷자리 4자리</b> (이게 로그인 번호예요)</span></div>
+  <div class="tip">💡 앱은 <b>Play 스토어 · 앱스토어에서 받지 않아요.</b> 링크를 열고 "홈 화면에 추가"만 하면 아이콘이 생겨요. 돈도 들지 않아요.</div>
+</div>
+
+<div class="toc">
+  <a href="#android"><span class="big">🤖</span>갤럭시 · 안드로이드<small>삼성, LG 등 대부분의 휴대폰</small></a>
+  <a href="#iphone"><span class="big">🍎</span>아이폰<small>애플 휴대폰</small></a>
+  <a class="wide" href="#trouble">😥 잘 안 돼요 · 이상한 화면이 나와요<small>자주 생기는 문제와 해결 방법</small></a>
+</div>
+<p class="muted">내 휴대폰이 무엇인지 모르겠으면: 휴대폰 뒷면에 <b>사과 모양</b>이 있으면 아이폰, 없으면 안드로이드예요.</p>
+
+<!-- ======================= 안드로이드 ======================= -->
+<h2 id="android"><span class="tag">안드로이드</span>갤럭시 · 안드로이드 휴대폰</h2>
+<p>모두 <b>4단계</b>예요. ① 링크 누르기 → ② 인터넷 앱(크롬)으로 열기 → ③ 로그인 → ④ 홈 화면에 추가</p>
+
+<h3>① 카카오톡에서 링크 누르기</h3>
+<div class="step">
+  <div class="txt"><h4><span class="no">1</span>단톡방의 파란 주소를 한 번 누르세요</h4>
+    <p>파란 글씨 주소나, 그 아래 <b>HERE. 그림 상자</b>를 누르면 돼요.</p>
+    <p class="muted">누르면 카카오톡 <b>안에서</b> 페이지가 열려요. 이 상태로는 홈 화면에 추가가 안 되니, 다음 단계에서 크롬으로 옮겨요.</p></div>
+  <div class="fig"><div class="ph"><div class="scr"><div class="st"><span>9:41</span><span>▮▮ 📶</span></div>
+    <div class="bar"><span class="ico">‹</span><span class="t">고등부 교사방<small>12명</small></span><span class="ico">≡</span></div>
+    <div class="body"><div class="chat"><div class="bub">선생님들 출석 앱 주소예요 🙏<br><span class="lnk tap">https://liebjesu.github.io/here/</span>
+      <div class="prev"><div class="img">HERE.</div><b>HERE · 목민교회 고등부</b><small>liebjesu.github.io</small></div></div></div></div>
+  </div></div><div class="cap">파란 주소를 눌러요</div></div>
+</div>
+
+<h3>② 크롬(또는 삼성 인터넷)으로 열기 — 가장 중요해요!</h3>
+<div class="step ok">
+  <div class="txt"><h4><span class="no">2</span>앱 화면의 <span class="k">Chrome으로 열기</span> 버튼을 누르세요</h4>
+    <p>카톡 안에서 열리면 앱이 알아서 <b>노란 안내 상자</b>를 보여 줘요. 그 안의 파란 버튼을 누르면 크롬으로 옮겨져요.</p>
+    <p class="muted">이 버튼이 안 보이면 아래 "방법 2"를 보세요.</p></div>
+  <div class="fig"><div class="ph"><div class="scr"><div class="st"><span>9:41</span><span>▮▮ 📶</span></div>
+    <div class="bar kk"><span class="ico">✕</span><span class="t">HERE · 목민교회 고등부<small>liebjesu.github.io</small></span><span class="ico">⋮</span></div>
+    <div class="body"><div class="appmock"><div class="lg">HERE<i>.</i></div>
+      <div class="yel">카카오톡 안에서 열려 있어요. Chrome에서 열어야 로그인이 유지되고 홈 화면에 추가할 수 있어요.<span class="b tap">Chrome으로 열기</span></div>
+      <div class="nm"><i>김</i>김OO 선생님</div><div class="nm"><i>박</i>박OO 선생님</div></div></div>
+  </div></div><div class="cap">노란 상자 안 파란 버튼</div></div>
+</div>
+<div class="step">
+  <div class="txt"><h4><span class="no">방법 2</span>오른쪽 위 <span class="k">⋮</span> → <span class="k">다른 브라우저로 열기</span></h4>
+    <p>카카오톡 화면 <b>오른쪽 위 점 세 개 ⋮</b>를 누르고, 목록에서 <b>다른 브라우저로 열기</b>를 누르세요.</p>
+    <p class="muted">카카오톡 버전에 따라 <b>오른쪽 아래</b>에 ⋯ 가 있을 수도 있어요. 메뉴 이름이 <b>"외부 브라우저로 열기"</b>, <b>"Chrome으로 열기"</b>로 보이기도 해요.</p></div>
+  <div class="fig"><div class="ph"><div class="scr"><div class="st"><span>9:41</span><span>▮▮ 📶</span></div>
+    <div class="bar kk"><span class="ico">✕</span><span class="t">HERE · 목민교회 고등부<small>liebjesu.github.io</small></span><span class="ico tap u">⋮</span></div>
+    <div class="body"><div class="appmock"><div class="lg">HERE<i>.</i></div><div class="nm"><i>김</i>김OO 선생님</div></div>
+      <div class="menu"><div>새로고침</div><div>링크 복사</div><div>공유하기</div><div class="sep tap">다른 브라우저로 열기</div><div>카카오톡으로 보내기</div></div></div>
+  </div></div><div class="cap">⋮ 누르고 → 다른 브라우저로 열기</div></div>
+</div>
+
+<div class="step case">
+  <div class="txt"><h4>"연결 프로그램 선택" 창이 떠요</h4>
+    <p><b>Chrome</b>(동그란 빨강 · 노랑 · 초록 아이콘)을 누르고, 아래 <span class="k">한 번만</span> 또는 <span class="k">항상</span>을 누르세요. 어느 쪽이든 괜찮아요.</p>
+    <p class="muted">Chrome이 목록에 없으면 <b>삼성 인터넷</b>(파란 행성 모양)을 골라도 돼요. 그 경우 ④단계에서 "삼성 인터넷" 설명을 보세요.</p></div>
+  <div class="fig"><div class="ph"><div class="scr"><div class="st"><span>9:41</span><span>▮▮ 📶</span></div>
+    <div class="body"><div class="appmock"><div class="lg">HERE<i>.</i></div></div><div class="dim"></div>
+      <div class="sheet"><div class="h"></div><b style="font-size:12px">연결 프로그램 선택</b>
+        <div class="row tap"><i style="background:conic-gradient(#ea4335 0 33%,#fbbc05 0 66%,#34a853 0)">●</i>Chrome</div>
+        <div class="row"><i style="background:#5a49d6">◉</i>삼성 인터넷</div>
+        <div style="display:flex;justify-content:space-around;margin-top:6px;font-weight:800;color:#1a63d8"><span>한 번만</span><span>항상</span></div></div></div>
+  </div></div><div class="cap">Chrome → 한 번만</div></div>
+</div>
+
+<div class="step case">
+  <div class="txt"><h4>크롬을 처음 쓰는데 "Chrome에 오신 것을 환영합니다"가 나와요</h4>
+    <p><span class="k">동의 및 계속</span>(또는 <span class="k">수락 및 계속</span>)을 누르세요.</p>
+    <p>그다음 <b>구글 계정으로 로그인</b>하라고 하면 <span class="k">계정 없이 사용</span> 또는 <span class="k">아니요</span>를 눌러도 돼요.</p>
+    <p>"알림을 받을까요?"는 <span class="k">허용 안함</span>을 눌러도 앱 사용에 문제없어요.</p></div>
+  <div class="fig"><div class="ph"><div class="scr"><div class="st"><span>9:41</span><span>▮▮ 📶</span></div>
+    <div class="body" style="background:#fff;padding:18px 12px;text-align:center"><div style="font-size:34px;margin-top:10px">🌐</div>
+      <b style="display:block;font-size:13px;margin:10px 0 6px">Chrome에 오신 것을 환영합니다</b><span style="color:#777">서비스 약관에 동의 …</span>
+      <div class="tap" style="margin:30px auto 0;width:120px;background:#1a63d8;color:#fff;border-radius:99px;padding:7px;font-weight:800">동의 및 계속</div></div>
+  </div></div><div class="cap">처음 한 번만 나와요</div></div>
+</div>
+
+<h3>③ 로그인 — 내 이름 → 번호 4자리</h3>
+<div class="step">
+  <div class="txt"><h4><span class="no">3</span>내 이름을 누르고, 휴대폰 번호 <b>뒷자리 4자리</b>를 누르세요</h4>
+    <p>예) 010-1234-<b>5678</b> 이면 <b>5 6 7 8</b></p>
+    <p>4자리를 다 누르면 자동으로 들어가요. 잘못 눌렀으면 <span class="k">지우기</span>나 <span class="k">처음</span>을 누르세요.</p>
+    <p class="muted">"이 기기에 로그인 유지"에 체크가 되어 있으면, 다음부터는 번호 없이 바로 열려요.</p></div>
+  <div class="fig"><div class="ph"><div class="scr"><div class="st"><span>9:41</span><span>▮▮ 📶</span></div>
+    <div class="bar"><span class="u">liebjesu.github.io/here/</span><span class="ico">⋮</span></div>
+    <div class="body"><div class="appmock"><div class="lg">HERE<i>.</i></div><div style="text-align:center;font-weight:800;margin-top:4px">김OO 선생님</div>
+      <div style="text-align:center;color:#666">전화번호 뒷자리 4자리</div><div class="dots"><i class="f"></i><i class="f"></i><i></i><i></i></div>
+      <div class="pad"><span>1</span><span>2</span><span>3</span><span>4</span><span class="tap">5</span><span>6</span><span>7</span><span>8</span><span>9</span><span style="font-size:10px">처음</span><span>0</span><span style="font-size:10px">지우기</span></div></div></div>
+  </div></div><div class="cap">번호 4자리를 눌러요</div></div>
+</div>
+
+<h3>④ 홈 화면에 추가 — 아이콘 만들기</h3>
+<div class="step ok">
+  <div class="txt"><h4><span class="no">4</span>가장 쉬운 방법: 초록 띠 <span class="k">한 번 눌러 홈 화면에 앱 추가</span></h4>
+    <p>로그인한 뒤 첫 화면 가운데쯤에 <b>초록색 띠</b>가 보이면 눌러 주세요.</p>
+    <p>창이 뜨면 <span class="k">설치</span>(또는 <span class="k">추가</span>)를 누르면 끝! 홈 화면에 <b>HERE.</b> 아이콘이 생겨요.</p>
+    <p class="muted">띠 이름이 "홈 화면에 앱으로 추가하기"로 보이면, 누른 뒤 나오는 설명을 따라 하거나 아래 "방법 2"를 보세요.</p></div>
+  <div class="fig"><div class="ph"><div class="scr"><div class="st"><span>9:41</span><span>▮▮ 📶</span></div>
+    <div class="bar"><span class="u">liebjesu.github.io/here/</span><span class="ico">⋮</span></div>
+    <div class="body"><div class="appmock"><b style="font-size:13px">김OO 쌤,</b>
+      <div style="background:#1b4683;color:#fff;border-radius:10px;padding:8px;margin-top:6px;font-weight:800">1-1반 출석 체크</div>
+      <div class="green tap">＋ 한 번 눌러 홈 화면에 앱 추가</div></div>
+      <div class="dim"></div><div class="dlg"><b>앱을 설치할까요?</b><div class="ic"><i>H.</i><span>HERE · 목민교회 고등부<br><small style="color:#777">liebjesu.github.io</small></span></div><div class="bt"><span style="color:#777">취소</span><span class="tap">설치</span></div></div></div>
+  </div></div><div class="cap">초록 띠 → 설치</div></div>
+</div>
+<div class="step">
+  <div class="txt"><h4><span class="no">방법 2</span>크롬: 오른쪽 위 <span class="k">⋮</span> → <span class="k">홈 화면에 추가</span></h4>
+    <p>크롬 화면 <b>오른쪽 위 점 세 개 ⋮</b>를 누르고 <b>홈 화면에 추가</b>를 누르세요.</p>
+    <p class="muted">크롬 버전에 따라 <b>"앱 설치"</b>로 보여요. 목록을 <b>위로 조금 밀어야</b> 보일 수 있어요.</p>
+    <p>그다음 <span class="k">설치</span> → (나오면) <span class="k">홈 화면에 추가</span> 또는 <span class="k">자동으로 추가</span>를 누르세요.</p></div>
+  <div class="fig"><div class="ph"><div class="scr"><div class="st"><span>9:41</span><span>▮▮ 📶</span></div>
+    <div class="bar"><span class="u">liebjesu.github.io/here/</span><span class="ico tap u">⋮</span></div>
+    <div class="body"><div class="appmock"><b style="font-size:13px">김OO 쌤,</b></div>
+      <div class="menu"><div>새 탭</div><div>새 시크릿 탭</div><div>방문 기록</div><div>북마크</div><div class="sep">공유…</div><div>페이지에서 찾기</div><div class="tap">홈 화면에 추가</div><div>데스크톱 사이트</div><div>설정</div></div></div>
+  </div></div><div class="cap">⋮ → 홈 화면에 추가</div></div>
+</div>
+<div class="step case">
+  <div class="txt"><h4><span class="k">설치</span>와 <span class="k">바로가기 만들기</span> 두 가지가 나와요</h4>
+    <p><b>설치</b>를 고르세요. 설치를 고르면 주소창 없이 진짜 앱처럼 열려요.</p>
+    <p class="muted">"바로가기 만들기"를 골라도 쓸 수는 있어요. 위쪽에 주소창이 보이는 것만 달라요.</p></div>
+  <div class="fig"><div class="ph"><div class="scr"><div class="st"><span>9:41</span><span>▮▮ 📶</span></div>
+    <div class="body"><div class="appmock"><b style="font-size:13px">김OO 쌤,</b></div><div class="dim"></div>
+      <div class="dlg"><b>홈 화면에 추가</b><div class="ic"><i>H.</i><span>HERE · 목민교회 고등부</span></div>
+        <div class="row tap" style="padding:6px;border-radius:8px;margin-top:4px">● 설치</div><div style="padding:6px">○ 바로가기 만들기</div>
+        <div class="bt"><span style="color:#777">취소</span><span>설치</span></div></div></div>
+  </div></div><div class="cap">설치를 골라요</div></div>
+</div>
+<div class="step case">
+  <div class="txt"><h4>"홈 화면에 추가" 확인 창 (아이콘 그림과 함께)</h4>
+    <p><span class="k">추가</span> 또는 <span class="k">자동으로 추가</span>를 누르세요. 아이콘을 손가락으로 눌러서 원하는 자리에 끌어다 놓는 방식도 있어요.</p></div>
+  <div class="fig"><div class="ph"><div class="scr"><div class="st"><span>9:41</span><span>▮▮ 📶</span></div>
+    <div class="body"><div class="appmock"></div><div class="dim"></div>
+      <div class="sheet"><div class="h"></div><b style="font-size:12px">홈 화면에 추가</b>
+        <div class="row"><i style="background:linear-gradient(155deg,#0f2244,#2675c9)">H.</i>HERE · 목민교회 고등부</div>
+        <div style="display:flex;justify-content:flex-end;gap:14px;margin-top:8px;font-weight:800;color:#1a63d8"><span style="color:#777">취소</span><span class="tap">추가</span></div></div></div>
+  </div></div><div class="cap">추가</div></div>
+</div>
+<div class="step">
+  <div class="txt"><h4><span class="no">삼성 인터넷</span>을 쓰는 경우: 아래 <span class="k">≡</span> → <span class="k">현재 페이지 추가</span> → <span class="k">홈 화면</span></h4>
+    <p>삼성 인터넷은 화면 <b>아래쪽 오른쪽 줄 세 개 ≡</b>를 눌러요.</p>
+    <p><b>현재 페이지 추가</b>(또는 <b>페이지 추가</b>) → <b>홈 화면</b> → <span class="k">추가</span></p>
+    <p class="muted">아래 막대가 안 보이면 화면을 살짝 <b>아래로</b> 끌어내리면 나와요. 주소창 오른쪽에 <b>⬇ 설치</b> 표시가 보이면 그걸 눌러도 돼요.</p></div>
+  <div class="fig"><div class="ph"><div class="scr"><div class="st"><span>9:41</span><span>▮▮ 📶</span></div>
+    <div class="bar"><span class="ico">🏠</span><span class="u">liebjesu.github.io/here/</span><span class="ico">⬇</span></div>
+    <div class="body"><div class="appmock"><b style="font-size:13px">김OO 쌤,</b></div>
+      <div class="menu bt"><div>북마크</div><div>방문 기록</div><div class="tap">＋ 현재 페이지 추가</div><div>다운로드</div><div>설정</div></div></div>
+    <div class="bot"><span>‹</span><span>›</span><span>⌂</span><span>❐</span><span class="tap">≡</span></div>
+  </div></div><div class="cap">≡ → 현재 페이지 추가 → 홈 화면</div></div>
+</div>
+
+<div class="step ok">
+  <div class="txt"><h4><span class="no">끝</span>홈 화면의 <b>HERE.</b> 아이콘을 누르면 바로 열려요</h4>
+    <p>다음부터는 카카오톡 링크 말고 <b>이 아이콘</b>으로 여세요.</p>
+    <p class="muted">아이콘으로 처음 열 때 한 번만 이름과 번호를 다시 누를 수 있어요. 그다음부터는 바로 열려요.</p>
+    <div class="tip">글씨가 작으면 앱 맨 위 <span class="k">가 글씨 크게</span>를 누르세요. 휴대폰마다 따로 기억해요.</div></div>
+  <div class="fig"><div class="ph"><div class="scr"><div class="st" style="background:#6b8fd6;color:#fff"><span>9:41</span><span>▮▮ 📶</span></div>
+    <div class="body"><div class="home"><div><i></i>전화</div><div><i></i>문자</div><div><i style="background:#fee500"></i>카카오톡</div><div><i></i>카메라</div>
+      <div><i></i>갤러리</div><div><i></i>설정</div><div class="here tap"><i>HERE.</i>HERE</div><div><i></i>Chrome</div></div></div>
+  </div></div><div class="cap">새로 생긴 HERE. 아이콘</div></div>
+</div>
+<a class="back" href="#top" onclick="scrollTo(0,0);return false">↑ 맨 위로</a>
+
+<!-- ======================= 아이폰 ======================= -->
+<h2 id="iphone"><span class="tag">아이폰</span>아이폰</h2>
+<p>모두 <b>4단계</b>예요. ① 링크 누르기 → ② Safari(사파리)로 열기 → ③ 로그인 → ④ 홈 화면에 추가</p>
+<div class="step">
+  <div class="txt"><h4><span class="no">1</span>단톡방의 파란 주소를 누르세요</h4><p>카카오톡 안에서 페이지가 열려요.</p></div>
+</div>
+<div class="step ok">
+  <div class="txt"><h4><span class="no">2</span><span class="k">Safari로 열기</span></h4>
+    <p>앱의 노란 상자에 있는 <span class="k">Safari로 열기</span> 버튼을 누르세요.</p>
+    <p>버튼이 안 되면: 카카오톡 화면 <b>오른쪽 아래 ⋯</b>(또는 나침반 모양 🧭)를 누르고 <b>Safari로 열기</b>(또는 <b>다른 브라우저로 열기</b>)를 누르세요.</p>
+    <p class="muted">"주소를 복사했어요"라고 나오면: Safari 앱(파란 나침반)을 열고, 위쪽 주소 칸을 꾹 눌러 <b>붙여넣기 및 이동</b>을 누르세요.</p></div>
+  <div class="fig"><div class="ph"><div class="scr"><div class="st"><span>9:41</span><span>📶 ▮▮</span></div>
+    <div class="bar kk"><span class="ico">✕</span><span class="t">HERE · 목민교회 고등부<small>liebjesu.github.io</small></span></div>
+    <div class="body"><div class="appmock"><div class="lg">HERE<i>.</i></div><div class="yel">카카오톡 안에서 열려 있어요.<span class="b">Safari로 열기</span></div></div></div>
+    <div class="bot"><span>‹</span><span>›</span><span>⤴</span><span class="tap">⋯</span></div>
+  </div></div><div class="cap">노란 상자 버튼, 또는 오른쪽 아래 ⋯</div></div>
+</div>
+<div class="step">
+  <div class="txt"><h4><span class="no">3</span>로그인: 내 이름 → 번호 뒷자리 4자리</h4><p>안드로이드와 똑같아요.</p></div>
+</div>
+<div class="step">
+  <div class="txt"><h4><span class="no">4</span>Safari 아래쪽 <span class="k">공유 □↑</span> → <span class="k">홈 화면에 추가</span> → <span class="k">추가</span></h4>
+    <p>화면 <b>아래쪽 가운데</b>의 네모에 화살표가 위로 나온 <b>공유</b> 버튼을 누르세요.</p>
+    <p class="muted">공유 버튼이 안 보이면 오른쪽 아래 <b>⋯</b>을 먼저 누르면 나와요. 화면을 살짝 위로 올리면 아래 막대가 다시 보여요.</p>
+    <p>목록을 <b>위로 밀어</b> <b>홈 화면에 추가</b>를 누르고, 오른쪽 위 <span class="k">추가</span>를 누르면 끝!</p>
+    <p class="muted">"웹 앱으로 열기" 스위치가 보이면 <b>켜진 상태(초록)</b>로 두세요.</p></div>
+  <div class="fig"><div class="ph"><div class="scr"><div class="st"><span>9:41</span><span>📶 ▮▮</span></div>
+    <div class="body"><div class="appmock"><b style="font-size:13px">김OO 쌤,</b></div><div class="dim"></div>
+      <div class="sheet"><div class="h"></div>
+        <div class="row"><i style="background:#999">⧉</i>복사</div><div class="row"><i style="background:#999">☆</i>즐겨찾기에 추가</div>
+        <div class="row tap"><i style="background:#555">＋</i>홈 화면에 추가</div><div class="row"><i style="background:#999">⌕</i>페이지에서 찾기</div></div></div>
+    <div class="bot"><span>‹</span><span>›</span><span class="tap u">⤴</span><span>📖</span><span>❐</span></div>
+  </div></div><div class="cap">공유 → 홈 화면에 추가</div></div>
+</div>
+<div class="tip">아이폰은 Safari와 홈 화면 앱이 로그인을 <b>따로</b> 기억해요. 아이콘으로 처음 열 때 이름과 번호를 한 번 더 눌러 주세요.</div>
+<a class="back" href="#top" onclick="scrollTo(0,0);return false">↑ 맨 위로</a>
+
+<!-- ======================= 문제 해결 ======================= -->
+<h2 id="trouble">😥 잘 안 돼요 · 이런 화면이 나와요</h2>
+
+<div class="step case"><div class="txt"><h4>링크를 눌렀는데 아무 일도 안 일어나요 / 하얀 화면만 나와요</h4>
+  <p>① 와이파이나 데이터가 켜져 있는지 확인하세요. (위쪽에 📶 표시)</p>
+  <p>② 10초쯤 기다려 보세요. 처음 열 때는 조금 걸릴 수 있어요.</p>
+  <p>③ 그래도 안 되면 카카오톡을 완전히 닫았다가 다시 열고, 링크를 다시 누르세요.</p></div></div>
+
+<div class="step case"><div class="txt"><h4>"사이트에 연결할 수 없음" · "웹페이지를 사용할 수 없음"</h4>
+  <p>인터넷이 끊겼거나 주소가 잘렸을 때 나와요. 인터넷을 확인하고, 단톡방의 <b>링크를 다시</b> 눌러 주세요.</p>
+  <p class="muted">주소를 손으로 칠 때: <b>liebjesu.github.io/here</b> (점 · 빗금 위치를 정확히)</p></div></div>
+
+<div class="step case"><div class="txt"><h4>"다른 브라우저로 열기"를 눌렀는데 또 카카오톡 안에서 열려요</h4>
+  <p>휴대폰에서 <b>크롬이 꺼져(사용 중지) 있을 수 있어요.</b></p>
+  <p>휴대폰 <b>설정 → 애플리케이션 → Chrome</b>을 찾아, 아래쪽 <span class="k">사용</span>(또는 <span class="k">사용 설정</span>)을 누르세요.</p>
+  <p class="muted">크롬이 아예 없으면 <b>Play 스토어</b>에서 "Chrome"을 검색해 설치하거나, <b>삼성 인터넷</b>으로 열어도 돼요.</p></div></div>
+
+<div class="step case"><div class="txt"><h4>매번 "연결 프로그램 선택"이 떠서 헷갈려요</h4>
+  <p>Chrome을 고르고 <span class="k">항상</span>을 누르면 다음부터는 묻지 않고 바로 크롬으로 열려요.</p></div></div>
+
+<div class="step case"><div class="txt"><h4>크롬 메뉴(⋮)에 "홈 화면에 추가"가 없어요</h4>
+  <p>① 메뉴 목록을 <b>위로 밀어</b> 아래쪽까지 보세요. <b>"앱 설치"</b>라는 이름일 수 있어요.</p>
+  <p>② 주소창 왼쪽에 <b>안경 쓴 얼굴(시크릿 모드)</b>이 있으면 시크릿 탭이에요. 시크릿 탭을 닫고 보통 탭에서 다시 여세요.</p>
+  <p>③ Play 스토어에서 <b>Chrome을 업데이트</b>한 뒤 다시 해 보세요.</p>
+  <p>④ 그래도 없으면 <b>공유… → 홈 화면에 추가</b>를 찾아보세요.</p></div></div>
+
+<div class="step case"><div class="txt"><h4>추가했다는데 홈 화면에 아이콘이 안 보여요</h4>
+  <p>① 홈 화면을 <b>옆으로 넘겨</b> 다른 쪽에 생겼는지 보세요.</p>
+  <p>② 홈 화면에서 <b>위로 밀어</b> 앱 목록을 열고, 위쪽 검색에 <b>HERE</b>를 쳐 보세요. 찾으면 아이콘을 <b>꾹 눌러 → 홈에 추가</b>.</p>
+  <p>③ 갤럭시: 홈 화면 빈 곳을 꾹 눌러 <b>설정</b> → <b>새 앱을 홈 화면에 추가</b>를 켜 두면 다음부터 바로 생겨요.</p>
+  <p class="muted">"홈 화면에 바로가기를 추가하도록 허용할까요?" 같은 권한 창이 뜨면 <span class="k">허용</span>을 누르세요.</p></div></div>
+
+<div class="step case"><div class="txt"><h4>홈 화면에 HERE. 아이콘이 두 개 생겼어요</h4>
+  <p>둘 다 같은 앱이에요. 하나를 <b>꾹 눌러 → 삭제(또는 홈에서 제거)</b>해도 괜찮아요. 내 출석 기록은 지워지지 않아요.</p></div></div>
+
+<div class="step case"><div class="txt"><h4>내 이름이 목록에 없어요</h4>
+  <p>교사 명단에 아직 없거나 이름이 다르게 적혀 있을 수 있어요. <b>총무 · 관리자 선생님</b>께 말씀해 주세요.</p>
+  <p class="muted">화면 위쪽 <b>연도</b>가 올해가 맞는지도 확인해 주세요.</p></div></div>
+
+<div class="step case"><div class="txt"><h4>번호가 맞지 않대요 / 잠겼대요</h4>
+  <p>교사 명단에 적힌 <b>휴대폰 번호의 뒷자리 4자리</b>예요. 번호를 바꾸셨다면 관리자 선생님께 새 번호를 알려 주세요.</p>
+  <p class="muted">여러 번 틀리면 안전을 위해 <b>10분 동안 잠겨요.</b> 10분 뒤에 다시 해 주세요.</p></div></div>
+
+<div class="step case"><div class="txt"><h4>아이콘으로 열었더니 다시 이름 고르는 화면이에요</h4>
+  <p>처음 한 번은 정상이에요. 이름과 번호를 다시 누르면, 다음부터는 바로 열려요.</p></div></div>
+
+<div class="step case"><div class="txt"><h4>"새 버전이 있어요" · 화면이 갑자기 새로고침돼요</h4>
+  <p>앱이 고쳐지면 저절로 새 버전으로 바뀌어요. 저장 중일 때는 끝날 때까지 기다렸다 바뀌니 걱정 마세요.</p></div></div>
+
+<div class="step case"><div class="txt"><h4>"인터넷 연결을 확인해 주세요"가 떠요</h4>
+  <p>잠깐 인터넷이 끊긴 거예요. 와이파이 · 데이터를 확인해 주세요. 출석은 앱이 다시 보내려고 계속 시도하니, <b>저장 중 표시가 사라질 때까지</b> 앱을 닫지 말고 기다려 주세요.</p></div></div>
+
+<div class="card" style="text-align:center">
+  <b style="font-size:1.1rem">그래도 어려우시면</b>
+  <p style="margin:.3rem 0">주일에 교육관에서 <b>총무 · 관리자 선생님</b>께 휴대폰을 보여 주세요. 1분이면 같이 해 드려요 🙂</p>
+  <a href="./" style="display:inline-block;margin-top:6px;background:var(--pri);color:#fff;text-decoration:none;font-weight:800;border-radius:99px;padding:10px 22px">HERE. 앱 열기</a>
+</div>
+<footer>대한예수교장로회 목민교회 고등부 · HERE.<br><span class="muted">휴대폰 · 카카오톡 버전에 따라 메뉴 이름이나 위치가 조금 다를 수 있어요.</span></footer>
+</div>
+<script>
+function fz(d){var h=document.documentElement,s=parseFloat(getComputedStyle(h).fontSize)||18;s=Math.max(15,Math.min(26,s+d*2));h.style.fontSize=s+'px';try{localStorage.setItem('hs_guide_fz',s)}catch(e){}}
+try{var s=localStorage.getItem('hs_guide_fz');if(s)document.documentElement.style.fontSize=s+'px'}catch(e){}
+</script>
+</body>
+</html>

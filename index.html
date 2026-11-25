@@ -1108,6 +1108,22 @@ button.set-row:active,a.set-row:active{background:var(--bg)}
 .bday.slim .bd-n b{font-size:.82rem}.bday.slim .bd-n small{font-size:.68rem}
 .bd-more{flex:none;align-self:center;font-size:.72rem;font-weight:700;color:var(--sub);white-space:nowrap}
 .lc-home{position:relative;display:block;width:100%;text-align:left;margin-top:.7rem;padding:.6rem .8rem;border:1px solid var(--line);border-top:4px solid var(--lc);border-radius:18px;background:#fff;font:inherit;color:inherit;cursor:pointer}
+/* 홈 바로가기: 앱 아이콘 대신 목록형 (흰 카드 안 2열, 아이콘 · 이름 · ›) */
+#app .mgroup{background:#fff;border:1px solid var(--line);border-radius:16px;padding:.45rem .7rem .3rem;box-shadow:var(--shadow)}
+#app .mgroup+.mgroup{margin-top:8px}
+#app .mg-h{margin:.05rem 0 .1rem;font-size:.74rem;font-weight:800;color:var(--ic0,var(--sub))}
+#app .mgrid{display:grid;grid-template-columns:1fr 1fr;column-gap:.9rem;row-gap:0}
+#app .mt{flex-direction:row;justify-content:flex-start;gap:.5rem;min-height:2.6rem;padding:.2rem 0;background:none;border:0;border-bottom:1px solid #eef1f5;border-radius:0;box-shadow:none;text-align:left}
+#app .mt:active{transform:none;background:#f6f8fb}
+#app .mt .ib{width:auto;height:auto;background:none;border-radius:0;flex:none}
+#app .mt .ib svg{width:1.15rem;height:1.15rem}
+#app .mt b{flex:1;font-size:.9rem;font-weight:700}
+#app .mt::after{content:"›";color:#b6bfcc;font-size:1.1rem;font-weight:700;line-height:1}
+#app .wide .mt{min-height:2.8rem}
+#app .mgrid .mt:last-child,#app .mgrid .mt:nth-last-child(2):nth-child(odd){border-bottom:0}
+.sc-h{display:flex;align-items:baseline;gap:.4rem;margin:1rem .15rem .45rem}.sc-h b{font-size:1rem;font-weight:800;letter-spacing:-.02em}
+.info2 .lc-home{margin:0;padding:.55rem .7rem;border-top-width:4px;border-radius:16px;min-width:0;display:flex;flex-direction:column;justify-content:center}
+.hero2 .icard{border-radius:18px}
 </style>
 </head>
 <body>
@@ -2399,7 +2415,7 @@ VIEWS.home = function () {
   // 메뉴: 흰 카드 + 아이콘 둘레만 옅은 색. 화면 폭 · 글씨 크기에 맞춰 줄 수가 자동으로 바뀜 (보통 4열)
   var gi = 0, GN = [];
   var G = function (title, items) { if (!items) return ''; GN.push(title); return '<div class="mgroup" id="mg' + (gi++) + '"><h3 class="mg-h">' + title + '</h3><div class="mgrid">' + items + '</div></div>'; };
-  setTimeout(function () { var el = $('mjump'); if (el && S._mjump) el.innerHTML = '<b>메뉴</b>' + S._mjump.map(function (t, i) { return '<button onclick="mJump(' + i + ')">' + t + '</button>'; }).join(''); }, 0);
+  setTimeout(function () { var el = $('mjump'); if (el && S._mjump) el.innerHTML = '<b>바로가기</b>' + S._mjump.map(function (t, i) { return '<button onclick="mJump(' + i + ')">' + t + '</button>'; }).join(''); }, 0);
   var M = function (icon, label, view, cls, keys) { return '<button class="mt ' + cls + '" data-k="' + label + ' ' + (keys || '') + '" onclick="go(\'' + view + '\')"><span class="ib">' + ic(icon) + '</span><b>' + label + '</b></button>'; };
   var past = b.guest ? '<div class="past"><span>' + esc(b.year) + '년 명단에는 없어서 보기만 할 수 있어요</span>' + (b.editYear && b.editYear !== b.year ? '<button class="btn small" onclick="switchYear(\'' + b.editYear + '\')">' + b.editYear + '년으로</button>' : '') + '</div>' : isPastYear() ? '<div class="past"><span>' + esc(b.year) + '년 자료 · 참고용</span><button class="btn small" onclick="switchYear(\'' + (b.editYear || b.latestYear) + '\')">' + (b.editYear || b.latestYear) + '년으로</button></div>' : '';
   return '<div class="hd"><span class="logo"><img src="' + SIG + '" alt="대한예수교장로회 목민교회"></span>' +
@@ -2412,9 +2428,9 @@ VIEWS.home = function () {
     '<div class="welcome"><div><b>' + esc(callName(S.user)) + ',</b><span>' + greet() + (isAdmin() ? ' <button class="gedit" onclick="greetForm()" aria-label="인사말 고치기">' + ic('pen') + '</button>' : '') + '</span></div><i class="wb">' + brandName() + '</i></div>' +
     '<div class="hero2"><button class="main-att" onclick="openAttend()"><span class="tx"><small>' + ic('calendar') + shortD(sun) + ' 주일예배</small>' +
     '<b>' + (hc ? esc(hc) + '반 출석 체크' : '출석 체크') + '</b><p>' + attLine(sun, fut) + '</p></span><span class="go">' + ic('arrow') + '</span></button>' +
-    lcHomeCard() + '</div>' +
-    '<div class="info2">' + myAttCard() + noticeCard(n) + '</div>' + memoCard() + rqCard() + birthdayCard() + installBanner() + '</div>' +
-    '<div class="mjump" id="mjump"></div>' +
+    myAttCard() + '</div>' +
+    '<div class="info2">' + lcHomeCard() + noticeCard(n) + '</div>' + memoCard() + rqCard() + birthdayCard() + installBanner() + '</div>' +
+    '<div class="sc-h"><b>바로가기</b></div>' +
     G('학생 · 우리 반', M('student', '학생 명단', 'students', 't-blue', '학생 명단 연락처 반') +
       M('grid', '출석부', 'sheet', 't-sky', '학생 출석부 표 전체') +
       M('sprout', '새신자', 'newcomers', 't-lime', '학생 새친구') +
@@ -2422,8 +2438,7 @@ VIEWS.home = function () {
       M('chart', '통계', 'stats', 't-sky', '학생 출석률')) +
     G('선생님', M('book', '교사 주소록', 'directory', 't-lilac', '교사 선생님 연락처 생일') +
       M('org', '조직표', 'org', 't-lime', '교사 조직 섬김이')) +
-    G('예배 · 사역', M('megaphone', '공지', 'notices', 't-rose', '광고 알림') +
-      M('calendar', '사역 준비', 'ministry', 't-lilac', '사역 일정 행사 준비') +
+    G('예배 · 사역', M('calendar', '사역 준비', 'ministry', 't-lilac', '사역 일정 행사 준비') +
       M('pray', '기도·봉헌', 'prayer', 't-rose', '기도 봉헌 순서') +
       M('music', '찬양팀', 'worship', 't-sky', '찬양 콘티') +
       M('star', '임역원', 'officers', 't-peach', '임역원 회의') +
@@ -2603,9 +2618,9 @@ function myAttCard() {
       '<span class="ring">' + (on ? ic('tick') : '') + '</span><span class="mt2"><em>' + (dt === todayStr() ? '오늘' : shortD(dt)) + ' ' + esc(m.이름) + '</em><b>' + (on ? '출석 완료' : '눌러서 출석') + '</b></span></button>';
   }).join('') + '</div>';
 }
-/** 홈 카드: 주일 광고 (가장 최근 공지) */
+/** 홈 카드: 공지 (가장 최근 공지) */
 function noticeCard(n) {
-  return '<button class="icard" onclick="go(\'notices\')"><span class="ih">' + ic('megaphone') + '<b>주일 광고</b>' + (n ? '<small>' + esc(shortD(n.날짜)) + '</small>' : '') + '</span>' +
+  return '<button class="icard" onclick="go(\'notices\')"><span class="ih">' + ic('megaphone') + '<b>공지</b>' + (n ? '<small>' + esc(shortD(n.날짜)) + '</small>' : '') + '</span>' +
     (n ? '<span class="nt">' + esc(n.제목) + '</span><span class="ns' + (n.중요 === 'Y' ? ' imp' : '') + '">' + (n.중요 === 'Y' ? '중요 공지 · 눌러서 보기' : '공지 전체 보기') + '</span>'
       : '<span class="nt" style="color:var(--sub);font-weight:600">새 공지가 없어요</span><span class="ns">공지 전체 보기</span>') + '</button>';
 }
@@ -4421,7 +4436,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261125182827';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261126080245';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

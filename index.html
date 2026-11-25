@@ -1406,6 +1406,8 @@ function honor(name) {
 }
 function callName(name) { return name + ' ' + honor(name); }
 function isAdmin() { return S.role === 'admin'; }
+/** 일반 선생님 쓰기: 보기 전용 · 손님(다른 해 선생님) · 지난 해 자료는 안 됨 */
+function canWrite() { return isAdmin() ? !S.viewOnly : !S.viewOnly && !(S.boot && S.boot.guest) && !isPastYear(); }
 function students() { return S.boot.students; }
 function stuById(id) { return students().filter(function (s) { return s.ID === id; })[0]; }
 function classNames() { return S.boot.classes.map(function (c) { return c.반; }).filter(function (c) { return /^\d-\d$/.test(c); }); }
@@ -2783,23 +2785,18 @@ VIEWS.prayer = function () {
         '<br><span class="muted">봉헌 ' + (esc(r.봉헌) || '-') + (r.비고 ? ' · ' + esc(r.비고) : '') + '</span></span>' + lcTag(r.날짜) + '</button>';
     }).join('');
   }).join('');
-  var mine = !ed && mc && !isPastYear() ? rows.filter(function (r) { return canPrayer(r); }).length : 0;
+  var mine = !ed && canWrite();
   return topbar('대표기도 · 봉헌') + lcStrip(cur ? cur.날짜 : ns) + hero +
-    (mine ? '<div class="hint">우리 반(' + esc(mc) + ') 순서 ' + mine + '번은 눌러서 기도자 · 봉헌을 고칠 수 있어요.</div>' : '') +
+    (mine ? '<div class="hint">주일을 누르면 대표기도 · 봉헌 · 비고를 고칠 수 있어요.' + (mc ? ' 우리 반(' + esc(mc) + ') 순서도 확인해 주세요.' : '') + '</div>' : '') +
     (ed ? '<div class="row" style="margin-top:.7rem"><button class="btn light small" onclick="prayerForm(\'\')">+ 주일 추가</button><button class="btn light small" onclick="fillSundays()">' + esc(S.boot.year) + '년 주일 모두 만들기</button></div>' : '') +
     (list || '<div class="empty">아직 순서가 없어요</div>');
 };
-/** 기도봉헌 한 줄을 고칠 수 있는지: 관리자는 모두, 담임은 우리 반 순서만 (학년반 또는 봉헌 칸에 반 이름) */
-function canPrayer(r) {
-  if (isAdmin()) return true;
-  var c = homeClass(); if (!c || isPastYear()) return false;
-  var re = new RegExp('(^|[^0-9])' + c.replace(/[^0-9A-Za-z가-힣]/g, '\\$&') + '([^0-9]|$)');
-  return re.test(r.학년반 || '') || re.test(r.봉헌 || '');
-}
+/** 기도봉헌 한 줄을 고칠 수 있는지: 관리자는 모두, 선생님은 기도자 · 봉헌 · 비고 */
+function canPrayer(r) { return isAdmin() || (!!r && canWrite()); }
 function prayerForm(id) {
   var r = id ? S.params._data.filter(function (x) { return x.ID === id; })[0] : { 날짜: nextSunday() };
-  if (!isAdmin()) {   // 담임: 기도자 · 봉헌 · 비고만, 삭제 없음
-    if (!r || !canPrayer(r)) { toast('담당반 순서만 고칠 수 있어요'); return; }
+  if (!isAdmin()) {   // 선생님: 기도자 · 봉헌 · 비고만, 삭제 없음
+    if (!r || !canPrayer(r)) { toast('지금은 고칠 수 없어요'); return; }
     rowForm('기도봉헌', r, [
       { k: '기도자', label: '대표기도', list: S.boot.teachers.map(function (t) { return t.이름; }).concat(students().map(function (s) { return s.이름; })) },
       { k: '봉헌', label: '봉헌 (반·팀·이름)', ph: '예) 1-1반, 서기팀' },
@@ -3739,7 +3736,7 @@ VIEWS.bulletin = function (p) {
     }
     return loadingView('주보');
   }
-  var d = S.params._data, date = p.date || nextSunday(), t = p.t || '보기', ed = isAdmin() && !isPastYear() && !(S.boot && S.boot.guest);
+  var d = S.params._data, date = p.date || nextSunday(), t = p.t || '보기', ed = canWrite();
   var tabs = [['보기', '주보 보기'], ['입력', '내용 입력'], ['절기', '교회력'], ['설교', '설교 기록', blRows(d).length]];
   if (!ed) tabs = [tabs[0], tabs[2], tabs[3]];
   var nav = '<div class="rp-nav noprint"><button class="btn light small" onclick="blGo(\'' + addDays(date, -7) + '\')">‹ 지난주</button>' +
@@ -3762,7 +3759,7 @@ VIEWS.bulletin = function (p) {
 function blGo(date) { if (!/^\d{4}-\d{2}-\d{2}$/.test(date || '')) return; blKeep(); var d = parseD(date); if (d.getDay()) date = addDays(date, 7 - d.getDay()); S.params.date = date; render(); }
 function blList(d) {
   var rows = blRows(d).filter(function (r) { return r.설교제목 || r.본문; });
-  if (!rows.length) return '<div class="empty">아직 쓴 설교가 없어요' + (isAdmin() ? ' · [내용 입력]에서 넣어 주세요' : '') + '</div>';
+  if (!rows.length) return '<div class="empty">아직 쓴 설교가 없어요' + (canWrite() ? ' · [내용 입력]에서 넣어 주세요' : '') + '</div>';
   return '<p class="muted" style="margin:.2rem 0 .3rem">누르면 그 주 주보로 가요</p>' + rows.map(function (r) {
     return '<button class="list-item" onclick="S.params.date=\'' + r.날짜 + '\';S.params.t=\'보기\';render()"><span class="grow"><b>' + esc(r.설교제목 || '(제목 없음)') + '</b><br><span class="muted">' + shortD(r.날짜) + ' · ' + esc(r.본문 || '') + (r.설교자 ? ' · ' + esc(r.설교자) : '') + '</span></span>' +
       '<span class="badge' + (r.묵상_적용 ? ' g' : '') + '">' + (r.묵상_적용 ? '묵상 있음' : '묵상 없음') + '</span>' + (r.설교요약 ? '<span class="badge">요약</span>' : '') + '</button>';
@@ -4114,14 +4111,14 @@ VIEWS.notices = function () {
   var card = function (n) {
     return '<div class="card" style="' + (n.중요 === 'Y' ? 'border-left:4px solid var(--warn-c)' : '') + '"><div class="muted">' + (NEW[n.ID] ? '<span class="nbadge">새 공지</span>' : '') + (n.중요 === 'Y' ? '<b>[중요]</b> · ' : '') + esc(fmtD(n.날짜)) + ' · ' + esc(n.작성자) + '</div>' +
       '<h3 style="margin-top:.3rem">' + esc(n.제목) + '</h3><div class="pre">' + esc(n.내용) + '</div>' +
-      (isAdmin() ? '<div class="row" style="margin-top:.6rem"><button class="btn light small" onclick="noticeForm(\'' + n.ID + '\')">고치기</button><button class="btn danger small" onclick="delNotice(\'' + n.ID + '\')">삭제</button></div>' : '') + '</div>';
+      (isAdmin() || (n.작성자 === S.user && canWrite()) ? '<div class="row" style="margin-top:.6rem"><button class="btn light small" onclick="noticeForm(\'' + n.ID + '\')">고치기</button><button class="btn danger small" onclick="delNotice(\'' + n.ID + '\')">삭제</button></div>' : '') + '</div>';
   };
   var fresh = rows.filter(function (n) { return NEW[n.ID]; }), seen = rows.filter(function (n) { return !NEW[n.ID]; });
   var sec = function (title, cnt, cls) { return '<div class="sec-h"><h2>' + title + '</h2><span class="ncount' + (cls || '') + '">' + cnt + '</span></div>'; };
   var html = !rows.length ? '<div class="empty">공지가 없어요</div>' :
     (fresh.length ? sec('안 읽은 공지', fresh.length) + '<div class="cols">' + fresh.map(card).join('') + '</div>' : '<div class="hint" style="margin-top:.9rem">새 공지를 모두 읽었어요. 꼼꼼히 챙겨 주셔서 고마워요.</div>') +
     (seen.length ? sec('읽은 공지', seen.length, ' g') + '<div class="cols">' + seen.map(card).join('') + '</div>' : '');
-  return topbar('공지사항') + (isAdmin() ? '<button class="btn" style="margin-top:.8rem" onclick="noticeForm()">+ 공지 쓰기</button>' : '') + html;
+  return topbar('공지사항') + (canWrite() ? '<button class="btn" style="margin-top:.8rem" onclick="noticeForm()">+ 공지 쓰기</button>' : '') + html;
 };
 function noticeForm(id) {
   var n = id ? S.params._data.filter(function (x) { return x.ID === id; })[0] : { 날짜: todayStr(), 작성자: S.user };
@@ -4405,7 +4402,7 @@ function ministryForm(id, day) {
     '<label>준비 시트 링크 <span class="muted">(비워두면 [탭 만들기]로 자동 생성)</span></label><input id="m_l" value="' + esc(m.구글시트링크 || '') + '" placeholder="https://docs.google.com/...">' +
     '<label>메모 (장소 · 시간 · 준비물 등)</label><textarea id="m_m">' + esc(m.메모 || '') + '</textarea>' +
     '<button class="btn" style="margin-top:1rem" onclick="saveMin(\'' + (id || '') + '\')">저장</button>' +
-    (id && isAdmin() ? '<button class="btn danger" style="margin-top:.6rem" onclick="delMin(\'' + id + '\')">삭제</button>' : ''));
+    (id && (isAdmin() || (canWrite() && String(m.담당 || '').split(/[,，、\/\n]+/).map(function (x) { return x.trim(); }).indexOf(S.user) >= 0)) ? '<button class="btn danger" style="margin-top:.6rem" onclick="delMin(\'' + id + '\')">삭제</button>' : ''));
 }
 function saveMin(id) {
   var o = { ID: id || undefined, 사역명: $('m_n').value.trim(), 날짜: $('m_d').value, 끝날: $('m_e').value, 시기: $('m_s').value, 담당: $('m_w').value.trim(), 구글시트링크: $('m_l').value.trim(), 메모: $('m_m').value.trim() };
@@ -4424,7 +4421,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261125180457';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261125182827';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

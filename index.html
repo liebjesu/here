@@ -1414,6 +1414,7 @@ function loadSpec(view, p) {
     case 'org': return { key: 'org', action: 'getTab', payload: { tab: '조직' } };
     case 'prayer': return { key: 'prayer', action: 'getTab', payload: { tab: '기도봉헌' } };
     case 'worship': return { key: 'worship', action: 'getTab', payload: { tabs: ['찬양팀', '찬양인도', '찬양콘티'] } };
+    case 'bulletin': return { key: 'bulletin', action: 'getTab', payload: { tabs: BL_TABS } };
     case 'officers': return { key: 'officers', action: 'getTab', payload: { tabs: ['임역원', '임역원회의'] } };
     case 'tatt': return { key: 'tatt', action: 'getTab', payload: { tabs: ['교사모임', '교사출석'] } };
     case 'requests': case 'reqApp': case 'reqIdea': case 'reqPlan': return { key: 'requests', action: 'getRequests', payload: {} };
@@ -1429,7 +1430,7 @@ function refreshQuiet(view, spec) {
     if (OUT.q.length) return;
     var changed = JSON.stringify(d) !== JSON.stringify(CACHE[spec.key]);
     CACHE[spec.key] = d; if (changed) saveSnapSoon();
-    if (changed && S.view === view && !$('modal').innerHTML) { S.params._data = d; render(); }
+    if (changed && S.view === view && !$('modal').innerHTML) { if (view === 'bulletin') blKeep(); S.params._data = d; render(); }   // 주보 입력 중이면 쓰던 칸을 지킴
   }).catch(function () {});
 }
 /** 로그인 직후: 이번 주 출석과 모든 메뉴 데이터를 한 번에 미리 받기 (다 받으면 메뉴가 바로 열림) */
@@ -3710,9 +3711,13 @@ function fitBl() {
 }
 window.addEventListener('resize', function () { if (S.view === 'bulletin') fitBl(); });
 VIEWS.bulletin = function (p) {
-  if (!S.params._data) {
-    Promise.all([call('getTab', { tabs: BL_TABS }), CACHE.notices ? Promise.resolve(CACHE.notices) : call('getNotices', {}, 'silent').catch(function () { return []; })])
-      .then(function (a) { CACHE.notices = CACHE.notices || a[1]; S.params._data = a[0]; render(); });
+  if (!S.params._data) {   // 처음 한 번만 기다림 (로그인 때 미리 받아 두고, 다음부터는 지난 자료로 바로 열고 뒤에서 맞춤)
+    if (!S.params._loading) {
+      S.params._loading = true;
+      Promise.all([call('getTab', { tabs: BL_TABS }, true), CACHE.notices ? Promise.resolve(CACHE.notices) : call('getNotices', {}, 'silent').catch(function () { return []; })])
+        .then(function (a) { CACHE.notices = CACHE.notices || a[1]; CACHE.bulletin = a[0]; S.params._loading = false; if (S.view === 'bulletin') { S.params._data = a[0]; render(); } })
+        .catch(function () { S.params._loading = false; });
+    }
     return loadingView('주보');
   }
   var d = S.params._data, date = p.date || nextSunday(), t = p.t || '보기', ed = isAdmin() && !isPastYear() && !(S.boot && S.boot.guest);
@@ -4325,7 +4330,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261125141450';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261125150529';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

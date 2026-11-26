@@ -1124,6 +1124,37 @@ button.set-row:active,a.set-row:active{background:var(--bg)}
 .sc-h{display:flex;align-items:baseline;gap:.4rem;margin:1rem .15rem .45rem}.sc-h b{font-size:1rem;font-weight:800;letter-spacing:-.02em}
 .info2 .lc-home{margin:0;padding:.55rem .7rem;border-top-width:4px;border-radius:16px;min-width:0;display:flex;flex-direction:column;justify-content:center}
 .hero2 .icard{border-radius:18px}
+/* 홈 좌우 반반 · 큰 글씨에서 줄바꿈 */
+.hero2,.info2{grid-template-columns:1fr 1fr!important;gap:8px}
+.fsbig .hero2 .main-att{flex-direction:column;align-items:stretch;gap:.3rem}
+.fsbig .hero2 .main-att .go{position:absolute;right:.55rem;top:.55rem;width:1.7rem;height:1.7rem}
+.fsbig .hero2 .main-att small{padding-right:1.9rem}
+.fsbig .hero2 .main-att small,.fsbig .hero2 .main-att b,.fsbig .lc-home>small,.fsbig .lc-home>b,.fsbig .lc-home>em,.fsbig .icard .ih b,.fsbig .icard .ns,.fsbig .mrow em,.fsbig .mrow b,.fsbig #app .mt b{white-space:normal;overflow:visible;text-overflow:clip;word-break:keep-all;overflow-wrap:anywhere}
+.fsbig .hero2 .main-att p,.fsbig .lc-home>p,.fsbig .icard .nt{display:block;-webkit-line-clamp:unset;overflow:visible}
+.fsbig .icard .ih .more{margin-left:0;padding-left:0}
+.fsbig .mrow{align-items:flex-start}.fsbig .mrow .ring{flex:none;margin-top:.1rem}
+.fsbig #app .mgrid{grid-template-columns:1fr}
+/* 줄여 보기 (이름만) */
+.vmode{display:inline-flex;margin-left:auto;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:#fff}
+.vmode button{padding:.3rem .75rem;font-size:.8rem;font-weight:700;color:var(--sub);background:none;border:0}
+.vmode button.on{background:var(--pri);color:#fff}
+.vbar{display:flex;align-items:center;gap:.4rem;margin:.55rem 0 .1rem}.vbar>span{font-size:.8rem;color:var(--sub);font-weight:700}
+.nmgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(5.6rem,1fr));gap:6px;margin-top:.5rem}
+.nmgrid button{display:flex;flex-direction:column;align-items:flex-start;min-width:0;padding:.5rem .6rem;border:1px solid var(--line);border-radius:12px;background:#fff;text-align:left}
+.nmgrid b{font-size:.95rem;max-width:100%;overflow-wrap:anywhere}.nmgrid small{font-size:.72rem;color:var(--sub);font-weight:600}
+.nmgrid button.off{opacity:.55}
+.nmh{margin:.8rem .1rem 0;font-size:.8rem;font-weight:800;color:var(--sub)}
+/* 주소록: 전화 · 문자 작은 아이콘 오른쪽 */
+.dact{display:flex;gap:.35rem;flex:none;margin-left:auto}
+.dact a{width:2.05rem;height:2.05rem;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);background:#fff;color:var(--pri)}
+.dact a.tel{background:var(--ok);border-color:var(--ok);color:#fff}
+.dact svg{width:1.05rem;height:1.05rem}
+.dlist{background:#fff;border:1px solid var(--line);border-radius:16px;padding:0 .75rem;margin-top:.6rem}
+.drow{display:flex;align-items:center;gap:.5rem;min-height:2.9rem;border-bottom:1px solid #eef1f5}.drow:last-child{border-bottom:0}
+.drow>span:first-child{flex:1;min-width:0}.drow b{font-size:.98rem}.drow small{color:var(--sub);font-weight:600;font-size:.8rem;margin-left:.3rem}
+/* 기도 · 봉헌: 이번 주 담당 칸 고정 */
+.psticky{position:sticky;z-index:4;top:var(--toph,3rem);background:var(--bg);padding-bottom:.35rem}
+.psticky .hero{margin-top:.5rem}
 </style>
 </head>
 <body>
@@ -1741,7 +1772,8 @@ var PERMS = [
   ['회계', '회계', '회계 기록 · 예산 · 보고서'],
   ['서기', '서기', '주간 교육활동 보고서 쓰기 · 고치기'],
   ['권한지정', '권한 지정', '이 권한 체크 바꾸기 · 새 연도 만들기 (구성 관리 포함)'],
-  ['전체보기', '전체 보기', '모든 화면 보기만 (고치기 없음) · 전화번호는 주소록에 안 보임 · 위임목사님 등']];
+  ['전체보기', '전체 보기', '모든 화면 보기만 (고치기 없음) · 전화번호는 주소록에 안 보임 · 위임목사님 등'],
+  ['통계제외', '출석 통계 빼기', '교사 출석 통계 · 주간 보고서 교사 출석 인원에서 뺌 (다른 권한은 그대로) · 목사님 · 전도사님은 체크 안 해도 늘 빠져요']];
 function permsOf(v) {
   v = String(v || '').trim();
   var f = { 일반: true, 구성: false, 회계: false, 서기: false, 권한지정: false, 전체보기: false };
@@ -2430,7 +2462,6 @@ VIEWS.home = function () {
     '<b>' + (hc ? esc(hc) + '반 출석 체크' : '출석 체크') + '</b><p>' + attLine(sun, fut) + '</p></span><span class="go">' + ic('arrow') + '</span></button>' +
     myAttCard() + '</div>' +
     '<div class="info2">' + lcHomeCard() + noticeCard(n) + '</div>' + memoCard() + rqCard() + birthdayCard() + installBanner() + '</div>' +
-    '<div class="sc-h"><b>바로가기</b></div>' +
     G('학생 · 우리 반', M('student', '학생 명단', 'students', 't-blue', '학생 명단 연락처 반') +
       M('grid', '출석부', 'sheet', 't-sky', '학생 출석부 표 전체') +
       M('sprout', '새신자', 'newcomers', 't-lime', '학생 새친구') +
@@ -2722,19 +2753,27 @@ VIEWS.directory = function (p) {
   var card = function (t) {
     var sub = roleLine(t);
     return '<div class="card"><div style="display:flex;align-items:center;gap:.6rem"><span class="av">' + esc(t.이름.charAt(0)) + '</span><div style="flex:1;min-width:0"><b style="font-size:1.05rem">' + esc(t.이름) + '</b> <span class="muted">' + esc(t.직분 || '') + '</span>' +
-      (sub ? '<div class="muted">' + esc(sub) + '</div>' : '') + '</div></div>' +
+      (sub ? '<div class="muted">' + esc(sub) + '</div>' : '') + '</div>' + dAct(t) + '</div>' +
       '<div class="muted" style="margin-top:.45rem">' + (t.연락처 ? esc(t.연락처) : '연락처 없음') + (t.생일 ? ' · 생일 ' + esc(bdayText(t.생일, isLunar(t))) : '') + '</div>' +
       (t.주소 ? '<div class="muted">' + esc(t.주소) + '</div>' : '') +
       (t.이름 === S.user ? '<button class="btn light small" style="margin-top:.55rem" onclick="myInfoForm()">' + ic('pen') + ' 내 정보 고치기</button>' : '') +
-      (t.연락처 && t.이름 !== S.user ? '<div class="row" style="margin-top:.55rem"><a class="btn ok small" href="tel:' + tel(t.연락처) + '">' + ic('phone') + '전화</a><a class="btn light small" href="sms:' + tel(t.연락처) + '">문자</a></div>' : '') + '</div>';
+      '</div>';
   };
   return topbar('교사 주소록') +
     '<input style="margin-top:.7rem" placeholder="이름·역할로 찾기" value="' + esc(q) + '" onchange="go(\'directory\',{q:this.value},true)">' +
     (bd.length && !q ? '<div class="hint">이번 달 생일: <b>' + bd.map(function (x) { return esc(x.t.이름) + ' (' + shortD(x.n) + (isLunar(x.t) ? ' · 음력' : '') + ')'; }).join(', ') + '</b></div>' : '') +
-    '<div class="cols">' + list.map(card).join('') + '</div>' +
+    vmodeBar('dir', list.length + '명') +
+    (vmode('dir') === 'name' ? '<div class="dlist">' + list.map(function (t) {
+      return '<div class="drow"><span><b>' + esc(t.이름) + '</b><small>' + esc(t.직분 || '') + '</small></span>' + dAct(t) + '</div>';
+    }).join('') + '</div>' : '<div class="cols">' + list.map(card).join('') + '</div>') +
     (isAdmin() ? '<button class="btn light" style="margin-top:.6rem" onclick="go(\'admTeachers\')">' + ic('people') + ' 선생님 정보 · 권한 고치기</button>' : '');
 };
 
+/** 주소록 오른쪽 작은 전화 · 문자 아이콘 */
+function dAct(t) {
+  if (!t.연락처 || t.이름 === S.user) return '';
+  return '<span class="dact"><a class="tel" href="tel:' + tel(t.연락처) + '" aria-label="' + esc(t.이름) + ' 전화">' + ic('phone') + '</a><a href="sms:' + tel(t.연락처) + '" aria-label="' + esc(t.이름) + ' 문자">' + ic('chat') + '</a></span>';
+}
 /* ---------- 조직표 ---------- */
 VIEWS.org = function () {
   if (!S.params._data) { call('getTab', { tab: '조직' }).then(function (d) { S.params._data = d; render(); }); return loadingView('조직표'); }
@@ -2795,17 +2834,25 @@ VIEWS.prayer = function () {
   var list = order.map(function (m) {
     return '<h3 class="org-h">' + (+m.slice(5)) + '월</h3>' + months[m].map(function (r) {
       var past = r.날짜 < ns;
-      return '<button class="list-item" style="' + (past ? 'opacity:.55' : '') + (r === cur ? ';border-color:var(--ci-sky);background:var(--p-sky)' : '') + '" ' + (canPrayer(r) ? 'onclick="prayerForm(\'' + r.ID + '\')"' : '') + '>' +
+      return '<button class="list-item"' + (r === cur ? ' id="pcur"' : '') + ' style="' + (past ? 'opacity:.55' : '') + (r === cur ? ';border-color:var(--ci-sky);background:var(--p-sky)' : '') + '" ' + (canPrayer(r) ? 'onclick="prayerForm(\'' + r.ID + '\')"' : '') + '>' +
         '<span style="width:3.2rem;font-weight:900">' + shortD(r.날짜) + '</span><span class="grow"><b>' + (esc(r.기도자) || '<span class="muted">기도 미정</span>') + '</b>' + (r.학년반 ? ' <span class="badge">' + esc(r.학년반) + '</span>' : '') +
         '<br><span class="muted">봉헌 ' + (esc(r.봉헌) || '-') + (r.비고 ? ' · ' + esc(r.비고) : '') + '</span></span>' + lcTag(r.날짜) + '</button>';
     }).join('');
   }).join('');
   var mine = !ed && canWrite();
-  return topbar('대표기도 · 봉헌') + lcStrip(cur ? cur.날짜 : ns) + hero +
+  if (cur && !S.params._sc) { S.params._sc = 1; setTimeout(prayerScroll, 30); }
+  return topbar('대표기도 · 봉헌') + lcStrip(cur ? cur.날짜 : ns) + (hero ? '<div class="psticky" id="psticky">' + hero + '</div>' : '') +
     (mine ? '<div class="hint">주일을 누르면 대표기도 · 봉헌 · 비고를 고칠 수 있어요.' + (mc ? ' 우리 반(' + esc(mc) + ') 순서도 확인해 주세요.' : '') + '</div>' : '') +
     (ed ? '<div class="row" style="margin-top:.7rem"><button class="btn light small" onclick="prayerForm(\'\')">+ 주일 추가</button><button class="btn light small" onclick="fillSundays()">' + esc(S.boot.year) + '년 주일 모두 만들기</button></div>' : '') +
     (list || '<div class="empty">아직 순서가 없어요</div>');
 };
+/** 기도 · 봉헌: 고정 칸 바로 아래에 이번 주가 오도록 내리기 */
+function prayerScroll() {
+  var top = document.querySelector('.top'), st = $('psticky'), el = $('pcur'); if (!el) return;
+  var th = top ? top.offsetHeight : 0; if (st) st.style.setProperty('--toph', th + 'px');
+  var y = el.getBoundingClientRect().top + window.scrollY - th - (st ? st.offsetHeight : 0) - 10;
+  window.scrollTo(0, Math.max(0, y));
+}
 /** 기도봉헌 한 줄을 고칠 수 있는지: 관리자는 모두, 선생님은 기도자 · 봉헌 · 비고 */
 function canPrayer(r) { return isAdmin() || (!!r && canWrite()); }
 function prayerForm(id) {
@@ -3085,11 +3132,22 @@ VIEWS.students = function (p) {
   }).join('') || '<div class="empty">학생이 없어요</div>';
   return topbar('학생 명단') +
     '<input style="margin-top:.8rem" placeholder="이름으로 찾기" value="' + esc(q) + '" onchange="go(\'students\',{cls:\'' + cls + '\',q:this.value},true)">' +
-    '<div class="chips">' + chips + '</div>' + (isWide() ? studentTable(list, nb) : rows) +
+    '<div class="chips">' + chips + '</div>' + vmodeBar('stu', list.length + '명') + (vmode('stu') === 'name' ? stuNames(list, cls === '전체' && !q) : isWide() ? studentTable(list, nb) : rows) +
     (isAdmin() || Object.keys(myClassSet()).length ? '<button class="btn light" style="margin-top:.6rem" onclick="studentForm(null,\'' + (cls === '전체' || !canEditStu(cls) ? '' : cls) + '\')">+ 학생 추가</button>' : '') +
     (isAdmin() ? '<button class="btn light" style="margin-top:.5rem" onclick="go(\'admStudents\')">' + ic('check') + ' 학생 반 · 상태 한꺼번에 바꾸기</button>' : '');
 };
 
+/** 학생 명단 줄여 보기: 이름만 (전체 반이면 반마다 묶음) */
+function stuNames(list, grp) {
+  if (!list.length) return '<div class="empty">학생이 없어요</div>';
+  var b = function (s) { return '<button class="' + (s.상태 === '재적' ? '' : 'off') + '" onclick="go(\'student\',{id:\'' + s.ID + '\'})"><b>' + esc(s.이름) + '</b>' + (s.상태 !== '재적' ? '<small>' + esc(s.상태) + '</small>' : grp ? '' : '<small>' + esc(s.반) + '반</small>') + '</button>'; };
+  if (!grp) return '<div class="nmgrid">' + list.map(b).join('') + '</div>';
+  var order = classNames(), by = {};
+  list.forEach(function (s) { (by[s.반] = by[s.반] || []).push(s); });
+  return Object.keys(by).sort(function (a, c) { return order.indexOf(a) - order.indexOf(c); }).map(function (c) {
+    return '<h4 class="nmh">' + esc(c) + '반 · ' + by[c].length + '명</h4><div class="nmgrid">' + by[c].map(b).join('') + '</div>';
+  }).join('');
+}
 function studentTable(list, nb) {
   if (!list.length) return '<div class="empty">학생이 없어요</div>';
   nb = nb || {};
@@ -3334,29 +3392,30 @@ function saveNote() {
 /* ---------- 통계 ---------- */
 VIEWS.stats = function (p) {
   if (!S.params._data) { call('getStats', {}).then(function (d) { S.params._data = d; render(); }); return topbar('출석 통계') + '<div class="empty">계산하는 중…</div>'; }
-  var d = S.params._data, tab = p.t || '한눈에', all = p.per === '전체';
+  var d = S.params._data, tab = p.t || '한눈에', all = p.per === '전체', f4 = p.per === '4';
   // 예전에 받아 둔 자료(전체 기간 숫자 없음)면 새로 받기
-  if (d.allWeeks === undefined && !S.params._re) { S.params._re = 1; call('getStats', {}, 'silent').then(function (nd) { CACHE.stats = nd; if (S.view === 'stats') { S.params._data = nd; render(); } }); }
-  var allN = d.allWeeks || d.weekly.length, nW = all ? allN : d.recentWeeks;
-  var w = all ? d.weekly : d.weekly.slice(-12), last = d.weekly[d.weekly.length - 1] || { 합계: 0, 반별: {} }, prev = d.weekly[d.weekly.length - 2];
+  if (d.r4Weeks === undefined && !S.params._re) { S.params._re = 1; call('getStats', {}, 'silent').then(function (nd) { CACHE.stats = nd; if (S.view === 'stats') { S.params._data = nd; render(); } }); }
+  var allN = d.allWeeks || d.weekly.length, nW = all ? allN : f4 ? (d.r4Weeks || 0) : d.recentWeeks;
+  var w = all ? d.weekly : d.weekly.slice(f4 ? -4 : -12), last = d.weekly[d.weekly.length - 1] || { 합계: 0, 반별: {} }, prev = d.weekly[d.weekly.length - 2];
   var max = Math.max.apply(null, w.map(function (x) { return x.합계; }).concat([1]));
   var avg = w.length ? Math.round(w.reduce(function (a, x) { return a + x.합계; }, 0) / w.length) : 0;
   var top = w.reduce(function (m, x) { return !m || x.합계 > m.합계 ? x : m; }, null);
   var diff = prev ? last.합계 - prev.합계 : 0;
-  var cnt = function (s) { return all ? (s.전체 || 0) : s.최근12주; };
+  var cnt = function (s) { return all ? (s.전체 || 0) : f4 ? (s.최근4주 || 0) : s.최근12주; };
+  var perL = all ? '전체 ' + allN + '주' : f4 ? '최근 ' + nW + '주' : '최근 ' + d.recentWeeks + '주';
   var careN = d.needCare.length;
   var tabs = ptabs('t', [['한눈에', '한눈에'], ['반별', '반별 · 학생별'], ['연락', '연락 필요', careN, 1]], tab);
-  var per = '<div class="chips">' + [['', '최근 12주'], ['전체', '전체 ' + allN + '주']].map(function (x) {
+  var per = '<div class="chips">' + [['4', '최근 4주'], ['', '최근 12주'], ['전체', '전체 ' + allN + '주']].map(function (x) {
     return '<button class="chip ' + ((p.per || '') === x[0] ? 'on' : '') + '" onclick="S.params.per=\'' + x[0] + '\';render()">' + x[1] + '</button>';
   }).join('') + '</div>';
   var body = '';
   if (tab === '반별') {
     body = per + '<p class="muted" style="margin:0 0 .3rem">반을 누르면 그 반 학생별 출석이 바로 아래에 펼쳐져요</p>' +
       d.classes.filter(function (c) { return /^\d-\d+$/.test(c.반); }).map(function (c) {
-        var rate = all ? (c.전체출석률 || 0) : c.평균출석률, open = p.c === c.반;
+        var rate = all ? (c.전체출석률 || 0) : f4 ? (c.출석률4 || 0) : c.평균출석률, open = p.c === c.반;
         var item = '<button class="list-item" onclick="S.params.c=' + (open ? 'null' : '\'' + c.반 + '\'') + ';render()" style="display:block;width:100%"><div style="display:flex;justify-content:space-between"><b>' + c.반 + '반 <span class="muted" style="font-weight:600">' + (open ? '▲ 접기' : '▼ 학생별') + '</span></b>' +
           '<span><b>' + (last.반별[c.반] || 0) + '명</b> <span class="muted">/ 재적 ' + c.재적 + '</span></span></div>' +
-          '<div class="meter"><i style="width:' + rate + '%"></i></div><div class="muted">' + (all ? '전체 ' + allN + '주' : '최근 ' + d.recentWeeks + '주') + ' 평균 출석률 ' + rate + '%</div></button>';
+          '<div class="meter"><i style="width:' + rate + '%"></i></div><div class="muted">' + perL + ' 평균 출석률 ' + rate + '%</div></button>';
         if (!open) return item;
         return item + '<div class="card" style="margin-top:-.2rem">' + d.perStudent.filter(function (s) { return s.반 === c.반; })
           .sort(function (a, b) { return cnt(b) - cnt(a); }).map(function (s) {
@@ -3364,7 +3423,7 @@ VIEWS.stats = function (p) {
             return '<div style="margin:.6rem 0" onclick="go(\'student\',{id:\'' + s.ID + '\'})"><div style="display:flex;justify-content:space-between"><b>' + esc(s.이름) + '</b><span>' + cnt(s) + '/' + nW + '주</span></div><div class="meter"><i style="width:' + pct + '%;background:' + (pct >= 70 ? 'var(--ok)' : pct >= 30 ? 'var(--pri)' : 'var(--no)') + '"></i></div></div>';
           }).join('') + '</div>';
       }).join('') +
-      '<button class="btn light" style="margin-top:.6rem" onclick="go(\'sheet\',{per:\'' + (all ? '올해' : '12주') + '\'})">' + ic('grid') + ' 날짜별 O · X 표로 보기 (출석부)</button>';
+      '<button class="btn light" style="margin-top:.6rem" onclick="go(\'sheet\',{per:\'' + (all ? '올해' : f4 ? '4주' : '12주') + '\'})">' + ic('grid') + ' 날짜별 O · X 표로 보기 (출석부)</button>';
   } else if (tab === '연락') {
     body = '<p class="muted" style="margin:.2rem 0 .3rem">3주 이상 출석하지 못한 재적 학생이에요 · 이름을 누르면 학생 정보</p>' + (d.needCare.slice(0, 30).map(function (s) {
       return '<div class="list-item"><div class="grow" onclick="go(\'student\',{id:\'' + s.ID + '\'})"><b>' + esc(s.이름) + '</b> <span class="muted">' + s.반 + '반</span><br><span class="badge w">' + s.결석주수 + '주째 못 나옴</span> <span class="muted">마지막 ' + shortD(s.최근출석) + '</span></div>' +
@@ -3375,8 +3434,8 @@ VIEWS.stats = function (p) {
     var bars = w.map(function (x) { return '<div class="b"><span>' + x.합계 + '</span><i style="height:' + Math.round(x.합계 / max * 100) + '%"></i><em>' + shortD(x.날짜) + '</em></div>'; }).join('');
     if (many) setTimeout(function () { var el = $('barwrap'); if (el) el.scrollLeft = el.scrollWidth; }, 0);
     body = per +
-      '<div class="stat-big"><div><b>' + last.합계 + '</b><span>최근 주일 출석</span></div><div><b class="' + (diff >= 0 ? 'g' : 'r') + '">' + (diff >= 0 ? '+' : '') + diff + '</b><span>전주 대비</span></div><div><b>' + avg + '</b><span>' + (all ? '전체 평균' : '12주 평균') + '</span></div></div>' +
-      '<div class="card"><h3>주일별 출석 인원 <span class="muted" style="font-size:.8rem">' + (all ? '전체 ' + w.length + '주' + (many ? ' · 옆으로 밀어 보기' : '') : '최근 12주') + '</span></h3>' +
+      '<div class="stat-big"><div><b>' + last.합계 + '</b><span>최근 주일 출석</span></div><div><b class="' + (diff >= 0 ? 'g' : 'r') + '">' + (diff >= 0 ? '+' : '') + diff + '</b><span>전주 대비</span></div><div><b>' + avg + '</b><span>' + (all ? '전체 평균' : f4 ? '4주 평균' : '12주 평균') + '</span></div></div>' +
+      '<div class="card"><h3>주일별 출석 인원 <span class="muted" style="font-size:.8rem">' + (all ? '전체 ' + w.length + '주' + (many ? ' · 옆으로 밀어 보기' : '') : f4 ? '최근 4주' : '최근 12주') + '</span></h3>' +
       (many ? '<div class="barwrap" id="barwrap"><div class="bars" style="width:' + (w.length * 34) + 'px">' + bars + '</div></div>' : '<div class="bars">' + bars + '</div>') +
       (all && top ? '<p class="muted" style="margin:.4rem 0 0">가장 많이 온 날: <b>' + shortD(top.날짜) + ' ' + top.합계 + '명</b></p>' : '') + '</div>' +
       '<div class="jumps">' +
@@ -3387,6 +3446,16 @@ VIEWS.stats = function (p) {
   return topbar('출석 통계') +
     '<p class="muted" style="margin:.7rem 0 0">' + (d.lastDate ? fmtD(d.lastDate) + ' 기준' : '아직 출석 기록이 없어요') + ' · 재적 ' + d.totalActive + '명</p>' + tabs + body;
 };
+/** 보기 방식 (자세히 / 이름만) · 이 폰에만 기억 */
+function vmode(k) { return store('hs_vm_' + k) === 'name' ? 'name' : 'full'; }
+function vmodeBar(k, label) {
+  var m = vmode(k);
+  return '<div class="vbar">' + (label ? '<span>' + label + '</span>' : '') + '<div class="vmode">' + [['full', '자세히'], ['name', '이름만']].map(function (x) {
+    return '<button class="' + (m === x[0] ? 'on' : '') + '" onclick="store(\'hs_vm_' + k + '\',\'' + x[0] + '\');render()">' + x[1] + '</button>';
+  }).join('') + '</div></div>';
+}
+/** 교사 출석 통계에서 뺄 분: 교역자(목사 · 전도사 등)와 '출석 통계 빼기' 체크한 분 */
+function tNoStat(t) { return !!(t.보기 || t.제외 || /교역자|목사|전도사|강도사/.test((t.역할 || '') + ' ' + (t.직분 || ''))); }
 /** 화면 위 탭: 아래에 숨은 기능도 한눈에 보이게. items = [[값, 이름, 숫자(선택)]] */
 function ptabs(key, items, cur) {
   return '<div class="ptabs noprint" role="tablist">' + items.map(function (it) {
@@ -3398,15 +3467,15 @@ function mJump(i) { var g = $('mg' + i); if (!g) return; var hd = document.query
 
 /* ---------- 출석부 전체표 (PC에서 넓게) ---------- */
 VIEWS.sheet = function (p) {
-  var per = p.per || '12주', cls = p.cls || '전체', y = +todayStr().slice(0, 4);
+  var per = p.per || '4주', cls = p.cls || '전체', y = +todayStr().slice(0, 4);
   var head = topbar('출석부 전체표') +
-    '<div class="chips">' + ['12주', '올해', '작년'].map(function (x) {
-      return '<button class="chip ' + (x === per ? 'on' : '') + '" onclick="go(\'sheet\',{per:\'' + x + '\',cls:\'' + cls + '\'},true)">' + (x === '12주' ? '최근 12주' : x === '올해' ? y + '년' : (y - 1) + '년') + '</button>';
+    '<div class="chips">' + ['4주', '12주', '올해', '작년'].map(function (x) {
+      return '<button class="chip ' + (x === per ? 'on' : '') + '" onclick="go(\'sheet\',{per:\'' + x + '\',cls:\'' + cls + '\'},true)">' + (x === '4주' ? '최근 4주' : x === '12주' ? '최근 12주' : x === '올해' ? y + '년' : (y - 1) + '년') + '</button>';
     }).join('') + '<span style="width:.6rem"></span>' + ['전체'].concat(classNames()).map(function (c) {
       return '<button class="chip ' + (c === cls ? 'on' : '') + '" onclick="S.params.cls=\'' + c + '\';render()">' + (c === '전체' ? '전체 반' : c + '반') + '</button>';
     }).join('') + '</div>';
   if (!S.params._data) {
-    var from = per === '12주' ? addDays(lastSunday(), -77) : per === '올해' ? y + '-01-01' : (y - 1) + '-01-01';
+    var from = per === '4주' ? addDays(lastSunday(), -21) : per === '12주' ? addDays(lastSunday(), -77) : per === '올해' ? y + '-01-01' : (y - 1) + '-01-01';
     var to = per === '작년' ? (y - 1) + '-12-31' : todayStr();
     call('getAttendanceRange', { from: from, to: to }).then(function (d) { S.params._data = d; render(); });
     return head + '<div class="empty load">불러오는 중…</div>';
@@ -4436,7 +4505,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261126080245';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261126093218';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -5028,7 +5097,9 @@ function tStats(d, p) {
   var ms = (d['교사모임'] || []).slice().sort(byOrder), mid = p.mid || (ms[0] && ms[0].ID) || '';
   var rows = (d['교사출석'] || []).filter(function (r) { return r.모임ID === mid && r.날짜 <= todayStr(); });
   var held = rows.map(function (r) { return r.날짜; }).filter(function (x, i, a) { return a.indexOf(x) === i; }).sort();
-  var names = S.boot.teachers.filter(function (x) { return !x.보기; }).map(function (x) { return x.이름; });
+  var names = S.boot.teachers.filter(function (x) { return !tNoStat(x); }).map(function (x) { return x.이름; });
+  rows = rows.filter(function (r) { return names.indexOf(r.이름) >= 0; });
+  held = rows.map(function (r) { return r.날짜; }).filter(function (x, i, a) { return a.indexOf(x) === i; }).sort();
   var per = names.map(function (n) { var c = rows.filter(function (r) { return r.이름 === n; }).length; return [n, c, held.length ? Math.round(c / held.length * 100) : 0]; })
     .sort(function (a, b) { return b[1] - a[1] || (a[0] < b[0] ? -1 : 1); });
   if (!isAdmin()) per = per.filter(function (x) { return x[0] === S.user; });   // 일반 선생님은 내 기록만
@@ -5085,7 +5156,7 @@ function fontStep(d) {
   if (j === i) { toast(d > 0 ? '가장 큰 글씨예요' : '가장 작은 글씨예요'); return; }
   store('hs_fs', SIZES[j]); applyFont();
 }
-function applyFont() { document.documentElement.style.setProperty('--fs', curFs() + 'px'); }
+function applyFont() { document.documentElement.style.setProperty('--fs', curFs() + 'px'); document.documentElement.classList.toggle('fsbig', curFs() >= 19); }
 
 /* ========================= 시작 ========================= */
 function start() {

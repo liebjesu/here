@@ -52,6 +52,19 @@ svg.ic{width:1.25em;height:1.25em;flex:none;display:block}
 .tools .pcbtn{flex:none;padding:0 1rem;border-radius:999px;background:var(--navy);color:#fff;font-weight:800;font-size:.86rem}
 @media (max-width:699px){.tools .pcbtn{display:none}}
 
+/* ----- 글씨 크기 3단계 (px 고정: 글씨를 키워도 버튼 크기는 그대로) ----- */
+.fsseg{flex:none;display:inline-flex;align-items:center;gap:1px;height:34px;padding:2px;border:1px solid var(--line);border-radius:999px;background:#fff;box-shadow:var(--shadow)}
+.fsseg button{width:30px;height:28px;min-height:0;padding:0;border:0;border-radius:999px;background:none;display:flex;align-items:center;justify-content:center;color:var(--sub);font-weight:800;line-height:1}
+.fsseg button.on{background:var(--navy);color:#fff}
+.fsseg .f0{font-size:12px}.fsseg .f1{font-size:15px}.fsseg .f2{font-size:19px}
+.tools{align-items:center;justify-content:flex-end}.tools .fs-lb{font-size:13px;font-weight:700;color:var(--sub);margin-right:2px}.tools .pcbtn{height:34px}
+.hd .fsseg{margin-left:auto}.hd .fsseg+.yearchip{margin-left:0}
+/* 맨 위 줄은 글씨 크기와 상관없이 같은 크기 (로고 자리 지키기) */
+.hd .yearchip{font-size:14px!important;min-height:34px!important;padding:0 10px!important}
+.hd .icon-btn{width:36px!important;height:36px!important}.hd .icon-btn svg{width:21px!important;height:21px!important}
+.hd .icon-btn .dot{top:7px;right:7px;width:8px;height:8px}
+.hd .logo img{height:34px!important}
+@media (max-width:380px){.fsseg{height:32px}.fsseg button{width:27px;height:26px}.hd .logo img{height:1.8rem}}
 /* ----- 상단 바 ----- */
 .top{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:.6rem;margin:0 -16px;padding:.6rem 16px;
   background:rgba(246,247,251,.82);-webkit-backdrop-filter:saturate(1.6) blur(14px);backdrop-filter:saturate(1.6) blur(14px)}
@@ -1134,6 +1147,16 @@ button.set-row:active,a.set-row:active{background:var(--bg)}
 .fsbig .icard .ih .more{margin-left:0;padding-left:0}
 .fsbig .mrow{align-items:flex-start}.fsbig .mrow .ring{flex:none;margin-top:.1rem}
 .fsbig #app .mgrid{grid-template-columns:1fr}
+/* 절기 색을 더 또렷하게: 절기 색 그라데이션 */
+.lc-home,.lc-strip{background:#fff;background:linear-gradient(115deg,color-mix(in srgb,var(--lc) 30%,#fff) 0%,color-mix(in srgb,var(--lc) 10%,#fff) 55%,#fff 100%)}
+.lc-home>small{color:color-mix(in srgb,var(--lc) 75%,#333)}
+.lc-home>small i,.lc-strip>i{box-shadow:0 0 0 3px color-mix(in srgb,var(--lc) 25%,transparent)}
+.lc-strip{border-color:color-mix(in srgb,var(--lc) 30%,#fff)}
+.lc-strip small{color:color-mix(in srgb,var(--lc) 70%,#333)}
+.wkc{border-top:0;position:relative}
+.wkc::before{content:"";display:block;height:5px;background:linear-gradient(90deg,var(--lc),color-mix(in srgb,var(--lc) 35%,#fff))}
+@media (min-width:700px){.wkc::before{grid-column:1/-1}}
+.wk-sub>.lc-home{background:linear-gradient(115deg,color-mix(in srgb,var(--lc) 30%,#fff) 0%,color-mix(in srgb,var(--lc) 10%,#fff) 60%,#fff 100%)!important}
 /* 홈: 이번 주일 묶음 (주보 · 교회력 · 공지) */
 .wkc{margin-top:8px;background:#fff;border:1px solid var(--line);border-top:4px solid var(--lc);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
 .wk-bl{display:flex;align-items:center;gap:.7rem;width:100%;padding:.7rem .7rem .65rem .8rem;text-align:left;background:linear-gradient(120deg,#fff 30%,#f5f8ff);font:inherit;color:inherit;cursor:pointer}
@@ -1649,12 +1672,11 @@ function go(view, params, noPush) {
 }
 function back() { var h = S.history.pop() || { view: 'home', params: {} }; go(h.view, h.params, true); }
 function topbar(title, extra) {
-  return '<div class="top"><button class="back" onclick="back()" aria-label="뒤로">' + ic('back') + '</button><h1>' + esc(title) + '</h1>' + (extra || '') + '</div>';
+  return '<div class="top"><button class="back" onclick="back()" aria-label="뒤로">' + ic('back') + '</button><h1>' + esc(title) + '</h1>' + (extra || '') + fsSeg() + '</div>';
 }
 /** 모든 화면 맨 위: 글씨 크기(가로로 넓은 버튼) + PC 넓게 보기 */
 function toolStrip() {
-  return '<div class="tools"><div class="seg"><button onclick="fontStep(-1)"><span class="a1">가</span> 글씨 작게</button><i></i>' +
-    '<button onclick="fontStep(1)"><span class="a2">가</span> 글씨 크게</button></div>' +
+  return '<div class="tools"><span class="fs-lb">글씨 크기</span>' + fsSeg() +
     '<button class="pcbtn" onclick="togglePC()">' + (isWide() ? '휴대폰 화면' : 'PC 넓게 보기') + '</button></div>';
 }
 function isWide() { var v = store('hs_pc'); return (v === null || v === undefined) ? window.innerWidth >= 900 : !!v; }
@@ -2485,7 +2507,7 @@ VIEWS.home = function () {
   var M = function (icon, label, view, cls, keys) { return '<button class="mt ' + cls + '" data-k="' + label + ' ' + (keys || '') + '" onclick="go(\'' + view + '\')"><span class="ib">' + ic(icon) + '</span><b>' + label + '</b></button>'; };
   var past = b.guest ? '<div class="past"><span>' + esc(b.year) + '년 명단에는 없어서 보기만 할 수 있어요</span>' + (b.editYear && b.editYear !== b.year ? '<button class="btn small" onclick="switchYear(\'' + b.editYear + '\')">' + b.editYear + '년으로</button>' : '') + '</div>' : isPastYear() ? '<div class="past"><span>' + esc(b.year) + '년 자료 · 참고용</span><button class="btn small" onclick="switchYear(\'' + (b.editYear || b.latestYear) + '\')">' + (b.editYear || b.latestYear) + '년으로</button></div>' : '';
   return '<div class="hd"><span class="logo"><img src="' + SIG + '" alt="대한예수교장로회 목민교회"></span>' +
-    '<button class="yearchip" onclick="yearMenu()" aria-label="연도 바꾸기">' + esc(b.year) + ' <i>▼</i></button>' +
+    fsSeg() + '<button class="yearchip" onclick="yearMenu()" aria-label="연도 바꾸기">' + esc(b.year) + ' <i>▼</i></button>' +
     '<button class="icon-btn" onclick="menuSearch()" aria-label="메뉴 검색">' + ic('search') + '</button>' +
     '<button class="icon-btn" onclick="go(\'notices\')" aria-label="공지">' + ic('bell') + (newNotice() ? '<i class="dot"></i>' : '') + '</button></div>' + past +
     '<div class="msbar" id="msbar" hidden><label class="msearch">' + ic('search') + '<input id="mq" type="search" placeholder="메뉴 찾기 (예: 주소록, 회계)" aria-label="메뉴 검색" oninput="menuFilter(this.value)"></label><button class="mclose" onclick="menuSearchClose()">닫기</button></div>' +
@@ -2705,13 +2727,7 @@ function noticeCard(n) {
 function bnav() {
   var v = S.view, tab = v === 'home' ? 'home' : v === 'ministry' ? 'ministry' : v === 'notices' ? 'notices' : v === 'settings' ? 'settings' : '';
   var B = function (k, icon, label, extra) { return '<button class="' + (tab === k ? 'on' : '') + '" onclick="navTab(\'' + k + '\')"' + (tab === k ? ' aria-current="page"' : '') + '>' + ic(icon) + label + (extra || '') + '</button>'; };
-  var b = S.boot || {};
-  // 구글시트 연동 · 새로 고침 · 로그아웃: 아래 메뉴 바로 위에 늘 보이게
-  var qa = '<div class="bqa"><div class="in">' +
-    (isAdmin() && b.sheetUrl ? '<a class="sheet-ic" href="' + esc(b.sheetUrl) + '" target="_blank">' + ic('sheet') + '구글시트 연동</a>' : '') +
-    '<button onclick="safeReload(\'manual\')">' + ic('refresh') + '새로 고침</button>' +
-    '<button onclick="logout()">' + ic('logout') + '로그아웃</button></div></div>';
-  return '<nav class="bnav" aria-label="아래 메뉴">' + qa + '<div class="in">' + B('home', 'home', '홈') + B('ministry', 'calendar', '일정') +
+  return '<nav class="bnav" aria-label="아래 메뉴"><div class="in">' + B('home', 'home', '홈') + B('ministry', 'calendar', '일정') +
     B('notices', 'bell', '알림', newNotice() && tab !== 'notices' ? '<i class="dot"></i>' : '') + B('settings', 'gear', '설정') + '</div></nav>';
 }
 function navTab(v) {
@@ -2727,7 +2743,7 @@ VIEWS.settings = function () {
   return topbar('설정') +
     '<div class="set-group"><h4>내 정보</h4><button class="set-row" onclick="myInfoForm()"><span class="si">' + ic('user') + '</span><span class="st"><b>' + esc(callName(S.user)) + '</b><small>' + (hc ? esc(hc) + '반 담임 · ' : '') + esc(b.year) + '년 · 연락처 · 생일 · 주소 고치기</small></span><span class="sv">' + ic('next') + '</span></button></div>' +
     '<div class="set-group"><h4>화면</h4><div class="set-row"><span class="si">' + ic('type') + '</span><span class="st"><b>글씨 크기</b><small>' + SIZE_NAMES[step - 1] + ' (' + step + ' / ' + SIZES.length + ')</small></span>' +
-    '<span class="fs-ctl"><button onclick="fontStep(-1);render()" aria-label="글씨 작게"><span class="a1">가</span></button><button onclick="fontStep(1);render()" aria-label="글씨 크게"><span class="a2">가</span></button></span></div>' +
+    fsSeg() + '</div>' +
     (window.innerWidth >= 700 ? row('monitor', isWide() ? '휴대폰 화면으로 보기' : 'PC 넓게 보기', '큰 화면에서 표 · 카드를 넓게', 'togglePC()') : '') + '</div>' +
     '<div class="set-group"><h4>앱</h4>' +
     row('calendar', '연도 바꾸기', '지난 해 자료 보기', 'yearMenu()', esc(b.year) + ' ') +
@@ -4550,7 +4566,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261126121246';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261126122053';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -5192,7 +5208,7 @@ function meetForm2(id) {
 }
 
 /* ---------- 글씨 크기 ---------- */
-var SIZES = [15, 17, 19, 22], DEF_FS = 17, SIZE_NAMES = ['작게', '보통', '크게', '아주 크게'];
+var SIZES = [15, 17, 20], DEF_FS = 17, SIZE_NAMES = ['작게', '보통', '크게'];
 /** 예전 9단계로 저장된 크기는 가장 가까운 단계로 */
 function curFs() { var v = +(store('hs_fs') || DEF_FS), b = SIZES[0]; SIZES.forEach(function (x) { if (Math.abs(x - v) < Math.abs(b - v)) b = x; }); return b; }
 function fontStep(d) {
@@ -5201,6 +5217,14 @@ function fontStep(d) {
   if (j === i) { toast(d > 0 ? '가장 큰 글씨예요' : '가장 작은 글씨예요'); return; }
   store('hs_fs', SIZES[j]); applyFont();
 }
+/** 맨 위 글씨 크기 버튼 3개 (작게 · 보통 · 크게) — 어느 화면에서나 늘 보임 */
+function fsSeg() {
+  var i = SIZES.indexOf(curFs());
+  return '<span class="fsseg" role="group" aria-label="글씨 크기">' + SIZE_NAMES.map(function (n, k) {
+    return '<button class="' + (k === i ? 'on' : '') + '" onclick="fontSet(' + k + ')" aria-label="글씨 ' + n + '" aria-pressed="' + (k === i) + '"><span class="f' + k + '">가</span></button>';
+  }).join('') + '</span>';
+}
+function fontSet(k) { if (SIZES[k] === curFs()) return; store('hs_fs', SIZES[k]); applyFont(); render(); toast('글씨 ' + SIZE_NAMES[k]); }
 function applyFont() { document.documentElement.style.setProperty('--fs', curFs() + 'px'); document.documentElement.classList.toggle('fsbig', curFs() >= 19); }
 
 /* ========================= 시작 ========================= */

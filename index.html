@@ -2951,9 +2951,9 @@ VIEWS.worship = function (p) {
   if (t === '콘티') {
     var cs = d['찬양콘티'].slice().sort(function (a, b) { return a.날짜 < b.날짜 ? 1 : -1; });
     body = (ed ? '<button class="btn" onclick="contiForm(\'\')">+ 콘티 쓰기</button>' : '') + '<div class="cols">' + (cs.map(function (c) {
-      return '<div class="card"><div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap"><h3 style="flex:1;margin:0">' + esc(fmtD(c.날짜)) + '</h3>' + lcTag(c.날짜) + (c.인도 ? '<span class="badge">인도 ' + esc(c.인도) + '</span>' : '') +
+      return '<div class="card"><div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap"><h3 style="flex:1;margin:0">' + esc(fmtD(c.날짜)) + '</h3>' + lcTag(c.날짜) + (function () { var ld = contiLead(c.날짜) || c.인도; return ld ? '<span class="badge">인도 ' + esc(ld) + '</span>' : ''; })() +
         (ed ? '<button class="btn light small" onclick="contiForm(\'' + c.ID + '\')">고치기</button>' : '') + '</div><div class="pre" style="margin-top:.5rem">' + linkify(c.내용) + '</div>' +
-        (c.비고 ? '<p class="muted" style="font-size:.82rem;margin:.4rem 0 0">' + esc(c.비고) + '</p>' : '') + '</div>';
+        ((c.묵상 || c.비고) ? '<div class="pre" style="font-size:.86rem;margin:.5rem 0 0;padding-top:.45rem;border-top:1px dashed var(--line);color:var(--sub)"><b>묵상</b> ' + esc(c.묵상 || c.비고) + '</div>' : '') + '</div>';
     }).join('') || '<div class="empty">콘티가 없어요</div>') + '</div>';
   } else if (t === '인도 순서') {
     var mon = d['찬양인도'], ms = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
@@ -2974,20 +2974,23 @@ VIEWS.worship = function (p) {
   return topbar('찬양팀') + chips + body;
 };
 function weekOf(dateStr) { var d = parseD(dateStr); return Math.ceil(d.getDate() / 7); }
+/** 그 주일 찬양 인도자 (인도 순서 표에서) */
+function contiLead(date) {
+  var d = S.params._data || {}, m = (+String(date || '').slice(5, 7)) + '월';
+  var lr = (d['찬양인도'] || []).filter(function (x) { return x.월 === m; })[0] || {};
+  return date ? lr[weekOf(date) + '주'] || '' : '';
+}
 function contiForm(id) {
   var d = S.params._data, r = id ? d['찬양콘티'].filter(function (x) { return x.ID === id; })[0] : null;
-  if (!r) {
-    var ns = nextSunday(), m = (+ns.slice(5, 7)) + '월', lr = d['찬양인도'].filter(function (x) { return x.월 === m; })[0] || {};
-    r = { 날짜: ns, 인도: lr[weekOf(ns) + '주'] || '', 내용: '1. \n\n2. \n\n3. \n\n<헌금>\n' };
-  }
+  if (!r) r = { 날짜: nextSunday(), 내용: '1. \n\n2. \n\n3. \n\n<헌금>\n' };
+  else if (!r.묵상 && r.비고) r = Object.assign({}, r, { 묵상: r.비고 });
   rowForm('찬양콘티', r, [
     { k: '날짜', label: '날짜', type: 'date' },
-    { k: '인도', label: '인도' },
     { k: '내용', label: '콘티 (곡 제목, 키, 유튜브 링크를 줄마다)', type: 'textarea', tall: true },
-    { k: '비고', label: '비고 · 인도 메모 (선택 · 곡을 고른 마음을 짧게 쓰면 주보 AI 묵상에 반영돼요)' }
+    { k: '묵상', label: '묵상 (이 곡들을 고른 마음 · 함께 묵상할 내용)', type: 'textarea' }
   ], id ? '콘티 고치기' : '콘티 쓰기');
-  var f = $('rf_비고');
-  if (f) f.insertAdjacentHTML('afterend', '<p class="muted" style="font-size:.8rem;margin:.3rem 0 0">찬양 묵상은 주보 [내용 입력]에서 설교와 함께 AI로 한 번에 만들어요.</p>');
+  var f = $('rf_묵상');
+  if (f) f.insertAdjacentHTML('afterend', '<p class="muted" style="font-size:.8rem;margin:.3rem 0 0">인도자는 [인도 순서] 표에서 자동으로 들어가요. 주보 [AI로 초안 만들기]를 누르면 AI가 콘티와 이 묵상을 보고 주보 \'찬양으로 묵상\'을 써요.</p>');
 }
 function leadForm(m) {
   var r = S.params._data['찬양인도'].filter(function (x) { return x.월 === m; })[0] || { 월: m };
@@ -3932,7 +3935,7 @@ function blForm(d, date) {
       (ai.admin ? ' <a href="#" onclick="blAiSetup();return false">' + (ai.has ? 'AI 연결 설정' : 'AI 자동 연결하기') + '</a>' : '') + '</p></div>' +
     T('묵상_성경', '성경 · 본문 이야기', '무슨 일이 있었는지 쉽게') + T('묵상_신학', '신학 · 이 말씀이 알려 주는 것', '하나님 · 예수님 · 복음') +
     T('묵상_역사', '역사 · 그때 그곳', '시대 · 장소 · 문화 배경') + T('묵상_적용', '적용 · 이번 주 해 볼 것', '고등학생 일상에서 한 가지') +
-    T('묵상_찬양', '찬양으로 묵상', A.곡 ? '이번 주 콘티 곡과 말씀을 이어서 (AI 초안에 함께 들어가요)' : '찬양팀에 이번 주 콘티를 쓰면 AI 초안에 곡이 함께 들어가요') +
+    T('묵상_찬양', '찬양으로 묵상', A.곡 ? '이번 주 콘티 곡 · 묵상과 말씀을 이어서 (AI 초안에 함께 들어가요)' : '찬양팀에 이번 주 콘티를 쓰면 AI 초안에 곡이 함께 들어가요') +
     '<h3 class="rp-eh">4. 지난주 말씀 요약 · 묵상 ' + (pv ? '<span class="muted" style="font-size:.8rem">' + shortD(pv.날짜) + ' · ' + esc(pv.설교제목 || '제목 없음') + '</span>' : '') + '</h3>' +
     (pv ? '<label>지난주 설교 요약</label><textarea id="bl_prevsum" rows="3" placeholder="지난주 설교 핵심 3~4줄">' + esc(r._prevsum !== undefined ? r._prevsum : pv.설교요약 || '') + '</textarea>' +
       '<label>지난주 말씀 묵상 (한 주 동안 되새길 글 + 실천 한 가지)</label><textarea id="bl_prevmed" rows="3">' + esc(r._prevmed !== undefined ? r._prevmed : pv.설교묵상 || '') + '</textarea>'
@@ -3974,7 +3977,7 @@ function blSave() {
 function blAiIn() {
   var v = function (k) { var el = $('bl_' + k); return el ? el.value.trim() : ''; };
   var d = S.params._data, date = S.params.date || nextSunday(), c = (d['찬양콘티'] || []).filter(function (x) { return x.날짜 === date; })[0];
-  return { title: v('설교제목'), verse: v('본문'), memo: v('본문말씀'), season: lcInfo(date).label, songs: c ? blSongs(c.내용).map(function (s) { return s[0] + (s[1] ? '(헌금 찬양)' : ''); }).join(', ') : '', note: c ? String(c.비고 || '').trim() : '' };
+  return { title: v('설교제목'), verse: v('본문'), memo: v('본문말씀'), season: lcInfo(date).label, songs: c ? blSongs(c.내용).map(function (s) { return s[0] + (s[1] ? '(헌금 찬양)' : ''); }).join(', ') : '', note: c ? String(c.묵상 || c.비고 || '').trim() : '' };
 }
 /* ---------- 설교 · 공과 자료(PDF · 사진 · 글) → 칸 채우기 (AI 없이 이 기기에서 읽음) ----------
    PDF: 글자가 들어 있는 PDF 는 바로 읽고(pdf.js), 스캔본이면 글자 인식 · 사진: 글자 인식(Tesseract.js, 한국어) · 읽은 글은 확인 · 고친 뒤 칸에 넣음 */
@@ -4165,11 +4168,11 @@ function blAi() {
 /** 키 없이도: ChatGPT · Gemini · Claude 에 붙여넣을 부탁 글 */
 function blAiPrompt(p) {
   return ['너는 한국 장로교회 고등부 주보에 들어갈 "묵상 도움글"을 쓰는 사역자야. 독자는 고등학생이야.',
-    '이번 주 설교 제목: ' + (p.title || '(없음)'), '성경 본문: ' + (p.verse || '(없음)'), p.memo ? '핵심 구절: ' + p.memo : '', p.season ? '교회력(예장통합): ' + p.season + ' (신학 칸에 절기의 의미와 오늘 말씀의 연결을 한 문장)' : '', p.songs ? '이번 주 찬양 곡 제목: ' + p.songs : '', p.note ? '찬양 인도자 메모: ' + p.note : '', '',
+    '이번 주 설교 제목: ' + (p.title || '(없음)'), '성경 본문: ' + (p.verse || '(없음)'), p.memo ? '핵심 구절: ' + p.memo : '', p.season ? '교회력(예장통합): ' + p.season + ' (신학 칸에 절기의 의미와 오늘 말씀의 연결을 한 문장)' : '', p.songs ? '이번 주 찬양 곡 제목: ' + p.songs : '', p.note ? '찬양 인도자의 묵상: ' + p.note : '', '',
     '아래 다섯 칸을 써 줘. 칸마다 2~4문장, 쉬운 말, 존댓말(~해요체).',
     '[성경] 본문 내용을 쉽게 풀어 줘.', '[신학] 이 말씀이 하나님 · 예수님 · 복음에 대해 알려 주는 핵심 (개혁주의 장로교 관점).',
     '[역사] 그 시대 · 장소 · 문화 배경 (확실한 사실만).', '[적용] 고등학생이 이번 주에 해 볼 구체적인 한 가지.',
-    '[찬양] ' + (p.songs ? '찬양 곡들이 어떤 고백인지 오늘 말씀과 이어서 (가사 인용 없이).' : '말씀을 기억하며 찬양하는 마음.'), '',
+    '[찬양] ' + (p.songs ? '찬양 곡들이 어떤 고백인지 오늘 말씀과 이어서 (가사 인용 없이).' + (p.note ? ' 찬양 인도자의 묵상을 중심으로 다듬어 줘.' : '') : '말씀을 기억하며 찬양하는 마음.'), '',
     '형식: 각 칸을 [성경] [신학] [역사] [적용] [찬양] 으로 시작하고 다른 말은 붙이지 마.'].filter(function (x, i, a) { return x !== '' || (a[i - 1] !== ''); }).join('\n');
 }
 function blAiCopy() {
@@ -4555,7 +4558,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261127153956';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261127221306';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

@@ -2953,7 +2953,7 @@ VIEWS.worship = function (p) {
     body = (ed ? '<button class="btn" onclick="contiForm(\'\')">+ 콘티 쓰기</button>' : '') + '<div class="cols">' + (cs.map(function (c) {
       return '<div class="card"><div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap"><h3 style="flex:1;margin:0">' + esc(fmtD(c.날짜)) + '</h3>' + lcTag(c.날짜) + (c.인도 ? '<span class="badge">인도 ' + esc(c.인도) + '</span>' : '') +
         (ed ? '<button class="btn light small" onclick="contiForm(\'' + c.ID + '\')">고치기</button>' : '') + '</div><div class="pre" style="margin-top:.5rem">' + linkify(c.내용) + '</div>' +
-        (c.묵상 ? '<div class="conti-md"><b>주보 · 찬양으로 묵상</b><p>' + esc(c.묵상) + '</p></div>' : (ed ? '<p class="muted" style="font-size:.8rem;margin:.4rem 0 0">[고치기]에서 주보에 실을 찬양 묵상을 쓰거나 AI 초안을 받을 수 있어요</p>' : '')) + '</div>';
+        (c.비고 ? '<p class="muted" style="font-size:.82rem;margin:.4rem 0 0">' + esc(c.비고) + '</p>' : '') + '</div>';
     }).join('') || '<div class="empty">콘티가 없어요</div>') + '</div>';
   } else if (t === '인도 순서') {
     var mon = d['찬양인도'], ms = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
@@ -2984,21 +2984,10 @@ function contiForm(id) {
     { k: '날짜', label: '날짜', type: 'date' },
     { k: '인도', label: '인도' },
     { k: '내용', label: '콘티 (곡 제목, 키, 유튜브 링크를 줄마다)', type: 'textarea', tall: true },
-    { k: '비고', label: '비고 · 인도 메모 (선택 · 곡을 고른 마음을 짧게 쓰면 묵상 초안에 반영돼요)' },
-    { k: '묵상', label: '주보 「찬양으로 묵상」 (비워 두면 주보에 안 나와요)', type: 'textarea', ph: '이번 주 찬양이 어떤 고백인지 3~4문장' }
+    { k: '비고', label: '비고 · 인도 메모 (선택 · 곡을 고른 마음을 짧게 쓰면 주보 AI 묵상에 반영돼요)' }
   ], id ? '콘티 고치기' : '콘티 쓰기');
-  var ta = $('rf_묵상');
-  if (ta) ta.insertAdjacentHTML('beforebegin', '<button type="button" class="btn light small" style="margin:.2rem 0 .3rem" onclick="contiAi()">' + ic('bulb') + ' 곡 제목으로 AI 묵상 초안 (글만 보내요)</button>');
-}
-/** 콘티 곡 제목 → 주보 찬양 묵상 초안 (Gemini, 글만) */
-function contiAi() {
-  var songs = blSongs(($('rf_내용') || {}).value).map(function (s) { return s[0] + (s[1] ? ' (헌금 찬양)' : ''); }), date = ($('rf_날짜') || {}).value || nextSunday();
-  if (!songs.length) { toast('콘티에 "1. 곡 제목" 처럼 곡을 먼저 써 주세요'); return; }
-  var ta = $('rf_묵상');
-  if (ta && ta.value.trim() && !confirm('이미 쓴 묵상을 AI 초안으로 바꿀까요?')) return;
-  call('aiPraise', { date: date, songs: songs, note: ($('rf_비고') || {}).value || '', season: lcInfo(date).label }).then(function (o) {
-    var el = $('rf_묵상'); if (el && o.찬양) { el.value = o.찬양; toast('묵상 초안을 넣었어요 · 읽고 고친 뒤 [저장]'); }
-  });
+  var f = $('rf_비고');
+  if (f) f.insertAdjacentHTML('afterend', '<p class="muted" style="font-size:.8rem;margin:.3rem 0 0">찬양 묵상은 주보 [내용 입력]에서 설교와 함께 AI로 한 번에 만들어요.</p>');
 }
 function leadForm(m) {
   var r = S.params._data['찬양인도'].filter(function (x) { return x.월 === m; })[0] || { 월: m };
@@ -3939,11 +3928,11 @@ function blForm(d, date) {
     '<div class="bl-aibox">' + (ai.has ? '<button class="btn" onclick="blAi()">' + ic('bulb') + ' AI로 초안 만들기</button>' : '') +
       '<button class="btn light" onclick="blAiCopy()">' + ic('share') + ' AI에게 부탁할 글 복사</button>' +
       '<button class="btn light" onclick="blAiPaste()">' + ic('doc') + ' AI 답 붙여넣기</button>' +
-      '<p class="muted" style="margin:.2rem 0 0;font-size:.82rem">' + (ai.has ? '[AI로 초안 만들기]를 누르면 설교 제목 · 본문 · 찬양 · 절기(글만)로 다섯 칸을 채워요 (구글 Gemini).' : '복사한 글을 ChatGPT · Gemini · Claude 앱에 붙여넣고, 받은 답을 [AI 답 붙여넣기]에 넣으면 칸이 채워져요.') +
+      '<p class="muted" style="margin:.2rem 0 0;font-size:.82rem">' + (ai.has ? '[AI로 초안 만들기]를 누르면 설교 제목 · 본문 · 찬양 콘티 · 절기(글만)로 말씀 묵상 네 칸과 찬양 묵상까지 한 번에 채워요 (구글 Gemini).' : '복사한 글을 ChatGPT · Gemini · Claude 앱에 붙여넣고, 받은 답을 [AI 답 붙여넣기]에 넣으면 칸이 채워져요.') +
       (ai.admin ? ' <a href="#" onclick="blAiSetup();return false">' + (ai.has ? 'AI 연결 설정' : 'AI 자동 연결하기') + '</a>' : '') + '</p></div>' +
     T('묵상_성경', '성경 · 본문 이야기', '무슨 일이 있었는지 쉽게') + T('묵상_신학', '신학 · 이 말씀이 알려 주는 것', '하나님 · 예수님 · 복음') +
     T('묵상_역사', '역사 · 그때 그곳', '시대 · 장소 · 문화 배경') + T('묵상_적용', '적용 · 이번 주 해 볼 것', '고등학생 일상에서 한 가지') +
-    T('묵상_찬양', '찬양으로 묵상', A.묵상 ? '비워 두면 찬양팀 콘티의 묵상이 들어가요: ' + A.묵상.slice(0, 40) + '…' : '이번 주 찬양 곡과 말씀을 이어서 (찬양팀 콘티에서 써도 돼요)') +
+    T('묵상_찬양', '찬양으로 묵상', A.곡 ? '이번 주 콘티 곡과 말씀을 이어서 (AI 초안에 함께 들어가요)' : '찬양팀에 이번 주 콘티를 쓰면 AI 초안에 곡이 함께 들어가요') +
     '<h3 class="rp-eh">4. 지난주 말씀 요약 · 묵상 ' + (pv ? '<span class="muted" style="font-size:.8rem">' + shortD(pv.날짜) + ' · ' + esc(pv.설교제목 || '제목 없음') + '</span>' : '') + '</h3>' +
     (pv ? '<label>지난주 설교 요약</label><textarea id="bl_prevsum" rows="3" placeholder="지난주 설교 핵심 3~4줄">' + esc(r._prevsum !== undefined ? r._prevsum : pv.설교요약 || '') + '</textarea>' +
       '<label>지난주 말씀 묵상 (한 주 동안 되새길 글 + 실천 한 가지)</label><textarea id="bl_prevmed" rows="3">' + esc(r._prevmed !== undefined ? r._prevmed : pv.설교묵상 || '') + '</textarea>'
@@ -3985,7 +3974,7 @@ function blSave() {
 function blAiIn() {
   var v = function (k) { var el = $('bl_' + k); return el ? el.value.trim() : ''; };
   var d = S.params._data, date = S.params.date || nextSunday(), c = (d['찬양콘티'] || []).filter(function (x) { return x.날짜 === date; })[0];
-  return { title: v('설교제목'), verse: v('본문'), memo: v('본문말씀'), season: lcInfo(date).label, songs: c ? blSongs(c.내용).map(function (s) { return s[0] + (s[1] ? '(헌금 찬양)' : ''); }).join(', ') : '' };
+  return { title: v('설교제목'), verse: v('본문'), memo: v('본문말씀'), season: lcInfo(date).label, songs: c ? blSongs(c.내용).map(function (s) { return s[0] + (s[1] ? '(헌금 찬양)' : ''); }).join(', ') : '', note: c ? String(c.비고 || '').trim() : '' };
 }
 /* ---------- 설교 · 공과 자료(PDF · 사진 · 글) → 칸 채우기 (AI 없이 이 기기에서 읽음) ----------
    PDF: 글자가 들어 있는 PDF 는 바로 읽고(pdf.js), 스캔본이면 글자 인식 · 사진: 글자 인식(Tesseract.js, 한국어) · 읽은 글은 확인 · 고친 뒤 칸에 넣음 */
@@ -4176,7 +4165,7 @@ function blAi() {
 /** 키 없이도: ChatGPT · Gemini · Claude 에 붙여넣을 부탁 글 */
 function blAiPrompt(p) {
   return ['너는 한국 장로교회 고등부 주보에 들어갈 "묵상 도움글"을 쓰는 사역자야. 독자는 고등학생이야.',
-    '이번 주 설교 제목: ' + (p.title || '(없음)'), '성경 본문: ' + (p.verse || '(없음)'), p.memo ? '핵심 구절: ' + p.memo : '', p.season ? '교회력(예장통합): ' + p.season + ' (신학 칸에 절기의 의미와 오늘 말씀의 연결을 한 문장)' : '', p.songs ? '이번 주 찬양 곡 제목: ' + p.songs : '', '',
+    '이번 주 설교 제목: ' + (p.title || '(없음)'), '성경 본문: ' + (p.verse || '(없음)'), p.memo ? '핵심 구절: ' + p.memo : '', p.season ? '교회력(예장통합): ' + p.season + ' (신학 칸에 절기의 의미와 오늘 말씀의 연결을 한 문장)' : '', p.songs ? '이번 주 찬양 곡 제목: ' + p.songs : '', p.note ? '찬양 인도자 메모: ' + p.note : '', '',
     '아래 다섯 칸을 써 줘. 칸마다 2~4문장, 쉬운 말, 존댓말(~해요체).',
     '[성경] 본문 내용을 쉽게 풀어 줘.', '[신학] 이 말씀이 하나님 · 예수님 · 복음에 대해 알려 주는 핵심 (개혁주의 장로교 관점).',
     '[역사] 그 시대 · 장소 · 문화 배경 (확실한 사실만).', '[적용] 고등학생이 이번 주에 해 볼 구체적인 한 가지.',
@@ -4566,7 +4555,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261126122053';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261127153956';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

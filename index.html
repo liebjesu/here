@@ -3959,8 +3959,8 @@ function blForm(d, date) {
     (pv ? '<label>지난주 설교 요약</label><textarea id="bl_prevsum" rows="3" placeholder="지난주 설교 핵심 3~4줄">' + esc(r._prevsum !== undefined ? r._prevsum : pv.설교요약 || '') + '</textarea>' +
       '<label>지난주 말씀 묵상 (한 주 동안 되새길 글 + 실천 한 가지)</label><textarea id="bl_prevmed" rows="3">' + esc(r._prevmed !== undefined ? r._prevmed : pv.설교묵상 || '') + '</textarea>'
       : '<p class="muted" style="margin:0">지난주 주보가 없어요. 지난 설교도 [‹ 지난주]로 가서 넣으면 여기에 이어져요.</p>') +
-    '<label>이번 주 설교 요약 (다음 주 주보 \'지난주 말씀\'에 나와요)</label><textarea id="bl_설교요약" rows="3">' + esc(r.설교요약 || '') + '</textarea>' +
-    '<label>이번 주 말씀 묵상 (다음 주 주보에 요약과 함께 나와요)</label><textarea id="bl_설교묵상" rows="3">' + esc(r.설교묵상 || '') + '</textarea>' +
+    // 이번 주 요약 · 묵상 칸은 안 보임 (다음 주에 '지난주' 칸에서 씀) · 나눔지 읽기로 채운 값은 그대로 저장되도록 숨겨 둠
+    '<textarea id="bl_설교요약" hidden>' + esc(r.설교요약 || '') + '</textarea><textarea id="bl_설교묵상" hidden>' + esc(r.설교묵상 || '') + '</textarea>' +
     '<h3 class="rp-eh">5. 광고 · 기도제목</h3>' + T('광고', '광고 (줄마다 하나, 선택)', '안 쓰면 주보에서 빈 칸이에요', 4) + T('기도제목', '함께 기도해요 (줄마다 하나, 선택)', '', 3) +
     '<button class="btn" style="margin-top:1rem" onclick="blSave()">저장하고 주보 보기</button>';
 }
@@ -4600,7 +4600,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261128223331';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261128223723';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

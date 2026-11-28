@@ -3808,10 +3808,9 @@ function blData(d, date) {
   B.설교자 = blName(B.설교자);
   var pv = (d['주보'] || []).filter(function (x) { return x.날짜 < date && (x.설교제목 || x.설교요약); }).sort(function (a, b) { return a.날짜 < b.날짜 ? 1 : -1; })[0];
   B.prev = pv || (sample ? S0._prev : null);
-  if (!B.광고) {   // 비워 두면 최근 2주 공지 제목
-    var from = addDays(date, -14);
-    B.광고 = (CACHE.notices || []).filter(function (n) { return (n.날짜 || '') >= from && (n.날짜 || '') <= date; }).slice(0, 4).map(function (n) { return n.제목; }).join('\n');
-  }
+  // 광고 · 기도제목은 직접 쓴 것만 (안 쓰면 빈 칸 · 공지나 샘플로 채우지 않음)
+  B.광고 = r ? String(r.광고 || '').trim() : '';
+  B.기도제목 = r ? String(r.기도제목 || '').trim() : '';
   var bd = [];
   if (!isPastYear()) students().forEach(function (s) {
     if (s.상태 !== '재적' || !/^\d{4}-\d{2}-\d{2}/.test(s.생년월일 || '')) return;
@@ -3889,7 +3888,7 @@ VIEWS.bulletin = function (p) {
       '<div class="row noprint" style="margin:.5rem 0 .6rem"><button class="btn" onclick="blImage()">' + ic('download') + ' 이미지로 저장 · 공유</button>' + (ed ? '<button class="btn light" onclick="S.params.t=\'입력\';render()">' + ic('pen') + ' 내용 입력</button>' : '') + '</div>' +
       '<div class="bl-wrap" id="blWrap"><div id="blSheet" style="width:' + BL_W + 'px;transform-origin:0 0">' + blHtml(B) + '</div></div>' +
       (B.나눔도움 && !B.sample && !(S.boot && S.boot.guest) ? '<details class="card bl-guide noprint"><summary><b>반별 나눔 인도자용 도움말</b> <span class="muted">선생님만 보여요 · 주보 이미지에는 안 들어가요</span></summary><div>' + blPara(B.나눔도움) + '</div></details>' : '') +
-      '<p class="muted" style="margin-top:.6rem">찬양은 [찬양팀] 콘티 · 인도 순서, 대표기도 · 봉헌은 [기도 · 봉헌], 광고는 비워 두면 최근 공지에서 자동으로 들어와요.</p>';
+      '<p class="muted" style="margin-top:.6rem">찬양은 [찬양팀] 콘티 · 인도 순서, 대표기도 · 봉헌은 [기도 · 봉헌], 광고 · 기도제목은 [내용 입력]에 쓴 것만 들어가요 (안 쓰면 빈 칸).</p>';
   }
   return topbar('주보') + ptabs('t', tabs, t) + body;
 };
@@ -3942,7 +3941,7 @@ function blForm(d, date) {
       : '<p class="muted" style="margin:0">지난주 주보가 없어요. 지난 설교도 [‹ 지난주]로 가서 넣으면 여기에 이어져요.</p>') +
     '<label>이번 주 설교 요약 (다음 주 주보 \'지난주 말씀\'에 나와요)</label><textarea id="bl_설교요약" rows="3">' + esc(r.설교요약 || '') + '</textarea>' +
     '<label>이번 주 말씀 묵상 (다음 주 주보에 요약과 함께 나와요)</label><textarea id="bl_설교묵상" rows="3">' + esc(r.설교묵상 || '') + '</textarea>' +
-    '<h3 class="rp-eh">5. 광고 · 기도제목</h3>' + T('광고', '광고 (줄마다 하나)', '비워 두면 최근 2주 공지 제목이 들어가요', 4) + T('기도제목', '함께 기도해요 (줄마다 하나, 선택)', '', 3) +
+    '<h3 class="rp-eh">5. 광고 · 기도제목</h3>' + T('광고', '광고 (줄마다 하나, 선택)', '안 쓰면 주보에서 빈 칸이에요', 4) + T('기도제목', '함께 기도해요 (줄마다 하나, 선택)', '', 3) +
     '<button class="btn" style="margin-top:1rem" onclick="blSave()">저장하고 주보 보기</button>';
 }
 /** 다른 메뉴에서 자동으로 오는 것 (샘플 없이 실제 값만) */
@@ -4558,7 +4557,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261128215313';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261128215658';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

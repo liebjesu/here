@@ -4162,7 +4162,8 @@ function blAiFill(o) {
 }
 function blAi() {
   var p = blAiIn(); if (!p.title && !p.verse) { toast('설교 제목이나 본문을 먼저 써 주세요'); return; }
-  call('aiMeditate', p).then(function (o) { var n = blAiFill(o); toast(n ? 'AI 초안을 넣었어요 · 꼭 읽고 고쳐 주세요' : 'AI 답을 칸에 맞추지 못했어요'); });
+  call('aiMeditate', p).then(function (o) { var n = blAiFill(o); toast(n ? 'AI 초안을 넣었어요 · 꼭 읽고 고쳐 주세요' : 'AI 답을 칸에 맞추지 못했어요'); }).catch(function () {});
+  var el = $('loading'); if (el) el.textContent = 'AI가 묵상 초안을 쓰는 중이에요 · 20~40초쯤 걸려요';
 }
 /** 키 없이도: ChatGPT · Gemini · Claude 에 붙여넣을 부탁 글 */
 function blAiPrompt(p) {
@@ -4557,7 +4558,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261128215658';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261128220341';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

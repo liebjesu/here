@@ -56,6 +56,16 @@ svg.ic{width:1.25em;height:1.25em;flex:none;display:block}
 .fsseg{flex:none;display:inline-flex;align-items:center;gap:1px;height:34px;padding:2px;border:1px solid var(--line);border-radius:999px;background:#fff;box-shadow:var(--shadow)}
 .fsseg button{width:30px;height:28px;min-height:0;padding:0;border:0;border-radius:999px;background:none;display:flex;align-items:center;justify-content:center;color:var(--sub);font-weight:800;line-height:1}
 .fsseg button.on{background:var(--navy);color:#fff}
+/* 첫 화면 선생님 | 학생 탭 · 학생 앱 */
+.lseg{display:flex;gap:4px;margin:.7rem 0 .3rem;padding:4px;background:#fff;border:1.5px solid var(--line);border-radius:999px;box-shadow:var(--shadow)}
+.lseg button{flex:1;min-height:2.5rem;border:0;border-radius:999px;background:none;font-weight:800;color:var(--sub);font-size:1rem}
+.lseg button.on{background:var(--navy);color:#fff}
+.lseg small{font-size:.7rem;font-weight:700;opacity:.8;margin-left:.2rem}
+.wchips{display:flex;flex-wrap:wrap;gap:6px;margin:.2rem 0 .3rem}
+.wchips button{min-height:2.3rem;padding:0 .85rem;border:1.5px solid var(--line);border-radius:999px;background:#fff;font-weight:700;color:var(--ink)}
+.wchips button.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.stu-ok{text-align:center;padding:1.4rem 1rem}
+.stu-ok .big{font-size:2.6rem;line-height:1;color:var(--ok);font-weight:900;margin-bottom:.4rem}
 .fsseg .f0{font-size:12px}.fsseg .f1{font-size:15px}.fsseg .f2{font-size:19px}
 .tools{align-items:center;justify-content:flex-end}.tools .fs-lb{font-size:13px;font-weight:700;color:var(--sub);margin-right:2px}.tools .pcbtn{height:34px}
 .hd .fsseg{margin-left:auto}.hd .fsseg+.yearchip{margin-left:0}
@@ -1685,6 +1695,7 @@ function togglePC() { store('hs_pc', !isWide()); applyWide(); render(); }
 function render() {
   var app = $('app');
   if (!S.user || !S.boot) { app.innerHTML = toolStrip() + viewLogin(); return; }
+  if (S.boot.student) { var sv = (/^stu/.test(S.view) && VIEWS[S.view]) || VIEWS.stuHome; app.innerHTML = sv(S.params); return; }   // 학생 앱: 가벼운 화면만 (미리 받기 없음)
   var v = VIEWS[S.view] || VIEWS.home;
   var out = v(S.params);
   if (typeof out === 'string') app.innerHTML = out + (out.indexOf('class="savebar"') < 0 ? bnav() : '');
@@ -1719,10 +1730,16 @@ function loadLoginInfo(year) {
     if (!S.user) render();
   }).catch(function () { LOGIN._loading = false; if (!S.user) render(); });
 }
+function loginSeg() {
+  var m = LOGIN.mode === 'stu';
+  return '<div class="lseg" role="tablist"><button role="tab" class="' + (m ? '' : 'on') + '" onclick="LOGIN.mode=\'t\';render()">선생님</button>' +
+    '<button role="tab" class="' + (m ? 'on' : '') + '" onclick="LOGIN.mode=\'stu\';render()">학생<small>테스트</small></button></div>';
+}
 function viewLogin() {
-  if (!LOGIN.years && !LOGIN._loading) loadLoginInfo('');
   var head = '<div class="login-hero">' + wordmark(true) + '</div>';
-  if (!LOGIN.years) return head + '<div class="empty load">불러오는 중…</div>' + verLine('margin-top:1.2rem') + sigFooter();
+  if (LOGIN.mode === 'stu') return head + loginSeg() + stuLoginView();
+  if (!LOGIN.years && !LOGIN._loading) loadLoginInfo('');
+  if (!LOGIN.years) return head + loginSeg() + '<div class="empty load">불러오는 중…</div>' + verLine('margin-top:1.2rem') + sigFooter();
   var list = LOGIN.lists[LOGIN.year];
   if (!list && !LOGIN._loading) loadLoginInfo(LOGIN.year);
 
@@ -1750,7 +1767,7 @@ function viewLogin() {
       '<span class="av">' + esc((t.이름 || '?').charAt(0)) + '</span><span class="grow"><b>' + esc(t.이름) + '</b> <span class="muted">' + esc(t.직분 || '') + '</span>' +
       '<br><span class="muted">' + esc(t.ok ? sub : '연락처 없음') + '</span></span></button>';
   }).join('');
-  return head + appIntro() + (LOGIN.years.length > 1 ? years : '') +
+  return head + loginSeg() + appIntro() + (LOGIN.years.length > 1 ? years : '') +
     '<h3 style="margin:1rem 0 .2rem">어느 선생님이세요?</h3><p class="muted" style="margin:0">반가워요! 내 이름을 눌러 주세요</p>' + rows + verLine('margin-top:1.2rem') + sigFooter();
 }
 function pickYear(y) { LOGIN.year = y; LOGIN.step = 'name'; render(); if (!LOGIN.lists[y]) loadLoginInfo(y); else loadLoginInfo(y); }
@@ -1789,6 +1806,7 @@ function softBoot(b) {
   if (!$('modal').innerHTML && !S.dirty && (S.view === 'home' || !loadSpec(S.view, S.params))) render(); else warmUp();
 }
 function logout(silent, again) {
+  if (S.boot && S.boot.student) { stuLogout(silent); return; }
   if (!silent && OUT.q.length) { flushOut(); toast('저장 중인 내용이 있어요. 잠시 후 다시 눌러 주세요'); return; }
   if (!silent && !confirm('로그아웃 할까요?')) return;
   var nm = S.auth && S.auth.name, yr = S.auth && S.auth.year;
@@ -1872,6 +1890,7 @@ VIEWS.admin = function () {
     '</div><h3 class="mg-h">앱 운영</h3><div class="tiles">' +
     item('calendar', 't-lilac', '연도 관리', '연도별 시트, 새 연도 시작하기', 'admYears') +
     item('sliders', 't-peach', '앱 설정', '부서명, 인사말, 교사 단톡방 링크', 'admSettings') +
+    item('student', 't-sky', '학생 앱 (테스트)', '학생 비밀번호 · 교회 위치 · 학생 출석 기록', 'admStuApp') +
     item('sheet', 't-lime', '시트 반영 기록', '언제 · 누가 · 몇 건 구글시트에 저장했는지', 'admSync') +
     item('shield', 't-blue', '보안 · 접속 기록', '누가 언제 들어왔는지, 모든 기기 다시 로그인', 'admSecurity') +
     '</div>';
@@ -4581,7 +4600,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261128220620';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261128223331';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -4765,7 +4784,7 @@ function shotMode() {
 function autoLogin() {
   if (shotMode()) return;
   var saved = loadLogin();
-  if (!(saved && saved.name && (saved.token || saved.code))) { render(); return; }
+  if (!(saved && saved.name && (saved.token || saved.code))) { if (stuAuto()) return; render(); return; }
   LOGIN.keep = !!store('hs_login');
   S.auth = { name: saved.name };
   if (saved.token) S.auth.token = saved.token; else S.auth.code = saved.code;
@@ -4795,6 +4814,221 @@ function autoLogin() {
     $('app').innerHTML = toolStrip() + '<div class="login-hero">' + wordmark(true) + '</div><div class="empty">인터넷 연결을 확인해 주세요</div>' +
       '<button class="btn" onclick="autoLogin()">다시 시도</button>' + sigFooter();
   });
+}
+
+
+/* ========================= 학생 앱 (테스트 중) =========================
+   첫 화면 [학생] 탭 → 이름 + 비밀번호 → 주보 보기 · 교회 출석 체크(교회 근처에서만) · 다른 예배 기록.
+   가볍게: 선생님 화면 자료는 받지 않고, 학생 화면 3개만. 로그인 유지 기기는 지난 자료로 바로 열고 뒤에서 맞춤 */
+function stuLoginView() {
+  var dup = LOGIN.sdup ? '<label>내 반 고르기</label><div class="wchips">' + LOGIN.sdup.map(function (d) {
+    return '<button class="' + (LOGIN.sid === d.id ? 'on' : '') + '" onclick="stuKeepIn();LOGIN.sid=\'' + esc(d.id) + '\';render()">' + esc(d.반 || '?') + '반</button>';
+  }).join('') + '</div>' : '';
+  return '<div class="card" style="margin-top:.6rem"><h3 style="margin:0 0 .2rem">학생으로 들어가기</h3>' +
+    '<p class="muted" style="margin:0 0 .4rem;font-size:.86rem">주보 보기 · 출석 체크 · 다른 예배 기록을 할 수 있어요 (테스트 중)</p>' +
+    '<label>이름</label><input id="sl_name" value="' + esc(LOGIN.sname || '') + '" autocomplete="name" placeholder="예: 김하나" oninput="LOGIN.sname=this.value;if(LOGIN.sdup){LOGIN.sdup=null;LOGIN.sid=\'\'}">' + dup +
+    '<label>비밀번호 (숫자 4자리)</label><input id="sl_pw" type="password" inputmode="numeric" maxlength="4" autocomplete="off" value="' + esc(LOGIN.spw || '') + '" onkeydown="if(event.key===\'Enter\')stuLogin()">' +
+    '<label class="keep"><input type="checkbox" ' + (LOGIN.skeep !== false ? 'checked' : '') + ' onchange="LOGIN.skeep=this.checked">이 기기에 로그인 유지 (30일)</label>' +
+    '<button class="btn" style="margin-top:.5rem" onclick="stuLogin()"' + (LOGIN.busy ? ' disabled' : '') + '>' + (LOGIN.busy ? '들어가는 중…' : '들어가기') + '</button>' +
+    '<p class="muted" style="font-size:.8rem;margin:.5rem 0 0">비밀번호는 선생님께 물어보세요.</p></div>' + verLine('margin-top:1.2rem') + sigFooter();
+}
+function stuKeepIn() { var n = $('sl_name'), w = $('sl_pw'); if (n) LOGIN.sname = n.value; if (w) LOGIN.spw = w.value; }
+function stuLogin() {
+  if (LOGIN.busy) return;
+  stuKeepIn();
+  var nm = String(LOGIN.sname || '').trim(), pw = String(LOGIN.spw || '');
+  if (!nm) { toast('이름을 써 주세요'); return; }
+  if (!/^\d{4}$/.test(pw)) { toast('비밀번호 숫자 4자리를 넣어 주세요'); return; }
+  if (LOGIN.sdup && !LOGIN.sid) { toast('내 반을 골라 주세요'); return; }
+  S.auth = { stu: 1, name: nm, code: pw }; if (LOGIN.sid) S.auth.id = LOGIN.sid;
+  LOGIN.busy = true; render();
+  call('stuBoot', {}, 'silent').then(function (b) {
+    LOGIN.busy = false; LOGIN.spw = ''; LOGIN.sdup = null; LOGIN.sid = '';
+    var tok = S._token; S._token = null;
+    S.auth = { stu: 1, name: b.me.이름, id: b.me.ID, token: tok };
+    var v = { name: b.me.이름, id: b.me.ID, token: tok, b: b, keep: LOGIN.skeep !== false };
+    stuStore(v); stuEnter(b);
+    toast(b.me.이름 + ', 반가워요!');
+  }).catch(function (e) {
+    LOGIN.busy = false; S.auth = null;
+    if (e && e.dup) { LOGIN.sdup = e.dup; LOGIN.sid = ''; }
+    render(); toast((e && e.error) || '인터넷 연결을 확인해 주세요', 4000);
+  });
+}
+function stuStore(v) {
+  stuClear();
+  try { if (v.keep) store('hs_slogin', v); else sessSet('hs_slogin', JSON.stringify(v)); } catch (e) {}
+}
+function stuLoad() { var v = store('hs_slogin'); if (!v) { try { v = JSON.parse(sessGet('hs_slogin') || 'null'); } catch (e) { v = null; } } return v; }
+function stuClear() { unstore('hs_slogin'); sessDel('hs_slogin'); unstore('hs_sbl'); }
+function stuSaveBoot() { var v = stuLoad(); if (v) { v.b = S.stu; stuStore(v); } }
+function stuEnter(b) {
+  S.stu = b; S.user = b.me.이름; S.role = ''; S.isSuper = false; S.fin = false; S.viewOnly = false;
+  S.boot = { student: true, year: b.year, today: b.today, title: b.title, teachers: b.teachers || [], students: [], classes: [] };
+  CACHE = {}; ATT = {}; S.view = 'stuHome'; S.params = {}; S.history = [];
+  render();
+}
+/** 로그인 유지한 학생 기기: 지난 자료로 바로 열고 뒤에서 새로 */
+function stuAuto() {
+  var v = stuLoad();
+  if (!v || !v.token || !v.name) return false;
+  S.auth = { stu: 1, name: v.name, id: v.id, token: v.token }; LOGIN.mode = 'stu';
+  if (v.b) { stuEnter(v.b); S.stuBl = store('hs_sbl') || null; }
+  else $('app').innerHTML = toolStrip() + '<div class="login-hero">' + wordmark(true) + '</div><div class="empty load">여는 중…</div>';
+  call('stuBoot', {}, 'silent').then(function (b) {
+    v.b = b; stuStore(v);
+    if (!S.boot || !S.boot.student) { stuEnter(b); return; }
+    S.stu = b; S.boot.teachers = b.teachers || []; S.boot.today = b.today;
+    if (/^stu(Home|Check|Log)$/.test(S.view) && !S.params.busy) render();
+  }).catch(function (e) {
+    if (e && e.auth) { stuGone(e.error); return; }
+    if (!v.b) $('app').innerHTML = toolStrip() + '<div class="login-hero">' + wordmark(true) + '</div><div class="empty">인터넷 연결을 확인해 주세요</div><button class="btn" onclick="autoLogin()">다시 시도</button>';
+  });
+  return true;
+}
+function stuGone(msg) {
+  var nm = S.auth && S.auth.name;
+  stuClear(); S.user = null; S.boot = null; S.stu = null; S.stuBl = null; S.auth = null;
+  LOGIN.mode = 'stu'; LOGIN.sname = nm || LOGIN.sname; LOGIN.busy = false;
+  render(); if (msg) toast(msg, 4000);
+}
+function stuLogout(silent) {
+  if (!silent && !confirm('로그아웃 할까요?')) return;
+  stuGone(silent ? '다시 로그인해 주세요' : '');
+}
+function stuMineList(rows, title) {
+  if (!rows.length) return '';
+  return '<h3 style="margin:1rem 0 .3rem">' + title + '</h3><div class="card" style="padding:.15rem .8rem">' + rows.slice(0, 12).map(function (r) {
+    return '<div class="list-item"><span class="grow"><b>' + esc(shortD(r.날짜)) + '</b> ' + esc(r.종류 === '다른 예배' ? r.예배 : r.종류) + (r.메모 ? ' <span class="muted">· ' + esc(r.메모) + '</span>' : '') + '</span><span class="muted">' + esc(r.시각 || '') + '</span></div>';
+  }).join('') + '</div>';
+}
+VIEWS.stuHome = function () {
+  var b = S.stu, me = b.me, mine = b.mine || [], today = todayStr();
+  var done = mine.filter(function (r) { return r.날짜 === today && r.종류 !== '다른 예배'; })[0];
+  var tile = function (v, icon, cls, t, d) { return '<button class="tile ' + cls + ' wide" onclick="go(\'' + v + '\')" style="min-height:4.6rem"><span class="ib">' + ic(icon) + '</span><span><b>' + t + '</b><small style="text-transform:none;letter-spacing:0;font-size:.8rem;font-weight:600;color:var(--sub)">' + d + '</small></span></button>'; };
+  return toolStrip() + '<div class="login-hero" style="padding-bottom:.2rem">' + wordmark(true) + '</div>' +
+    '<div class="card" style="display:flex;align-items:center;gap:.7rem"><span class="av">' + esc((me.이름 || '?').charAt(0)) + '</span><span class="grow"><b style="font-size:1.08rem">' + esc(me.이름) + '</b> <span class="muted">' + (me.반 ? esc(me.반) + '반' : '') + '</span><br><span class="muted" style="font-size:.85rem">' + esc(fmtD(today)) + '</span></span><span class="badge">학생 · 테스트</span></div>' +
+    '<div class="tiles" style="margin-top:.7rem">' +
+    tile('stuBulletin', 'book', 't-peach', '주보 보기', '이번 주 말씀 · 찬양 · 묵상') +
+    tile('stuCheck', 'usercheck', 't-lime', done ? '오늘 출석 완료 ✓' : '출석 체크', done ? esc(done.시각) + ' · ' + esc(done.종류) : '교회 근처에서 버튼 한 번') +
+    tile('stuLog', 'pray', 't-lilac', '다른 예배 기록', '새벽기도 · 수요예배 · 금요기도회 …') +
+    '</div>' + stuMineList(mine, '내 기록') +
+    '<button class="btn light" style="margin-top:1rem" onclick="logout()">' + ic('logout') + ' 로그아웃</button>' + verLine('margin-top:1.2rem');
+};
+/* 주보: 서버에서 주보 · 찬양 · 기도봉헌만 받음 (인도자용 도움말은 빠짐) · 이 기기에 보관해서 다음엔 바로 */
+function stuBlLoad() {
+  if (S._stuBlL) return; S._stuBlL = true;
+  call('stuBulletin', {}, 'silent').then(function (d) {
+    S._stuBlL = false;
+    var ch = JSON.stringify(d) !== JSON.stringify(S.stuBl);
+    S.stuBl = d; if (ch) { try { store('hs_sbl', d); } catch (e) {} if (S.view === 'stuBulletin') render(); }
+  }).catch(function (e) { S._stuBlL = false; toast((e && e.error) || '인터넷 연결을 확인해 주세요'); if (!S.stuBl && S.view === 'stuBulletin') render(); });
+}
+function stuBlDate(d) {
+  var ns = nextSunday(); if (blRow(d, ns)) return ns;
+  var past = blRows(d).filter(function (r) { return r.날짜 <= ns; })[0];
+  return past ? past.날짜 : ns;
+}
+function stuBlGo(date) { if (!/^\d{4}-\d{2}-\d{2}$/.test(date || '')) return; var d = parseD(date); if (d.getDay()) date = addDays(date, 7 - d.getDay()); S.params.date = date; render(); }
+VIEWS.stuBulletin = function (p) {
+  if (!S.stuBl) S.stuBl = store('hs_sbl') || null;
+  if (!p._fetched) { p._fetched = 1; stuBlLoad(); }
+  if (!S.stuBl) return topbar('주보') + '<div class="empty load">' + (S._stuBlL ? '불러오는 중…' : '주보를 불러오지 못했어요') + '</div>';
+  var d = S.stuBl, date = p.date || stuBlDate(d), body;
+  var nav = '<div class="rp-nav noprint"><button class="btn light small" onclick="stuBlGo(\'' + addDays(date, -7) + '\')">‹ 지난주</button>' +
+    '<input type="date" value="' + date + '" onchange="stuBlGo(this.value)"><button class="btn light small" onclick="stuBlGo(\'' + addDays(date, 7) + '\')">다음주 ›</button></div>';
+  if (!blRow(d, date)) body = '<div class="empty">' + esc(fmtD(date)) + ' 주보는 아직 준비 중이에요</div>';
+  else {
+    var B = blData(d, date);
+    setTimeout(fitBl, 0); setTimeout(fitBl, 400);
+    body = '<div class="bl-wrap" id="blWrap" style="margin-top:.6rem"><div id="blSheet" style="width:' + BL_W + 'px;transform-origin:0 0">' + blHtml(B) + '</div></div>';
+  }
+  return topbar('주보') + nav + body;
+};
+/* 출석 체크: 휴대폰 위치로 교회 근처인지 확인 (서버가 거리를 다시 계산 · 위치 자체는 저장 안 함, 거리만) */
+VIEWS.stuCheck = function (p) {
+  var mine = S.stu.mine || [], today = todayStr();
+  var done = mine.filter(function (r) { return r.날짜 === today && r.종류 !== '다른 예배'; })[0], body;
+  if (done) body = '<div class="card stu-ok"><div class="big">✓</div><b style="font-size:1.15rem">오늘 출석했어요</b><p class="muted" style="margin:.3rem 0 0">' + esc(fmtD(done.날짜)) + ' ' + esc(done.시각) + ' · ' + esc(done.종류) + '</p></div>';
+  else if (!S.stu.church) body = '<div class="hint warm" style="margin-top:.7rem">교회 위치가 아직 정해지지 않아서 출석 체크를 할 수 없어요. 선생님께 알려 주세요.</div>';
+  else body = '<div class="card" style="margin-top:.7rem"><p style="margin:0 0 .7rem">교회에 왔다면 아래 버튼을 눌러 주세요. <b>목민교회 근처</b>에서만 출석 체크가 돼요.</p>' +
+    '<button class="btn" onclick="stuCheckGo()"' + (p.busy ? ' disabled' : '') + '>' + ic('usercheck') + (p.busy ? ' 위치 확인 중…' : ' 지금 출석 체크하기') + '</button>' +
+    (p.err ? '<div class="hint warn" style="margin-top:.7rem">' + esc(p.err) + '</div>' : '') +
+    '<p class="muted" style="font-size:.8rem;margin:.7rem 0 0">처음 한 번 "위치 사용"을 물어보면 [허용]을 눌러 주세요. 위치는 출석 확인에만 쓰고, 기록에는 교회까지의 거리만 남아요.</p></div>';
+  return topbar('출석 체크') + body + stuMineList(mine.filter(function (r) { return r.종류 !== '다른 예배'; }), '내 출석 기록');
+};
+function stuCheckGo() {
+  var P = S.params; if (P.busy) return;
+  if (!navigator.geolocation) { P.err = '이 기기에서는 위치를 쓸 수 없어요.'; render(); return; }
+  P.busy = true; P.err = ''; render();
+  var again = function () { if (S.params === P) render(); };
+  navigator.geolocation.getCurrentPosition(function (pos) {
+    call('stuCheck', { lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy }, 'silent').then(function (r) {
+      P.busy = false; S.stu.mine = r.mine; stuSaveBoot(); again();
+      toast(r.already ? '오늘은 이미 출석했어요' : '✓ 출석했어요!', 4000);
+    }).catch(function (e) { P.busy = false; P.err = (e && e.error) || '인터넷 연결을 확인해 주세요'; again(); });
+  }, function (er) {
+    P.busy = false;
+    P.err = er && er.code === 1 ? '위치 사용이 꺼져 있어요. 브라우저(또는 휴대폰 설정)에서 이 사이트의 위치 사용을 허용한 뒤 다시 눌러 주세요.' : '위치를 찾지 못했어요. 잠시 뒤 다시 눌러 주세요.';
+    again();
+  }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 });
+}
+/* 다른 예배 기록 (위치 확인 없음 · 두 달 안) */
+var STU_WS = ['새벽기도', '수요예배', '금요기도회', '주일 대예배', '수련회 · 집회', '다른 교회 예배'];
+VIEWS.stuLog = function (p) {
+  var w = p.w || '', mine = (S.stu.mine || []).filter(function (r) { return r.종류 === '다른 예배'; });
+  return topbar('다른 예배 기록') + '<div class="card" style="margin-top:.7rem"><p class="muted" style="margin:0 0 .3rem">고등부 예배 말고 드린 예배를 기록해요 (두 달 안).</p>' +
+    '<label>날짜</label><input type="date" id="sw_d" value="' + esc(p.d || todayStr()) + '" max="' + todayStr() + '" onchange="S.params.d=this.value">' +
+    '<label>어떤 예배였나요?</label><div class="wchips">' + STU_WS.concat(['직접 쓰기']).map(function (x) {
+      return '<button class="' + (w === x ? 'on' : '') + '" onclick="S.params.w=\'' + x + '\';render()">' + x + '</button>';
+    }).join('') + '</div>' +
+    (w === '직접 쓰기' ? '<input id="sw_w" placeholder="예배 이름" maxlength="30" value="' + esc(p.ww || '') + '" oninput="S.params.ww=this.value">' : '') +
+    '<label>메모 (선택)</label><input id="sw_m" maxlength="100" value="' + esc(p.m || '') + '" oninput="S.params.m=this.value" placeholder="예: 부모님과 함께, 말씀 제목">' +
+    '<button class="btn" style="margin-top:.7rem" onclick="stuLogGo()"' + (p.busy ? ' disabled' : '') + '>' + (p.busy ? '저장 중…' : '기록하기') + '</button></div>' +
+    stuMineList(mine, '내 다른 예배 기록');
+};
+function stuLogGo() {
+  var P = S.params; if (P.busy) return;
+  var w = P.w === '직접 쓰기' ? String(P.ww || '').trim() : P.w, d = ($('sw_d') || {}).value || P.d || todayStr();
+  if (!w) { toast('어떤 예배였는지 골라 주세요'); return; }
+  P.busy = true; render();
+  call('stuLog', { date: d, worship: w, memo: String(P.m || '').trim() }, 'silent').then(function (r) {
+    S.stu.mine = r.mine; stuSaveBoot();
+    if (S.params === P) { S.params = {}; render(); }
+    toast('✓ 기록했어요', 3500);
+  }).catch(function (e) { P.busy = false; if (S.params === P) render(); toast('⚠ ' + ((e && e.error) || '인터넷 연결을 확인해 주세요'), 6000); });
+}
+/* 구성 관리 → 학생 앱 (테스트): 비밀번호 · 교회 위치 · 기록 보기 */
+VIEWS.admStuApp = function (p) {
+  if (!p._data) {
+    if (!p._ld) { p._ld = 1; call('getStuApp', {}).then(function (d) { p._data = d; if (S.params === p) render(); }).catch(function () { p._ld = 0; }); }
+    return loadingView('학생 앱 (테스트)');
+  }
+  var d = p._data, rows = d.rows || [], today = todayStr();
+  var tc = rows.filter(function (r) { return r.날짜 === today && r.종류 !== '다른 예배'; }).length;
+  var tb = rows.length ? '<div class="tblwrap"><table class="tbl"><thead><tr><th>날짜</th><th>시각</th><th>이름</th><th>반</th><th>종류</th><th>거리</th><th>메모</th></tr></thead><tbody>' + rows.map(function (r) {
+    return '<tr><td>' + esc(shortD(r.날짜)) + '</td><td>' + esc(r.시각) + '</td><td class="l"><b>' + esc(r.이름) + '</b></td><td>' + esc(r.반) + '</td><td class="l">' + esc(r.종류 === '다른 예배' ? r.예배 : r.종류) + '</td><td>' + (r.거리 ? esc(r.거리) + 'm' : '') + '</td><td class="note">' + esc(r.메모) + '</td></tr>';
+  }).join('') + '</tbody></table></div>' : '<div class="empty">아직 학생 기록이 없어요</div>';
+  return topbar('학생 앱 (테스트)') +
+    '<div class="hint" style="margin-top:.7rem">학생은 첫 화면 <b>[학생]</b> 탭에서 이름 + 비밀번호로 들어와요. <b>주보 보기 · 교회 출석 체크(교회 근처에서만) · 다른 예배 기록</b>만 할 수 있고, 선생님 자료(명단 · 연락처 · 출석부 · 면담)는 볼 수 없어요. 학생 기록은 시트 <b>학생출석</b> 탭에 따로 쌓이고, 선생님 출석부에는 들어가지 않아요.</div>' +
+    '<div class="card"><label>학생 비밀번호 (모든 학생 같음 · 숫자 4자리)</label><input id="sa_pw" inputmode="numeric" maxlength="4" value="' + esc(d.pw) + '">' +
+    '<label>교회 위치 (위도,경도)</label><input id="sa_loc" value="' + esc(d.loc) + '" placeholder="교회에서 아래 버튼을 누르면 채워져요">' +
+    '<div class="row" style="margin-top:.4rem"><button class="btn light small" onclick="stuHereLoc()">지금 내 위치로 채우기</button>' + (d.loc ? '<a class="btn light small" target="_blank" rel="noopener" href="https://www.google.com/maps?q=' + encodeURIComponent(d.loc) + '">지도에서 확인</a>' : '') + '</div>' +
+    '<label>출석 인정 거리 (m · 50~3000)</label><input id="sa_r" type="number" min="50" max="3000" step="50" value="' + esc(d.radius) + '">' +
+    '<button class="btn" style="margin-top:.7rem" onclick="stuAppSave()">저장</button></div>' +
+    '<h3 style="margin:1rem 0 .3rem">학생 기록 <span class="muted" style="font-size:.85rem">오늘 교회 출석 ' + tc + '명 · 최근 ' + rows.length + '건</span></h3>' + tb;
+};
+function stuHereLoc() {
+  if (!navigator.geolocation) { toast('이 기기에서는 위치를 쓸 수 없어요'); return; }
+  toast('위치를 찾는 중이에요…', 4000);
+  navigator.geolocation.getCurrentPosition(function (pos) {
+    var el = $('sa_loc'); if (el) el.value = pos.coords.latitude.toFixed(6) + ',' + pos.coords.longitude.toFixed(6);
+    toast('채웠어요 (정확도 약 ' + Math.round(pos.coords.accuracy) + 'm) · [저장]을 눌러 주세요', 5000);
+  }, function (er) { toast(er && er.code === 1 ? '위치 사용을 허용해 주세요' : '위치를 찾지 못했어요', 4000); }, { enableHighAccuracy: true, timeout: 15000 });
+}
+function stuAppSave() {
+  var P = S.params;
+  call('saveStuApp', { pw: $('sa_pw').value.trim(), loc: $('sa_loc').value.trim(), radius: $('sa_r').value }).then(function (d) { P._data = d; if (S.params === P) render(); toast('저장했어요'); }).catch(function () {});
 }
 
 /* ========================= 회계 ========================= */

@@ -1472,7 +1472,7 @@ document.addEventListener('change', function (e) {
   var el = e.target; if (!el || el.type !== 'tel') return;
   var f = fmtPhone(el.value, true); if (f !== el.value) el.value = f;
 });
-function toast(msg) { var t = $('toast'); t.textContent = msg; t.style.display = 'block'; clearTimeout(t._h); t._h = setTimeout(function () { t.style.display = 'none'; }, 2200); }
+function toast(msg, ms) { var t = $('toast'); t.textContent = msg; t.style.display = 'block'; clearTimeout(t._h); t._h = setTimeout(function () { t.style.display = 'none'; }, ms || 2200); }
 function loading(on) { var el = $('loading'); el.classList.toggle('on', !!on); if (!on) el.textContent = '잠시만요…'; }
 var WD = ['일', '월', '화', '수', '목', '금', '토'];
 function parseD(s) { var p = s.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
@@ -3903,7 +3903,8 @@ function blList(d) {
 }
 /* ---------- 주보 내용 입력 ---------- */
 function blForm(d, date) {
-  var r = Object.assign({}, blRow(d, date) || {}, ((S.params._draft || {})[date]) || {}), A = blAuto(d, date);
+  var r = Object.assign({}, blRow(d, date) || {}, ((S.params._draft || {})[date]) || {}, BL_AIP[date] || {}), A = blAuto(d, date);
+  if (BL_AIP[date]) { delete BL_AIP[date]; setTimeout(blKeep, 0); }   // 다른 화면에 있는 동안 끝난 AI 초안
   var pv = (d['주보'] || []).filter(function (x) { return x.날짜 < date; }).sort(function (a, b) { return a.날짜 < b.날짜 ? 1 : -1; })[0];
   var I = function (k, label, ph) { return '<label>' + label + '</label><input id="bl_' + k + '" value="' + esc(r[k] || '') + '" placeholder="' + (ph || '') + '">'; };
   var T = function (k, label, ph, rows) { return '<label>' + label + '</label><textarea id="bl_' + k + '" rows="' + (rows || 3) + '" placeholder="' + (ph || '') + '">' + esc(r[k] || '') + '</textarea>'; };
@@ -3927,7 +3928,7 @@ function blForm(d, date) {
     '<div class="row" style="margin-top:.3rem"><button class="btn light small" onclick="go(\'worship\')">찬양팀 열기</button><button class="btn light small" onclick="go(\'prayer\')">기도 · 봉헌 열기</button></div>' +
     I('사회', '사회 (선택)', '예) 고등부 회장 김수아') +
     '<h3 class="rp-eh">3. 말씀 묵상 도움글 <span class="muted" style="font-size:.8rem">AI 초안을 받아서 고쳐 쓰세요</span></h3>' +
-    '<div class="bl-aibox">' + (ai.has ? '<button class="btn" onclick="blAi()">' + ic('bulb') + ' AI로 초안 만들기</button>' : '') +
+    '<div class="bl-aibox">' + (ai.has ? (BL_AIBUSY ? '<button class="btn" disabled>' + ic('bulb') + ' AI가 쓰는 중… (다른 화면을 써도 돼요)</button>' : '<button class="btn" onclick="blAi()">' + ic('bulb') + ' AI로 초안 만들기</button>') : '') +
       '<button class="btn light" onclick="blAiCopy()">' + ic('share') + ' AI에게 부탁할 글 복사</button>' +
       '<button class="btn light" onclick="blAiPaste()">' + ic('doc') + ' AI 답 붙여넣기</button>' +
       '<p class="muted" style="margin:.2rem 0 0;font-size:.82rem">' + (ai.has ? '[AI로 초안 만들기]를 누르면 설교 제목 · 본문 · 찬양 콘티 · 절기(글만)로 말씀 묵상 네 칸과 찬양 묵상까지 한 번에 채워요 (구글 Gemini).' : '복사한 글을 ChatGPT · Gemini · Claude 앱에 붙여넣고, 받은 답을 [AI 답 붙여넣기]에 넣으면 칸이 채워져요.') +
@@ -4160,10 +4161,32 @@ function blAiFill(o) {
   var n = 0; [['성경', '묵상_성경'], ['신학', '묵상_신학'], ['역사', '묵상_역사'], ['적용', '묵상_적용'], ['찬양', '묵상_찬양']].forEach(function (x) { var el = $('bl_' + x[1]); if (el && o[x[0]]) { el.value = o[x[0]]; n++; } });
   return n;
 }
+/* 주보 AI 초안: 뒤에서 만들고(앱은 계속 쓸 수 있음), 끝나면 알림. 다른 화면에 있으면 BL_AIP 에 두었다가 [내용 입력]을 열 때 넣음 */
+var BL_AIBUSY = false, BL_AIP = {};
+function blAiBtn() { if (S.view === 'bulletin' && S.params.t === '입력') { blKeep(); render(); } }
 function blAi() {
+  if (BL_AIBUSY) { toast('AI가 아직 쓰는 중이에요'); return; }
   var p = blAiIn(); if (!p.title && !p.verse) { toast('설교 제목이나 본문을 먼저 써 주세요'); return; }
-  call('aiMeditate', p).then(function (o) { var n = blAiFill(o); toast(n ? 'AI 초안을 넣었어요 · 꼭 읽고 고쳐 주세요' : 'AI 답을 칸에 맞추지 못했어요'); }).catch(function () {});
-  var el = $('loading'); if (el) el.textContent = 'AI가 묵상 초안을 쓰는 중이에요 · 20~40초쯤 걸려요';
+  var date = S.params.date || nextSunday();
+  BL_AIBUSY = true; blAiBtn();
+  toast('AI가 묵상 초안을 쓰고 있어요 · 20~40초쯤 걸려요 · 그동안 다른 화면을 써도 돼요', 5000);
+  call('aiMeditate', p, 'silent').then(function (o) {
+    BL_AIBUSY = false;
+    var here = S.view === 'bulletin' && S.params.t === '입력' && (S.params.date || nextSunday()) === date && $('bl_묵상_성경');
+    if (here) {
+      var n = blAiFill(o); blKeep(); blAiBtn();
+      toast(n ? '✓ AI 초안을 넣었어요 · 꼭 읽고 고친 뒤 [저장]을 눌러 주세요' : '⚠ AI 답을 칸에 맞추지 못했어요 · 다시 눌러 주세요', 6000);
+      return;
+    }
+    var m = {}, n2 = 0;
+    [['성경', '묵상_성경'], ['신학', '묵상_신학'], ['역사', '묵상_역사'], ['적용', '묵상_적용'], ['찬양', '묵상_찬양']].forEach(function (x) { if (o && o[x[0]]) { m[x[1]] = o[x[0]]; n2++; } });
+    if (!n2) { toast('⚠ 주보 AI 답을 칸에 맞추지 못했어요 · 다시 눌러 주세요', 6000); return; }
+    BL_AIP[date] = m;
+    toast('✓ ' + shortD(date) + ' 주보 AI 초안이 다 됐어요 · 주보 [내용 입력]을 열면 들어가 있어요 (저장은 직접)', 7000);
+  }).catch(function (e) {
+    BL_AIBUSY = false; blAiBtn();
+    toast('⚠ 주보 AI 초안을 못 만들었어요: ' + ((e && e.error) || '인터넷 연결을 확인해 주세요'), 9000);
+  });
 }
 /** 키 없이도: ChatGPT · Gemini · Claude 에 붙여넣을 부탁 글 */
 function blAiPrompt(p) {
@@ -4558,7 +4581,7 @@ function saveMin(id) {
 function delMin(id) { if (!confirm('이 사역을 삭제할까요?')) return; removeLocal(S.params._data, id); enqueue('deleteMinistry', { id: id }); closeModal(); render(); }
 
 /* ========================= 홈 화면에 추가 (아이폰 · 안드로이드 따로) ========================= */
-var BUILD = '20261128220341';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
+var BUILD = '20261128220620';   // 배포할 때 web.ps1 이 배포 시각으로 바꿈 → version.json 과 비교해 새 버전이면 새로고침
 var UA = navigator.userAgent || '';
 var PLAT = (function () {
   var ios = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
